@@ -1,0 +1,7 @@
+{% extends 'myhealthdb/first_base.html' %}
+{% load staticfiles %}
+{% block body_block %}
+<p>Logged out!</p>  
+<a href="{% url 'auth_login'%}">Click here to login again.</a>
+
+{%endblock%}

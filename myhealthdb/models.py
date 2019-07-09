@@ -7,6 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 
 from django.db import models
+from django.contrib.auth.models import User
 
 class Address(models.Model):
     line1 = models.CharField(max_length=64)
@@ -25,8 +26,14 @@ class Address(models.Model):
 
 
 class Patient(models.Model):
+
+    SEX  =(
+        ('M', 'Male'),
+        ('F', 'Female')
+    )
+
     name = models.CharField(max_length=64)
-    sex = models.BooleanField()
+    sex = models.CharField(choices = SEX, max_length=32)
     dob = models.DateField()
     weight = models.DecimalField(max_digits=255, decimal_places=2, blank=True, null=True)
     height = models.IntegerField(blank=True, null=True)
@@ -36,6 +43,7 @@ class Patient(models.Model):
     security_qu = models.CharField(max_length=128)
     security_ans = models.CharField(max_length=64)
     nhs_no = models.CharField(unique=True, max_length=128)
+    user = models.OneToOneField(User, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -88,6 +96,7 @@ class Staff(models.Model):
     tel_no = models.CharField(max_length=32, blank=True, null=True)
     ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True)
     role = models.CharField(max_length=32)   
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name_plural = "staff" 
