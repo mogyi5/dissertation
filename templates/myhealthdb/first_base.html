@@ -17,6 +17,13 @@
 
     <!-- Custom styles for this template -->
     <link href="{% static 'css/first_base.css' %}" rel="stylesheet">
+
+    <!-- General JQuery stuff -->
+    <script src="{% static 'js/jquery-3.4.1.js' %}"></script>
+
+    <!-- Particular JQuery stuff -->
+    <script src="{% static 'js/myhealthdb_jquery.js' %}"></script>
+
   </head>
 
   <body class="text-center"> 
@@ -24,12 +31,15 @@
     <div class="cover-container d-flex h-100 w-100 p-3 mx-auto flex-column">
       <header class="masthead mb-auto">
         <div class="inner">
-          <h3 class="masthead-brand">MyHealthDB</h3>
-          <!-- <nav class="nav nav-masthead justify-content-center">
-            <a class="nav-link active" href="#">Home</a>
-            <a class="nav-link" href="#">Features</a>
-            <a class="nav-link" href="#">Contact</a>
-          </nav> -->
+          <h3 class="masthead-brand"><a href="{% url 'index' %}">MyHealthDB</a></h3>
+          <nav class="nav nav-masthead justify-content-center">
+            <a class="nav-link" href="{% url 'account_login' %}">Sign In</a>
+            <a class="nav-link" href="#" dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Register..</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'signup-patient' %}">as a Patient</a>
+              <a class="dropdown-item" href=" {% url 'signup-staff' %}">your Hospital</a>
+            </div>
+          </nav>
         </div>
       </header>
 
@@ -38,7 +48,7 @@
 
       <footer class="mastfoot mt-auto">
         <div class="inner">
-          <p><a href="https://twitter.com/mdo">About this project</a></p>
+          <p><a href="{% url 'about_this' %}">About this project</a></p>
         </div>
       </footer>
     </div>

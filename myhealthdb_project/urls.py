@@ -18,17 +18,14 @@ from django.contrib import admin
 
 from django.conf import settings
 from django.conf.urls.static import static
-from registration.backends.default.views import RegistrationView
+# from registration.backends.default.views import RegistrationView
+from myhealthdb import views
 
-
-class MyRegistrationView(RegistrationView):
-    def get_success_url(self,request, user):
-        return '/myhealthdb/'
 
 urlpatterns = [
     path('myhealthdb/', include('myhealthdb.urls')),
     path('admin/', admin.site.urls),
-
-    path('accounts/', include('registration.backends.default.urls')),
-    path('accounts/register/', MyRegistrationView.as_view(), name='registration_register'),
+    path('accounts/', include('allauth.urls')),
+    path('accounts/signup/patient/',views.patient_signup, name='signup-patient'),
+    path('accounts/signup/staff/',views.staff_signup, name='signup-staff'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
