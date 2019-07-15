@@ -21,11 +21,11 @@ from django.conf.urls.static import static
 # from registration.backends.default.views import RegistrationView
 from myhealthdb import views
 
-
 urlpatterns = [
+    path('captcha/', include('captcha.urls')),
     path('myhealthdb/', include('myhealthdb.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('accounts/signup/patient/',views.patient_signup, name='signup-patient'),
-    path('accounts/signup/staff/',views.staff_signup, name='signup-staff'),
+    path('contact/', include('contact_form.urls')),
+    #path('accounts/signup/staff/',views.staff_signup, name='signup-staff'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,13 @@
+{% extends 'myhealthdb/first_base.html' %}
+ 
+{% block body_block %}
+                        <form role="form" action="" method="post" enctype="multipart/form-data" >{% csrf_token %}
+                            {% for field in form %}
+                                <div class="fieldWrapper">
+                                    {{ field.errors }}
+                                    {{ field.label_tag }} {{ field }}
+                                </div>
+                            {% endfor %}
+                            <input type="submit" value="Submit">
+                        </form>
+{% endblock %}

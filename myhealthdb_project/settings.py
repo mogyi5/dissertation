@@ -53,6 +53,12 @@ INSTALLED_APPS = [
     'allauth', # new
     'allauth.account', # new
     'allauth.socialaccount', # new
+
+    'crispy_forms',
+
+    'contact_form',
+
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -93,25 +99,25 @@ WSGI_APPLICATION = 'myhealthdb_project.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
-    'hospital1': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3_hospital1'),
-    },
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'NAME': 'postgres',
-    #     'USER': 'postgres',
-    #     'PASSWORD': 'password',
-    #     'HOST':'localhost',
-    #     'PORT': '5432',
-    # }
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # },
+    # 'hospitals': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3_hospitals'),
+    # },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'myhealthdb',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST':'localhost',
+        'PORT': '5432',
+    }
 }
 
-DATABASE_ROUTERS = ['myhealthdb.routers.HospitalRouter', ]
+#DATABASE_ROUTERS = ['myhealthdb.routers.HealthcareRouter', ]
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -179,3 +185,16 @@ ACCOUNT_UNIQUE_EMAIL = True
 
 LOGIN_REDIRECT_URL = 'home_base'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'index'
+
+ACCOUNT_SIGNUP_FORM_CLASS = "myhealthdb.forms.PatientSignupForm"
+
+# Contact Form specific
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'szaboki.reka@gmail.com'  # this is my email address, use yours
+EMAIL_HOST_PASSWORD = 'Cttbsr48R2'   # set environ yourself
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
+RECAPTCHA_PUBLIC_KEY = '6Ld_ya0UAAAAACdlTzZNLrMDzp_99XUX6lFM7rq4'
+RECAPTCHA_PRIVATE_KEY = '6Ld_ya0UAAAAAAY9-Gw97sL411C1ImaAVoXwPVdC'

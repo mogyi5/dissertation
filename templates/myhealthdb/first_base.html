@@ -24,6 +24,9 @@
     <!-- Particular JQuery stuff -->
     <script src="{% static 'js/myhealthdb_jquery.js' %}"></script>
 
+    {% comment %} recaptcha {% endcomment %}
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+
   </head>
 
   <body class="text-center"> 
@@ -36,8 +39,8 @@
             <a class="nav-link" href="{% url 'account_login' %}">Sign In</a>
             <a class="nav-link" href="#" dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Register..</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" href="{% url 'signup-patient' %}">as a Patient</a>
-              <a class="dropdown-item" href=" {% url 'signup-staff' %}">your Hospital</a>
+              <a class="dropdown-item" href="{% url 'account_signup' %}">as a Patient</a>
+              <a class="dropdown-item" href=" {% url 'contact_form' %}">your Hospital</a>
             </div>
           </nav>
         </div>

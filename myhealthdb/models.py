@@ -8,6 +8,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
+from django_random_queryset import RandomManager
 
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
@@ -23,19 +24,18 @@ class CustomUser(AbstractUser):
         return self.email
 
 
-class Address(models.Model):
-    line1 = models.CharField(max_length=64)
-    line2 = models.CharField(max_length=64, null=True, blank=True)
-    city = models.CharField(max_length=32)
-    postcode = models.CharField(max_length=32)
-    country = models.CharField(max_length=32)
+# class Address(models.Model):
+#     line1 = models.CharField(max_length=64)
+#     line2 = models.CharField(max_length=64, null=True, blank=True)
+#     city = models.CharField(max_length=32)
+#     postcode = models.CharField(max_length=32)
+#     country = models.CharField(max_length=32)
 
-    class Meta:
-        unique_together = (('postcode', 'line1'),)
-        verbose_name_plural = "addresses"
+#     class Meta:
+#         verbose_name_plural = "addresses"
 
-    def __str__(self):
-        return self.postcode
+#     def __str__(self):
+#         return self.postcode
 
 class Patient(models.Model):
 
@@ -44,24 +44,28 @@ class Patient(models.Model):
         ('F', 'Female')
     )
 
-    name = models.CharField(max_length=64)
+    first_name = models.CharField(max_length=32)
+    last_name= models.CharField(max_length=32)
     sex = models.CharField(choices = SEX, max_length=32)
     dob = models.DateField()
     weight = models.DecimalField(max_digits=255, decimal_places=2, blank=True, null=True)
     height = models.IntegerField(blank=True, null=True)
     tel_no = models.CharField(max_length=32, blank=True, null=True)
-    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True), 
+    #address = models.OneToOneField(Address, on_delete=models.SET_NULL, null=True, blank=True, related_query_name="specific_pat",)
     nhs_no = models.CharField(unique=True, max_length=128, blank=True, null=True)
     baseuser = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
-
-    # def save(self, *args, **kwargs):
-    #     self.baseuser.user_type=1
-    #     super(Patient, self).save(*args, **kwargs)
+    ad_line1 = models.CharField(max_length=64)
+    ad_line2 = models.CharField(max_length=64, null=True, blank=True)
+    ad_city = models.CharField(max_length=32)
+    ad_postcode = models.CharField(max_length=32)
+    ad_country = models.CharField(max_length=32)
 
     def __str__(self):
-        return self.baseuser.id
+        return self.baseuser.email
 
 class Hospital(models.Model):
+
+    objects = RandomManager()
 
     TYPE = (
         ('General Practice', 'General Practice'),
@@ -69,17 +73,15 @@ class Hospital(models.Model):
         ('Specialized Hospital', 'Specialized Hospital')
     )
 
-    COUNTRY = (
-        ('United Kingdom', 'United Kingdom'),
-        ('Ireland', 'Ireland'),
-        ('France', 'France')
-    )
-
     name = models.CharField(max_length=64)
     region = models.CharField(max_length=64)
-    address = models.OneToOneField(Address, on_delete=models.PROTECT)
-    country = models.CharField(max_length=64, choices = COUNTRY)
+    #address = models.OneToOneField(Address, on_delete=models.PROTECT)
     type = models.CharField(max_length=64, choices = TYPE)
+    ad_line1 = models.CharField(max_length=64)
+    ad_line2 = models.CharField(max_length=64, null=True, blank=True)
+    ad_city = models.CharField(max_length=32)
+    ad_postcode = models.CharField(max_length=32)
+    ad_country = models.CharField(max_length=32)
 
     def __str__(self):
         return self.name
@@ -89,7 +91,7 @@ class Ward(models.Model):
     name = models.CharField(max_length=64)
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
     type = models.CharField(max_length=32)
-    w_id = models.AutoField(primary_key=True)
+    # w_id = models.AutoField(primary_key=True)
 
     def __str__(self):
         return self.name
@@ -102,9 +104,10 @@ class Staff(models.Model):
         ('Admin', 'Admin'),
     )
 
-    name = models.CharField(max_length=64)
+    first_name = models.CharField(max_length=32)
+    last_name = models.CharField(max_length=32)
     tel_no = models.CharField(max_length=32, blank=True, null=True)
-    ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True)
+    ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, blank=True, null=True)
     baseuser = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key = True)
 
     class Meta:
@@ -123,7 +126,7 @@ class PatientDoctor(models.Model):
     def save(self, *args, **kwargs):   ####watch out for this code######################
         if self.primary:
             try:
-                temp = PatientDoctor.objects.get(primary=True)
+                temp = PatientDoctor.objects.get(primary=True, patient=self.patient)
                 if self != temp:
                     temp.primary = False
                     temp.save()
@@ -221,7 +224,11 @@ class EmergencyContact(models.Model):
     name = models.CharField(max_length=64)
     email = models.CharField(max_length=64, blank=True, null=True)
     phone = models.CharField(primary_key=True, max_length=64)
-    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True)
+    ad_line1 = models.CharField(max_length=64)
+    ad_line2 = models.CharField(max_length=64, null=True, blank=True)
+    ad_city = models.CharField(max_length=32)
+    ad_postcode = models.CharField(max_length=32)
+    ad_country = models.CharField(max_length=32)
 
     def __str__(self):
         return self.name
@@ -243,8 +250,8 @@ class Event(models.Model):
     type = models.CharField(choices=TYPE, max_length=32)
     notes = models.CharField(max_length=256, blank=True, null=True)
 
-    class Meta:
-        unique_together = ('date_in', 'pd_relation'),
+    # class Meta:
+    #     unique_together = ('date_in', 'pd_relation'),
 
     def __str__(self):
         return self.type

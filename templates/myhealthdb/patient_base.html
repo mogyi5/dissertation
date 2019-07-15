@@ -26,10 +26,10 @@
     <div class="navbar-collapse collapse">
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-          <a class="nav-link" href="#">Help</a>
+          <p class="navbar-text"> {{ patientprofile.first_name }} {{patientprofile.last_name}}</p>
         </li>
         <li class="nav-item">
-          <p class="navbar-text"> {{ patientprofile.name }}</p>
+          <a class="nav-link" href="#">Help</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{%url 'patient_details' id=patientprofile.baseuser.id%}">My Details</a>

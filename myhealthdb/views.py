@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from allauth.account.views import SignupView
 from django.contrib.auth.decorators import login_required, user_passes_test
-from myhealthdb.forms import PatientSignupForm, StaffSignupForm, AddressForm, PatientProfileForm
+from myhealthdb.forms import PatientSignupForm, PatientProfileForm, StaffProfileForm, HospitalContactForm
 from django.shortcuts import redirect
 from myhealthdb.models import CustomUser, Patient, Staff
+from django.views.generic.edit import FormView
 
 def patient_check(user):
     if user.user_type == 1:
@@ -65,7 +66,6 @@ def staff_home(request,id):
         return redirect('index')
 
     staffprofile = Staff.objects.get_or_create(baseuser=baseuser)[0]
-    #context_dict = {}
 
     response = render(request, 'myhealthdb/staff_home.html', {'staffprofile': staffprofile})
 
@@ -85,39 +85,29 @@ def patient_details(request,id):
         return redirect('index')
 
     patientprofile = Patient.objects.get_or_create(baseuser=baseuser)[0]
+    form = PatientProfileForm({'dob':patientprofile.dob, 'first_name':patientprofile.first_name, 'last_name':patientprofile.last_name, 'sex':patientprofile.sex, 'tel_no':patientprofile.tel_no,'nhs_no':patientprofile.nhs_no, 'ad_line1':patientprofile.ad_line1, 'ad_line2':patientprofile.ad_line2, 'ad_city':patientprofile.ad_city, 'ad_postcode':patientprofile.ad_postcode, 'ad_country':patientprofile.ad_country} )
+
 
     if request.method == 'POST':
-        form_1 = AddressForm(request.POST)
-        form_2 = PatientProfileForm(request.POST, initial={'name': patientprofile.name, 'dob':patientprofile.dob })
+        form = PatientProfileForm(request.POST,instance=request.user.patient)
 
-        if form_1.is_valid() and form_2.is_valid():
-            form_1.save()
-            form_2.save()
+        if form.is_valid():
+            # form.save()
+            patientprofile = form.save(commit=False)
+            patientprofile.save()
             return redirect('patient_home', id)
         else:
+            form = PatientProfileForm(instance = request.user.patient)
             print(form.errors)
 
-    else:
-        form_1 = AddressForm()
-        form_2 = PatientProfileForm()
-
-    
 
     context = {
-        'form1': form_1,
-        'form2': form_2,
+        'form': form,
         'patientprofile' : patientprofile,
     }
 
-    return render(request, 'myhealthdb/patient_details.html', context)
-
-    # patientprofile = Patient.objects.get_or_create(baseuser=baseuser)[0]
-    # form = UserProfileForm({'about': userprofile.about, 'picture': userprofile.picture})
-
-    # context_dict = {}
-    # response = render(request, 'myhealthdb/patient_details.html', {'patientprofile': patientprofile})
-
-    # return response
+    response = render(request, 'myhealthdb/patient_details.html', context)
+    return response
 
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def staff_details(request,id):
@@ -131,42 +121,68 @@ def staff_details(request,id):
         return redirect('index')
 
     staffprofile = Staff.objects.get_or_create(baseuser=baseuser)[0]
-    #context_dict = {}
+    form = StaffProfileForm({'tel_no':staffprofile.tel_no, 'first_name':staffprofile.first_name, 'last_name':staffprofile.last_name, 'ward':staffprofile.ward} )
 
-    response = render(request, 'myhealthdb/staff_home.html', {'staffprofile': staffprofile})
+    if request.method == 'POST':
+        form = StaffProfileForm(request.POST,instance=request.user.staff)
 
+        if form.is_valid():
+            # form.save()
+            staffprofile = form.save(commit=False)
+            staffprofile.save()
+            return redirect('staff_home', id)
+        else:
+            form = StaffProfileForm(instance = request.user.staff)
+            print(form.errors)
+
+
+    context = {
+        'form': form,
+        'staffprofile' : staffprofile,
+    }
+
+    response = render(request, 'myhealthdb/staff_details.html', context)
     return response
 
 
-class PatientSignupView(SignupView):
-
-    template_name = 'account/signup_patient.html'
-    form_class = PatientSignupForm
-    view_name = 'patient_signup'
-
-    def get_context_data(self, **kwargs):
-        ret = super(PatientSignupView, self).get_context_data(**kwargs)
-        ret.update(self.kwargs)
-        return ret
-    
-patient_signup = PatientSignupView.as_view()
-
-
-class StaffSignupView(SignupView):
-    template_name = 'account/signup_staff.html'
-    form_class = StaffSignupForm
-    view_name = 'staff_signup'
-
-staff_signup = StaffSignupView.as_view()
-
-
+@login_required(redirect_field_name ='index')
 def home_base(request):
 
-    if request.user.is_authenticated:
-        thisid = request.user.id
-        if request.user.user_type == 1:
-            return redirect('patient_home', id=thisid)
-        else: 
-            return redirect("staff_home", id=thisid)
-    else:
-        return redirect("index")
+    thisid = request.user.id
+    if request.user.user_type == 1:
+        return redirect('patient_home', id=thisid)
+    else: 
+        return redirect("staff_home", id=thisid)
+
+# class StaffSignupView(SignupView):
+#     template_name = 'account/signup_staff.html'
+#     form_class = StaffSignupForm
+#     view_name = 'staff_signup'
+
+# staff_signup = StaffSignupView.as_view()
+
+
+class HospitalContactFormView(FormView):
+    form_class = HospitalContactForm
+    template_name = 'contact_form/contact_form.html'
+ 
+    def form_valid(self, form):
+        human = True
+        form.save()
+        return super(HospitalContactFormView, self).form_valid(form)
+ 
+    def get_form_kwargs(self):
+        # ContactForm instances require instantiation with an
+        # HttpRequest.
+        kwargs = super(HospitalContactFormView, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
+ 
+    def get_success_url(self):
+        # This is in a method instead of the success_url attribute
+        # because doing it as an attribute would involve a
+        # module-level call to reverse(), creating a circular
+        # dependency between the URLConf (which imports this module)
+        # and this module (which would need to access the URLConf to
+        # make the reverse() call).
+        return reverse('contact_form_sent')
