@@ -26,13 +26,13 @@
     <div class="navbar-collapse collapse">
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-          <p class="navbar-text"> {{ staffprofile.first_name }} {{ staffprofile.last_name }}</p>
+          <p class="navbar-text"> {{ profile.first_name }} {{ profile.last_name }}</p>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Help</a>
         </li>
- <li class="nav-item">
-          <a class="nav-link" href="{%url 'staff_details' id=staffprofile.baseuser.id %}">My Details</a>
+        <li class="nav-item">
+          <a class="nav-link" href="{%url 'staff_details' id=profile.baseuser.id %}">My Details</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{%url 'account_logout' %}">Logout</a>

@@ -3,12 +3,25 @@
 
 
 {% block body_block %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Your Dashboard</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    {% comment %} <div class="btn-group mr-2">
+      <button class="btn btn-sm btn-outline-secondary">Share</button>
+      <button class="btn btn-sm btn-outline-secondary">Export</button>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary dropdown-toggle"> {% endcomment %}
+      <span data-feather="calendar"></span>
+      This week
+    </button>
+  </div>
+</div>
 <div class="card">
   <div class="card-block">
     <h4 class="card-title">Your updates</h4>
     <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
     {% comment %} {%if %}
-      {% for board in boards %}
+    {% for board in boards %}
     <tr>
       <td>
         <a href="{% url 'board_topics' board.pk %}">{{ board.name }}</a>
@@ -18,7 +31,7 @@
       <td class="align-middle">0</td>
       <td></td>
     </tr>
-  {% endfor %} {% endcomment %}
+    {% endfor %} {% endcomment %}
     <a href="#" class="card-link">Card link</a>
     <a href="#" class="card-link">Another link</a>
   </div>
@@ -26,21 +39,22 @@
 <div class="card">
   <div class="card-block">
     <h4 class="card-title">Your appointments</h4>
-    <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-    {% comment %} {%if %}
-      {% for board in boards %}
-    <tr>
-      <td>
-        <a href="{% url 'board_topics' board.pk %}">{{ board.name }}</a>
-        <small class="text-muted d-block">{{ board.description }}</small>
-      </td>
-      <td class="align-middle">0</td>
-      <td class="align-middle">0</td>
-      <td></td>
-    </tr>
-  {% endfor %} {% endcomment %}
-    <a href="#" class="card-link">Card link</a>
+    {% if events %}
+    {% for e in events %}
+
+    {{e.title}}
+    {{e.date_in}}
+    {{e.type}}
+    <button href="#" class="btn btn-sm btn-outline-secondary">Edit</button>
+    <button href="#" class="btn btn-sm btn-outline-secondary">Delete</button>
+    {% endfor %}
+
+    {% endif%} <br/>
+    {% comment %} <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> {% endcomment %}
+    <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Card link</a>
     <a href="#" class="card-link">Another link</a>
+    <button href="{%url 'event_create' id=profile.baseuser.id %}" class="btn btn-sm btn-outline-secondary">Book
+      appointment</button>
   </div>
 </div>
 {% endblock %}

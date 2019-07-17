@@ -1,9 +1,9 @@
 from django import forms
-from myhealthdb.models import CustomUser, Patient, Staff, PatientEm, PatientDoctor
-#from allauth.account.forms import SignupForm
+from myhealthdb.models import CustomUser, Patient, Staff, PatientEm, PatientDoctor, Event
 from contact_form.forms import ContactForm
 from captcha.fields import CaptchaField
 from django.forms import inlineformset_factory
+from datetimewidget.widgets import DateTimeWidget
 
 
 PDSet = inlineformset_factory(Patient, PatientDoctor, fields = ['doctor', 'primary', 'note'],  can_delete=True, extra=1, max_num=5)
@@ -21,12 +21,19 @@ class StaffProfileForm(forms.ModelForm):
         model = Staff
         exclude = ('baseuser',)
 
+class EventBookingForm(forms.ModelForm):
 
-# class AddressForm(forms.ModelForm):
+    # title =  
+    date_in = forms.DateTimeField()
+    # date_out = forms.DateTimeInput()
+    # relation 
+    # type
+    # notes
 
-#     class Meta:
-#         model = Address
-#         exclude = ('a_id', )
+    class Meta:
+        model = Event
+        exclude = ('letter', 'date_out')
+
 
 class PatientSignupForm(forms.Form):
 

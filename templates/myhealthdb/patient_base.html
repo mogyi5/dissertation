@@ -24,7 +24,7 @@
 
   {% comment %} Make the buttons work for inlineformstet {% endcomment %}
   {% comment %} <script src="{% static 'js/jquery.formset.js' %}"></script> {% endcomment %}
- 
+
 
 </head>
 
@@ -34,13 +34,13 @@
     <div class="navbar-collapse collapse">
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-          <p class="navbar-text"> {{ patientprofile.first_name }} {{patientprofile.last_name}}</p>
+          <p class="navbar-text"> {{ profile.first_name }} {{profile.last_name}}</p>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Help</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{%url 'patient_details' id=patientprofile.baseuser.id%}">My Details</a>
+          <a class="nav-link" href="{%url 'patient_details' id=profile.baseuser.id%}">My Details</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{%url 'account_logout' %}">Logout</a>
@@ -114,20 +114,7 @@
       </nav>
 
       <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-        <div
-          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h1 class="h2">Your Dashboard</h1>
-          <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group mr-2">
-              <button class="btn btn-sm btn-outline-secondary">Share</button>
-              <button class="btn btn-sm btn-outline-secondary">Export</button>
-            </div>
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
-              <span data-feather="calendar"></span>
-              This week
-            </button>
-          </div>
-        </div>
+
 
         {%block body_block%}{%endblock%}
         <!-- <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas> -->

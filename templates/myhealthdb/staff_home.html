@@ -21,5 +21,28 @@
     <a href="#" class="card-link">Another link</a>
   </div>
 </div>
+<div class="card">
+  <div class="card-block">
+    <h4 class="card-title">Your appointments</h4>
+    {% if events %}
+    {% for e in events %}
+
+    {{e.title}}
+    {{e.date_in}}
+    {{e.type}}
+    <button href="#" class="btn btn-sm btn-outline-secondary">Edit</button>
+    <button href="#" class="btn btn-sm btn-outline-secondary">Delete</button>
+    {% endfor %}
+
+    {% endif%} <br/>
+    {% comment %} <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> {% endcomment %}
+    <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Create event</a>
+    <a href="#" class="card-link">Another link</a>
+    {% if profile.baseuser.user_type == 3 %}
+    <button href="{%url 'event_create' id=profile.baseuser.id %}" class="btn btn-sm btn-outline-secondary">Book
+      appointment</button>
+      {% endif %}
+  </div>
+</div>
 
 {% endblock %}

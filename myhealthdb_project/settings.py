@@ -19,17 +19,17 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 
-STATICFILES_FINDERS = [
-    'djangobower.finders.BowerFinder',
-]
+# STATICFILES_FINDERS = [
+#     'djangobower.finders.BowerFinder',
+# ]
 
-BOWER_COMPONENTS_ROOT = '/PROJECT_ROOT/components/'
+# BOWER_COMPONENTS_ROOT = '/PROJECT_ROOT/components/'
 
-BOWER_INSTALLED_APPS = (
-    'jquery',
-    'jquery-ui',
-    'bootstrap'
-)
+# BOWER_INSTALLED_APPS = (
+#     'jquery',
+#     'jquery-ui',
+#     'bootstrap'
+# )
 
 #USER STUFF
 AUTH_USER_MODEL = 'myhealthdb.CustomUser'
@@ -70,8 +70,11 @@ INSTALLED_APPS = [
     'contact_form',
 
     'captcha',
-    'schedule',
-    'djangobower',
+    'datetimewidget'
+    # 'schedule',
+    # 'djangobower',
+
+    # 'fullcalendar',
 ]
 
 MIDDLEWARE = [
@@ -98,8 +101,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media'
-
-                # 'django.template.context_processors.request',
             ],
         },
     },
@@ -168,7 +169,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATICFILES_DIRS = [STATIC_DIR]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 STATIC_URL = '/static/'
 
 # Media

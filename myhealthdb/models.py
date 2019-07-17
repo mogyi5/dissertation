@@ -9,7 +9,6 @@
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django_random_queryset import RandomManager
-from schedule.models import Event, EventRelation, Calendar
 
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
@@ -140,7 +139,7 @@ class PatientDoctor(models.Model):
         unique_together =('patient', 'doctor')
 
     def __str__(self):
-        return self.patient
+        return self.patient.first_name
 
 
 class Activity(models.Model):
@@ -248,7 +247,7 @@ class Event(models.Model):
     letter = models.ForeignKey(Document, on_delete=models.SET_NULL,blank=True, null=True)  #if letter gets deleted doesn't mean that event will
     date_in = models.DateTimeField()
     date_out = models.DateTimeField(blank=True, null=True)
-    pd_relation = models.ForeignKey(PatientDoctor, on_delete=models.PROTECT) #unsure about this one
+    pd_relation = models.ForeignKey(PatientDoctor, on_delete=models.PROTECT, related_name='reversepd') #unsure about this one
     type = models.CharField(choices=TYPE, max_length=32)
     notes = models.CharField(max_length=256, blank=True, null=True)
 
@@ -256,7 +255,7 @@ class Event(models.Model):
     #     unique_together = ('date_in', 'pd_relation'),
 
     def __str__(self):
-        return self.type
+        return self.title
 
 
 class Immunization(models.Model):
@@ -301,8 +300,7 @@ class PatientEm(models.Model):
     p_id = models.AutoField(primary_key=True)
 
     def __str__(self):
-        return self.emcontact
-
+        return self.name
 
 class Symptom(models.Model):
     name = models.CharField(primary_key=True, max_length=64)
