@@ -27,5 +27,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('contact/', include('contact_form.urls')),
+    path('calendar/', include('schedule.urls')),
     #path('accounts/signup/staff/',views.staff_signup, name='signup-staff'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

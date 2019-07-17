@@ -19,6 +19,17 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 
+STATICFILES_FINDERS = [
+    'djangobower.finders.BowerFinder',
+]
+
+BOWER_COMPONENTS_ROOT = '/PROJECT_ROOT/components/'
+
+BOWER_INSTALLED_APPS = (
+    'jquery',
+    'jquery-ui',
+    'bootstrap'
+)
 
 #USER STUFF
 AUTH_USER_MODEL = 'myhealthdb.CustomUser'
@@ -59,6 +70,8 @@ INSTALLED_APPS = [
     'contact_form',
 
     'captcha',
+    'schedule',
+    'djangobower',
 ]
 
 MIDDLEWARE = [
@@ -160,7 +173,8 @@ STATIC_URL = '/static/'
 
 # Media
 
-MEDIA_ROOT = MEDIA_DIR
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = '/media/'
 
 # emaillogin_project/settings.py
@@ -198,3 +212,5 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 
 RECAPTCHA_PUBLIC_KEY = '6Ld_ya0UAAAAACdlTzZNLrMDzp_99XUX6lFM7rq4'
 RECAPTCHA_PRIVATE_KEY = '6Ld_ya0UAAAAAAY9-Gw97sL411C1ImaAVoXwPVdC'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

@@ -9,6 +9,7 @@
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django_random_queryset import RandomManager
+from schedule.models import Event, EventRelation, Calendar
 
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
@@ -121,7 +122,8 @@ class PatientDoctor(models.Model):
     doctor = models.ForeignKey(Staff, on_delete=models.CASCADE)
     primary = models.BooleanField()
     pd_id = models.AutoField(primary_key=True)
-    inpatient = models.BooleanField()
+    inpatient = models.BooleanField(default=False)
+    note = models.CharField(max_length=32, blank=True, null=True)
 
     def save(self, *args, **kwargs):   ####watch out for this code######################
         if self.primary:
@@ -133,6 +135,9 @@ class PatientDoctor(models.Model):
             except PatientDoctor.DoesNotExist:
                 pass
         super(PatientDoctor, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together =('patient', 'doctor')
 
     def __str__(self):
         return self.patient
@@ -220,18 +225,14 @@ class Document(models.Model):
     def __str__(self):
         return self.name
 
-class EmergencyContact(models.Model):
-    name = models.CharField(max_length=64)
-    email = models.CharField(max_length=64, blank=True, null=True)
-    phone = models.CharField(primary_key=True, max_length=64)
-    ad_line1 = models.CharField(max_length=64)
-    ad_line2 = models.CharField(max_length=64, null=True, blank=True)
-    ad_city = models.CharField(max_length=32)
-    ad_postcode = models.CharField(max_length=32)
-    ad_country = models.CharField(max_length=32)
+# class EmergencyContact(models.Model):
+#     name = models.CharField(max_length=64)
+#     email = models.CharField(max_length=64, blank=True, null=True)
+#     phone1 = models.CharField(primary_key=True, max_length=64)
+#     phone2 = models.CharField(max_length=64, blank=True, null=True)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
 
 class Event(models.Model):
@@ -243,7 +244,8 @@ class Event(models.Model):
         ('Emergency', 'Emergency'),
     )
 
-    letter = models.ForeignKey(Document, on_delete=models.SET_NULL, null=True)  #if letter gets deleted doesn't mean that event will
+    title = models.CharField(max_length=32)
+    letter = models.ForeignKey(Document, on_delete=models.SET_NULL,blank=True, null=True)  #if letter gets deleted doesn't mean that event will
     date_in = models.DateTimeField()
     date_out = models.DateTimeField(blank=True, null=True)
     pd_relation = models.ForeignKey(PatientDoctor, on_delete=models.PROTECT) #unsure about this one
@@ -291,8 +293,11 @@ class Medication(models.Model):
 
 
 class PatientEm(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    emcontact = models.ForeignKey(EmergencyContact, on_delete=models.CASCADE) 
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='em_pat')
+    name = models.CharField(max_length=64)
+    email = models.CharField(max_length=64, blank=True, null=True)
+    phone1 = models.CharField(max_length=64)
+    phone2 = models.CharField(max_length=64, blank=True, null=True)
     p_id = models.AutoField(primary_key=True)
 
     def __str__(self):
