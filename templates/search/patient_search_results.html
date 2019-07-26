@@ -1,0 +1,15 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+<h4>Matching patients:</h4>
+
+<ul>
+  {% for p in object_list %}
+    <li>
+      {{ p.first_name }}
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

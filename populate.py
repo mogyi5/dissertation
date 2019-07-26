@@ -18,28 +18,37 @@ def populate():
     super = create_super_user(username, email, password)
 
 # making some new users for fun
-    patient = CustomUser.objects.create_user(username='patient',email='patient@patient.com',password='myhealthdb', user_type='1' )
-    doctor = CustomUser.objects.create_user(username='doctor',email='doctor@doctor.com',password='myhealthdb', user_type = '2' )
+    patient1 = CustomUser.objects.create_user(username='patient',email='patient@patient.com',password='myhealthdb', user_type='1' )
+    patient2 = CustomUser.objects.create_user(username='patient2',email='patient2@patient2.com',password='myhealthdb', user_type='1' )
+    patient3 = CustomUser.objects.create_user(username='patient3',email='patient3@patient3.com',password='myhealthdb', user_type='1' )
+    doctor1 = CustomUser.objects.create_user(username='doctor',email='doctor@doctor.com',password='myhealthdb', user_type = '2' )
+    doctor2 = CustomUser.objects.create_user(username='doctor2',email='doctor2@doctor2.com',password='myhealthdb', user_type = '2' )
+    doctor3 = CustomUser.objects.create_user(username='doctor3',email='doctor3@doctor3.com',password='myhealthdb', user_type = '2' )
 
 # populating the patients also
-    Profiles1 = {
+    Profiles = {
     "patient@patient.com":{'firstname':'pat', 'lastname':'pot',"sex": "Female", "dob": "2002-02-02", "tel_no": "111111111111", "ad_line1":"my first line", "ad_city":"glasgow", "ad_postcode":"g22 opp", "ad_country":"uk"},
+    "patient2@patient2.com":{'firstname':'bot', 'lastname':'bat',"sex": "Male", "dob": "2003-03-03", "tel_no": "2222222222222", "ad_line1":"hello hello", "ad_city":"edinburgh", "ad_postcode":"ginaaa", "ad_country":"england"},    
+    "patient3@patient3.com":{'firstname':'yoyo', 'lastname':'whatsup',"sex": "Female", "dob": "2004-04-04", "tel_no": "333333333333", "ad_line1":"i am groot", "ad_city":"wales", "ad_postcode":"binary", "ad_country":"spain"},
     }
 
-    for p, p_data in Profiles1.items():
+    for p, p_data in Profiles.items():
         add_patient(CustomUser.objects.get(email = p),p_data['firstname'],p_data['lastname'], p_data["sex"], p_data["dob"], p_data["tel_no"], p_data["ad_line1"], p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"])
 
 # populating the staff also
-    Profiles2 = {
+    Staff = {
     "doctor@doctor.com":{'firstname':'dic', 'lastname':'doc',"tel_no": "222222222222"},
+    "doctor2@doctor2.com":{'firstname':'derek', 'lastname':'doo',"tel_no": "1324"},
+    "doctor3@doctor3.com":{'firstname':'drunk', 'lastname':'yoohoo',"tel_no": "07479509090"},
     }
 
-    for p, p_data in Profiles2.items():
+    for p, p_data in Staff.items():
         add_staff(CustomUser.objects.get(email = p),p_data['firstname'],p_data['lastname'], p_data["tel_no"])
 
 # populating the hospitals also
     Hospitals = {
     'hospital1':{'name':'hospital1', 'region':'highlands', 'type':'General Practice', "ad_line1":"first", "ad_city":"inverness", "ad_postcode":"iv22 747", "ad_country":"uk"},
+    'hospital2':{'name':'hospital2', 'region':'aberdeen', 'type':'General Hospital', "ad_line1":"line1", "ad_city":"aberdeen", "ad_postcode":"ab56566", "ad_country":"greenland"},
     }
 
     for p, p_data in Hospitals.items():
@@ -47,7 +56,9 @@ def populate():
 
 # populating the wards also
     Wards = {
-    'ward':{'name':'ward', 'type':'General Practice'},
+    'ward':{'name':'ward', 'type':'Cancer'},
+    'ward2':{'name':'ward2', 'type':'Pediatry'},
+    'ward3':{'name':'ward3', 'type':'Genius'},
     }
 
     for p, p_data in Wards.items():

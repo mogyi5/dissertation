@@ -1,4 +1,4 @@
-{% extends 'myhealthdb/patient_base.html' %}
+{% extends 'myhealthdb/second_base.html' %}
 {% load staticfiles %}
 
 
@@ -20,41 +20,28 @@
   <div class="card-block">
     <h4 class="card-title">Your updates</h4>
     <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-    {% comment %} {%if %}
-    {% for board in boards %}
-    <tr>
-      <td>
-        <a href="{% url 'board_topics' board.pk %}">{{ board.name }}</a>
-        <small class="text-muted d-block">{{ board.description }}</small>
-      </td>
-      <td class="align-middle">0</td>
-      <td class="align-middle">0</td>
-      <td></td>
-    </tr>
-    {% endfor %} {% endcomment %}
     <a href="#" class="card-link">Card link</a>
     <a href="#" class="card-link">Another link</a>
   </div>
 </div>
+<br/>
 <div class="card">
   <div class="card-block">
-    <h4 class="card-title">Your appointments</h4>
+    <h4 class="card-title">Your upcoming appointments</h4>
     {% if events %}
     {% for e in events %}
 
     {{e.title}}
     {{e.date_in}}
-    {{e.type}}
-    <button href="#" class="btn btn-sm btn-outline-secondary">Edit</button>
-    <button href="#" class="btn btn-sm btn-outline-secondary">Delete</button>
+    {{e.type}} 
+    <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
+    <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
+    <br/>
     {% endfor %}
-
-    {% endif%} <br/>
-    {% comment %} <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> {% endcomment %}
-    <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Card link</a>
-    <a href="#" class="card-link">Another link</a>
-    <button href="{%url 'event_create' id=profile.baseuser.id %}" class="btn btn-sm btn-outline-secondary">Book
-      appointment</button>
+     {% else %}
+      <p>You have no pending events!</p>
+    {% endif%}
+    <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
   </div>
 </div>
 {% endblock %}

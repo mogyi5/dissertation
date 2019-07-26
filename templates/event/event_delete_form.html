@@ -1,0 +1,10 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+<form method="post">{% csrf_token %}
+    <p>Are you sure you want to delete "{{ object.title }}" at "{{ object.date_in }}" ?</p>
+    <input type="submit" value="Confirm">
+</form>
+{%endblock%}

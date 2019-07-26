@@ -1,0 +1,32 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+
+<div class="container">
+    <h4>Coming up</h4>
+    {%if new_events%}
+    {%for ne in new_events%}
+    {{ne.title}}
+    <br/>
+    {%endfor%}
+    {%else%}
+    <h6></h6>
+    {%endif%}
+</div>
+
+<div class="container">
+    <h4>Past events</h4>
+    {%if past_events%}
+    {%for pe in past_events%}
+    {{pe.title}}
+    <br/>
+    {%endfor%}
+    {%else%}
+    <h6>No events yet!</h6>
+    {%endif%}
+</div>
+
+
+{%endblock%}

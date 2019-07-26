@@ -1,0 +1,104 @@
+{% extends 'myhealthdb/second_base.html' %}
+{% load staticfiles %}
+
+{% block body_block %}
+<div class="card">
+  <div class="card-block">
+    <h4 class="card-title">Your updates</h4>
+    <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+    <a href="#" class="card-link">Card link</a>
+    <a href="#" class="card-link">Another link</a>
+  </div>
+</div>
+<br />
+{% comment %} <div class="card">
+  <div class="card-block">
+    <h4 class="card-title">Your appointments today</h4>
+    {% if events %}
+    {% for e in events %}
+
+    {{e.title}}
+    {{e.date_in}}
+    {{e.type}}
+    <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
+    <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
+    <br />
+    {% endfor %}
+    {% else %}
+    <p>You have no pending events!</p>
+    {% endif%} <br />
+    {% if profile.baseuser.id == 3%}
+    <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
+    {% endif %}
+  </div>
+</div> {% endcomment %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 ">
+      <nav>
+        <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-schedule" role="tab"
+            aria-controls="nav-home" aria-selected="true">Schedule</a>
+          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-inpatients" role="tab"
+            aria-controls="nav-profile" aria-selected="false">Inpatients</a>
+          {% comment %} <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact"
+            role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
+          <a class="nav-item nav-link" id="nav-about-tab" data-toggle="tab" href="#nav-about" role="tab"
+            aria-controls="nav-about" aria-selected="false">About</a> {% endcomment %}
+        </div>
+      </nav>
+      <div class="tab-content py-3 px-3 px-sm-0" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-schedule" role="tabpanel" aria-labelledby="nav-home-tab">
+          <h4 class="card-title">Your appointments today</h4>
+          {% if events %}
+          {% for e in events %}
+
+          {{e.title}}
+          {{e.date_in}}
+          {{e.type}}
+          <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
+          <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
+          <br />
+          {% endfor %}
+          {% else %} 
+          <p>You have no pending events!</p>
+          {% endif%} <br />
+          {% if profile.baseuser.id == 3%}
+          <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-inpatients" role="tabpanel" aria-labelledby="nav-profile-tab">
+          {% if inpatients %}
+          {% for i in inpatients %}
+
+          {{i.patient}}
+ 
+          <br />
+          {% endfor %}
+          {% else %} 
+          <p>You have no inpatients!</p>
+          {% endif%} 
+        </div>
+        {% comment %} <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+          Et et consectetur ipsum labore excepteur est proident excepteur ad velit occaecat qui minim occaecat veniam.
+          Fugiat veniam incididunt anim aliqua enim pariatur veniam sunt est aute sit dolor anim. Velit non irure
+          adipisicing aliqua ullamco irure incididunt irure non esse consectetur nostrud minim non minim occaecat. Amet
+          duis do nisi duis veniam non est eiusmod tempor incididunt tempor dolor ipsum in qui sit. Exercitation mollit
+          sit culpa nisi culpa non adipisicing reprehenderit do dolore. Duis reprehenderit occaecat anim ullamco ad duis
+          occaecat ex.
+        </div>
+        <div class="tab-pane fade" id="nav-about" role="tabpanel" aria-labelledby="nav-about-tab">
+          Et et consectetur ipsum labore excepteur est proident excepteur ad velit occaecat qui minim occaecat veniam.
+          Fugiat veniam incididunt anim aliqua enim pariatur veniam sunt est aute sit dolor anim. Velit non irure
+          adipisicing aliqua ullamco irure incididunt irure non esse consectetur nostrud minim non minim occaecat. Amet
+          duis do nisi duis veniam non est eiusmod tempor incididunt tempor dolor ipsum in qui sit. Exercitation mollit
+          sit culpa nisi culpa non adipisicing reprehenderit do dolore. Duis reprehenderit occaecat anim ullamco ad duis
+          occaecat ex.
+        </div> {% endcomment %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

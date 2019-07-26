@@ -9,51 +9,42 @@
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django_random_queryset import RandomManager
+from django.utils.text import slugify
+
 
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
-      (1, 'patient'),
-      (2, 'doctor'),
-      (3, 'receptionist'),
-      (4, 'admin'),
+        (1, 'patient'),
+        (2, 'doctor'),
+        (3, 'receptionist'),
+        (4, 'admin'),
     )
 
-    user_type = models.IntegerField(choices = USER_TYPE_CHOICES, null=True)
+    user_type = models.IntegerField(choices=USER_TYPE_CHOICES, null=True)
 
     def __str__(self):
         return self.email
 
-
-# class Address(models.Model):
-#     line1 = models.CharField(max_length=64)
-#     line2 = models.CharField(max_length=64, null=True, blank=True)
-#     city = models.CharField(max_length=32)
-#     postcode = models.CharField(max_length=32)
-#     country = models.CharField(max_length=32)
-
-#     class Meta:
-#         verbose_name_plural = "addresses"
-
-#     def __str__(self):
-#         return self.postcode
-
 class Patient(models.Model):
 
-    SEX  =(
+    SEX = (
         ('M', 'Male'),
         ('F', 'Female')
     )
 
     first_name = models.CharField(max_length=32)
-    last_name= models.CharField(max_length=32)
-    sex = models.CharField(choices = SEX, max_length=32)
+    last_name = models.CharField(max_length=32)
+    sex = models.CharField(choices=SEX, max_length=32)
     dob = models.DateField()
-    weight = models.DecimalField(max_digits=255, decimal_places=2, blank=True, null=True)
+    weight = models.DecimalField(
+        max_digits=255, decimal_places=2, blank=True, null=True)
     height = models.IntegerField(blank=True, null=True)
     tel_no = models.CharField(max_length=32, blank=True, null=True)
     #address = models.OneToOneField(Address, on_delete=models.SET_NULL, null=True, blank=True, related_query_name="specific_pat",)
-    nhs_no = models.CharField(unique=True, max_length=128, blank=True, null=True)
-    baseuser = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    nhs_no = models.CharField(
+        unique=True, max_length=128, blank=True, null=True)
+    baseuser = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, primary_key=True, related_name='patient')
     ad_line1 = models.CharField(max_length=64)
     ad_line2 = models.CharField(max_length=64, null=True, blank=True)
     ad_city = models.CharField(max_length=32)
@@ -62,6 +53,7 @@ class Patient(models.Model):
 
     def __str__(self):
         return self.baseuser.email
+
 
 class Hospital(models.Model):
 
@@ -76,7 +68,7 @@ class Hospital(models.Model):
     name = models.CharField(max_length=64)
     region = models.CharField(max_length=64)
     #address = models.OneToOneField(Address, on_delete=models.PROTECT)
-    type = models.CharField(max_length=64, choices = TYPE)
+    type = models.CharField(max_length=64, choices=TYPE)
     ad_line1 = models.CharField(max_length=64)
     ad_line2 = models.CharField(max_length=64, null=True, blank=True)
     ad_city = models.CharField(max_length=32)
@@ -95,26 +87,29 @@ class Ward(models.Model):
 
     def __str__(self):
         return self.name
-        
+
 
 class Staff(models.Model):
 
     ROLE = (
-        ('Doctor','Doctor'),
+        ('Doctor', 'Doctor'),
         ('Admin', 'Admin'),
     )
 
     first_name = models.CharField(max_length=32)
     last_name = models.CharField(max_length=32)
     tel_no = models.CharField(max_length=32, blank=True, null=True)
-    ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, blank=True, null=True)
-    baseuser = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key = True)
+    ward = models.ForeignKey(
+        Ward, on_delete=models.SET_NULL, blank=True, null=True)
+    baseuser = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, primary_key=True, related_name='doctor')
 
     class Meta:
-        verbose_name_plural = "staff" 
+        verbose_name_plural = "staff"
 
     def __str__(self):
         return self.baseuser.email
+
 
 class PatientDoctor(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -124,10 +119,11 @@ class PatientDoctor(models.Model):
     inpatient = models.BooleanField(default=False)
     note = models.CharField(max_length=32, blank=True, null=True)
 
-    def save(self, *args, **kwargs):   ####watch out for this code######################
+    def save(self, *args, **kwargs):  # watch out for this code######################
         if self.primary:
             try:
-                temp = PatientDoctor.objects.get(primary=True, patient=self.patient)
+                temp = PatientDoctor.objects.get(
+                    primary=True, patient=self.patient)
                 if self != temp:
                     temp.primary = False
                     temp.save()
@@ -136,7 +132,7 @@ class PatientDoctor(models.Model):
         super(PatientDoctor, self).save(*args, **kwargs)
 
     class Meta:
-        unique_together =('patient', 'doctor')
+        unique_together = ('patient', 'doctor')
 
     def __str__(self):
         return self.patient.first_name
@@ -145,17 +141,17 @@ class PatientDoctor(models.Model):
 class Activity(models.Model):
 
     TYPE = (
-	 ('Run','Run'),
-	 ('Jog','Jog'),
-	 ('Walk','Walk'),
-	 ('Cycle','Cycle'),
-	 ('Swim','Swim'),
+        ('Run', 'Run'),
+        ('Jog', 'Jog'),
+        ('Walk', 'Walk'),
+        ('Cycle', 'Cycle'),
+        ('Swim', 'Swim'),
     )
 
     UNIT = (
-	 ('m','m'),
-	 ('Km','Km'),
-	 ('Mi','Mi'),
+        ('m', 'm'),
+        ('Km', 'Km'),
+        ('Mi', 'Mi'),
     )
 
     a_id = models.AutoField(primary_key=True)
@@ -163,7 +159,8 @@ class Activity(models.Model):
     calories = models.IntegerField(blank=True, null=True)
     type = models.CharField(choices=TYPE, max_length=32)
     distance = models.IntegerField(blank=True, null=True)
-    distance_unit = models.CharField(max_length=32, choices = UNIT, blank=True, null=True )
+    distance_unit = models.CharField(
+        max_length=32, choices=UNIT, blank=True, null=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True)
 
     class Meta:
@@ -176,29 +173,28 @@ class Activity(models.Model):
 class Condition(models.Model):
 
     TYPE = (
-	 ('Allergy','Allergy'),
-	 ('Heart Condition','Heart Condition'),
-	 ('Blindness','Blindness'),
-	 ('Deaf','Deaf'),
+        ('Allergy', 'Allergy'),
+        ('Heart Condition', 'Heart Condition'),
+        ('Blindness', 'Blindness'),
+        ('Deaf', 'Deaf'),
     )
 
     SEVERITY = (
         ('Minor', 'Minor'),
         ('Low', 'Low'),
-        ('Moderate','Moderate'),
-        ('Very High','Very High'),
+        ('Moderate', 'Moderate'),
+        ('Very High', 'Very High'),
         ('Severe', 'Severe'),
     )
 
     start = models.DateField()
     stop = models.DateField(blank=True, null=True)
-    type = models.CharField(max_length= 64,choices = TYPE, blank=True, null=True)
+    type = models.CharField(max_length=64, choices=TYPE, blank=True, null=True)
     reaction = models.CharField(max_length=64)
-    severity = models.IntegerField(choices = SEVERITY, blank=True, null=True)
+    severity = models.IntegerField(choices=SEVERITY, blank=True, null=True)
     details = models.CharField(max_length=256, blank=True, null=True)
     title = models.CharField(max_length=32)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-
 
     class Meta:
         unique_together = ('start', 'title', 'patient'),
@@ -212,13 +208,14 @@ class Document(models.Model):
     TYPE = (
         ('Discharge Letter', 'Discharge Letter'),
         ('Lab Result', 'Lab Result'),
+        ('Prescription', 'Prescription')
     )
 
     name = models.CharField(primary_key=True, max_length=32)
     read = models.BooleanField(default=False)
     file = models.FileField()
     description = models.CharField(max_length=256, blank=True, null=True)
-    type = models.CharField(choices = TYPE, max_length=32)
+    type = models.CharField(choices=TYPE, max_length=32)
 
     # class Meta:
     def __str__(self):
@@ -239,17 +236,21 @@ class Event(models.Model):
     TYPE = (
         ('Surgery', 'Surgery'),
         ('Consultation', 'Consultation'),
-        ('Imunization','Immunization'),
+        ('Imunization', 'Immunization'),
         ('Emergency', 'Emergency'),
     )
 
     title = models.CharField(max_length=32)
-    letter = models.ForeignKey(Document, on_delete=models.SET_NULL,blank=True, null=True)  #if letter gets deleted doesn't mean that event will
+    # if letter gets deleted doesn't mean that event will
+    letter = models.ForeignKey(
+        Document, on_delete=models.SET_NULL, blank=True, null=True)
     date_in = models.DateTimeField()
     date_out = models.DateTimeField(blank=True, null=True)
-    pd_relation = models.ForeignKey(PatientDoctor, on_delete=models.PROTECT, related_name='reversepd') #unsure about this one
+    pd_relation = models.ForeignKey(
+        PatientDoctor, on_delete=models.PROTECT, related_name='reversepd')  # unsure about this one
     type = models.CharField(choices=TYPE, max_length=32)
     notes = models.CharField(max_length=256, blank=True, null=True)
+    done = models.BooleanField(default=False)
 
     # class Meta:
     #     unique_together = ('date_in', 'pd_relation'),
@@ -266,9 +267,9 @@ class Immunization(models.Model):
 
     date = models.DateField()
     end = models.DateField(blank=True, null=True)
-    type = models.CharField(max_length=64,choices=TYPE)
+    type = models.CharField(max_length=64, choices=TYPE)
     amount = models.CharField(max_length=32)
-    patient = models.ForeignKey(Patient, on_delete = models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.type
@@ -282,7 +283,7 @@ class Medication(models.Model):
     type = models.CharField(max_length=64)
     amount = models.CharField(max_length=16, blank=True, null=True)
     frequency = models.CharField(max_length=64)
-    patient = models.ForeignKey(Patient, on_delete= models.CASCADE) 
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('type', 'patient'),
@@ -290,9 +291,26 @@ class Medication(models.Model):
     def __str__(self):
         return self.type
 
+class Group(models.Model):
+    name = models.CharField(max_length=128, primary_key=True)
+    members = models.ManyToManyField(Staff)
+    ad = models.ForeignKey(Staff, on_delete=models.SET_DEFAULT, default=1, related_name='admin') ##maybe not needed
+    description = models.CharField(max_length=256, blank=True, null=True)
+    slug = models.SlugField(blank=True)
+
+    def save(self, *args, **kwargs):
+                # Uncomment if you don't want the slug to change every time the name changes
+                #if self.id is None:
+                        #self.slug = slugify(self.name)
+                self.slug = slugify(self.name)
+                super(Group, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 class PatientEm(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='em_pat')
+    patient = models.ForeignKey(
+        Patient, on_delete=models.CASCADE, related_name='em_pat')
     name = models.CharField(max_length=64)
     email = models.CharField(max_length=64, blank=True, null=True)
     phone1 = models.CharField(max_length=64)
@@ -301,6 +319,7 @@ class PatientEm(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Symptom(models.Model):
     name = models.CharField(primary_key=True, max_length=64)
@@ -319,14 +338,18 @@ class SymptomsSet(models.Model):
     def __str__(self):
         return self.diagnosis
 
+
 DEFAULT_STAFF_EMAIL = 'default@default.com'
+
+
 class Task(models.Model):
     deadline = models.DateTimeField(primary_key=True)
     notes = models.CharField(max_length=256)
     complete = models.BooleanField()
     name = models.CharField(max_length=32)
     #set_by = models.ForeignKey(Staff)
-    completed_by = models.ForeignKey(Staff, on_delete=models.SET_DEFAULT, default=DEFAULT_STAFF_EMAIL)
+    completed_by = models.ForeignKey(
+        Staff, on_delete=models.SET_DEFAULT, default=DEFAULT_STAFF_EMAIL)
 
     def __str__(self):
         return self.name
@@ -335,6 +358,7 @@ class Task(models.Model):
         unique_together = ('deadline', 'name'),
 
 #################################################################################################################################################
+
 
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
@@ -408,7 +432,8 @@ class DjangoAdminLog(models.Model):
     object_repr = models.CharField(max_length=200)
     action_flag = models.SmallIntegerField()
     change_message = models.TextField()
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
+    content_type = models.ForeignKey(
+        'DjangoContentType', models.DO_NOTHING, blank=True, null=True)
     user = models.ForeignKey(AuthUser, models.DO_NOTHING)
 
     class Meta:

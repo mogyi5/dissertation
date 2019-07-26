@@ -1,0 +1,13 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+<form method="post" class="mb-4" novalidate>
+    {% csrf_token %}
+    {{form|crispy}}
+
+    <button type="submit" class="btn btn-success">Save changes</button>
+    <a href="{% url 'home_base' %}" class="btn btn-outline-secondary" role="button">Cancel</a>
+  </form>
+  {%endblock%}

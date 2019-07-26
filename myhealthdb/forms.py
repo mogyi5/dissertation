@@ -4,12 +4,49 @@ from contact_form.forms import ContactForm
 from captcha.fields import CaptchaField
 from django.forms import inlineformset_factory
 from datetimewidget.widgets import DateTimeWidget
+# from haystack.forms import SearchForm
+
+# class PatientSearchForm(SearchForm):
+#     # first_name = forms.CharField(required=False)
+#     # last_name = forms.CharField(required=False)
+#     # dob = forms.DateTimeField(required=False)
+#     # nhs_no = forms.CharField(required=False)
+#     # ad_postcode = forms.CharField(required=False)
+
+#     def search(self):
+#         # First, store the SearchQuerySet received from other processing.
+#         sqs = super(PatientSearchForm, self).search()
+
+#         if not self.is_valid():
+#             return self.no_query_found()
+
+#         # Check to see if a start_date was chosen.
+#         # if self.cleaned_data['first_name']:
+#         #     sqs = sqs.filter(first_name=self.cleaned_data['first_name'])
+
+#         # # Check to see if an end_date was chosen.
+#         # if self.cleaned_data['end_date']:
+#         #     sqs = sqs.filter(pub_date__lte=self.cleaned_data['end_date'])
+
+#         return sqs
 
 
 PDSet = inlineformset_factory(Patient, PatientDoctor, fields = ['doctor', 'primary', 'note'],  can_delete=True, extra=1, max_num=5)
 ECSet = inlineformset_factory(Patient, PatientEm, fields = ['name', 'email', 'phone1', 'phone2'],  can_delete=True, extra=1, max_num=5)
 
 class PatientProfileForm(forms.ModelForm):
+
+    first_name = forms.CharField()
+    last_name= forms.CharField()
+    sex = forms.ChoiceField(choices = Patient.SEX)
+    dob = forms.DateField()
+    tel_no = forms.CharField(required = False)
+    nhs_no = forms.CharField(required = False)
+    ad_line1 = forms.CharField()
+    ad_line2 = forms.CharField(required = False)
+    ad_city = forms.CharField()
+    ad_postcode = forms.CharField()
+    ad_country = forms.CharField()    
     
     class Meta:
         model = Patient
@@ -23,12 +60,12 @@ class StaffProfileForm(forms.ModelForm):
 
 class EventBookingForm(forms.ModelForm):
 
-    # title =  
+    title = forms.CharField()
     date_in = forms.DateTimeField()
-    # date_out = forms.DateTimeInput()
-    # relation 
-    # type
-    # notes
+    date_out = forms.DateTimeInput()
+    relation = forms.ModelChoiceField(queryset = PatientDoctor.objects.all()) 
+    type = forms.ChoiceField(choices = Event.TYPE)
+    notes = forms.CharField()
 
     class Meta:
         model = Event

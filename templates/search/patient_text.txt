@@ -1,0 +1,5 @@
+{{ object.first_name }}
+{{object.last_name}}
+{{ object.dob }}
+{{object.nhs_no}}
+{{ object.ad_postcode }}

@@ -19,21 +19,6 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 
-# STATICFILES_FINDERS = [
-#     'djangobower.finders.BowerFinder',
-# ]
-
-# BOWER_COMPONENTS_ROOT = '/PROJECT_ROOT/components/'
-
-# BOWER_INSTALLED_APPS = (
-#     'jquery',
-#     'jquery-ui',
-#     'bootstrap'
-# )
-
-#USER STUFF
-AUTH_USER_MODEL = 'myhealthdb.CustomUser'
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -70,7 +55,14 @@ INSTALLED_APPS = [
     'contact_form',
 
     'captcha',
-    'datetimewidget'
+    'datetimewidget',
+    # 'pysolr',
+    # 'elasticsearch',
+    # 'elasticsearch2',
+    # 'haystack',
+    #'xapian-haystack',
+    # 'todo',
+    # 'bleach',
     # 'schedule',
     # 'djangobower',
 
@@ -215,3 +207,23 @@ RECAPTCHA_PUBLIC_KEY = '6Ld_ya0UAAAAACdlTzZNLrMDzp_99XUX6lFM7rq4'
 RECAPTCHA_PRIVATE_KEY = '6Ld_ya0UAAAAAAY9-Gw97sL411C1ImaAVoXwPVdC'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+#         'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+#     },
+# }
+
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+#         'URL': 'http://127.0.0.1:9200/',
+#         'INDEX_NAME': 'haystack',
+#     },
+# }
+
+# HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+#USER STUFF
+AUTH_USER_MODEL = 'myhealthdb.CustomUser'
