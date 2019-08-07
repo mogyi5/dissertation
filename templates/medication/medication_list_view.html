@@ -1,0 +1,45 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+
+<div class="card">
+  <div class="card-header">
+    <h1>Your Medication</h1>
+  </div>
+  <div class="card-body">
+    <h4>Current Medicine</h4>
+    {%if current%}
+    <ul>
+      {% for p in current %}
+      <li>
+        {{ p.type }}
+        <input data-url="{% url 'medication_done' %}" type="button" id="done{{p.id}}" class="done btn btn-info"
+          name="{{ p.id }}" value="No longer taking" />
+      </li>
+      {% endfor %}
+    </ul>
+    {%else%}
+    <h4>You have no current medication!</h4>
+    {%endif%}
+
+    <h4>Past Medicine</h4>
+    {%if past%}
+    <ul>
+      {% for p in past %}
+      <li>
+        {{ p.type }}
+      </li>
+      {% endfor %}
+    </ul>
+    {%else%}
+    <h4>You have no past medication!</h4>
+    {%endif%}
+
+
+    <a href="{% url 'create_medication' id=profile.baseuser.id %}">
+      <button class="btn btn-secondary">Add Medication</button></a>
+  </div>
+</div>
+{% endblock %}

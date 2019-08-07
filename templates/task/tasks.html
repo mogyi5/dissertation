@@ -1,0 +1,201 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+<div class="card">
+    <div class="card-header">
+        <h1>Task Manager</h1>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-3">
+                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <a class="nav-link active" id="v-pills-mytasks-tab" data-toggle="pill" href="#v-pills-mytasks"
+                        role="tab" aria-controls="v-pills-mytasks" aria-selected="true">My Tasks</a>
+                    <a class="nav-link" id="v-pills-setbyme-tab" data-toggle="pill" href="#v-pills-setbyme" role="tab"
+                        aria-controls="v-pills-setbyme" aria-selected="false">Set by Me</a>
+                    <a class="nav-link" id="v-pills-archive-tab" data-toggle="pill" href="#v-pills-archive" role="tab"
+                        aria-controls="v-pills-archive" aria-selected="false">Archived</a>
+                    <a class="nav-link disabled" href="#"></a>
+                    <a class="nav-link disabled" href="#"></a>
+                    <a class='nav-link' id='task_creating' href="{% url 'create_task' id=profile.baseuser.id%}">
+                        Create Task
+                    </a>
+                </div>
+            </div>
+            <div class="col-9">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="v-pills-mytasks" role="tabpanel"
+                        aria-labelledby="v-pills-mytasks-tab">
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" id="myTab1" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="active1-tab" data-toggle="tab" href="#active1" role="tab"
+                                    aria-controls="active1" aria-selected="true">Active</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="finished1-tab" data-toggle="tab" href="#finished1" role="tab"
+                                    aria-controls="finished1" aria-selected="false">Finished</a>
+                            </li>
+                        </ul>
+
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="active1" role="tabpanel" aria-labelledby="active1-tab">
+                                {% comment %} my_tasks_overdue = Task.objects.filter(complete_by = profile,
+                                deadline__lte = now)
+                                my_tasks_due = Task.objects.filter(complete_by = profile, deadline__gte = now)
+                                my_tasks_finished = Task.objects.filter(complete_by = profile, complete=True)
+                                {% endcomment %}
+
+                                {% if my_tasks_overdue %}
+                                <h4 class="card-title">Overdue</h4>
+                                {% for t in my_tasks_overdue %}
+
+                                <div>
+                                    <li>{{t.name}}
+                                        {{t.deadline}}</li> <input data-url="{% url 'task_complete' %}" type="button"
+                                        id="complete{{t.id}}" class="complete" name="{{ t.id }}" value="✓" />
+                                    <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
+                                        <button class="btn btn-secondary">Edit</button></a>
+                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        {% csrf_token %}
+                                        <a href="{% url 'delete_task' task_pk=t.pk %}">
+                                            <button class="btn btn-danger"
+                                                onClick="deleteFunction()">Delete</button></a>
+                                    </form>
+
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <p>You have no overdue tasks!</p>
+                                {% endif%} <br />
+
+
+                                {% if my_tasks_due %}
+                                <h4 class="card-title">Due</h4>
+                                {% for t in my_tasks_due %}
+
+                                <div>
+                                    <li>{{t.name}}
+                                        {{t.deadline}}</li> <input data-url="{% url 'task_complete' %}" type="button"
+                                        id="complete{{t.id}}" class="complete" name="{{ t.id }}" value="✓" />
+                                    <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
+                                        <button class="btn btn-secondary">Edit</button></a>
+                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        {% csrf_token %}
+                                        <a href="{% url 'delete_task' task_pk=t.pk %}">
+                                            <button class="btn btn-danger"
+                                                onClick="deleteFunction()">Delete</button></a>
+
+                                    </form>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <p>You have no tasks to complete!</p>
+                                {% endif%} <br />
+                            </div>
+                            <div class="tab-pane" id="finished1" role="tabpanel" aria-labelledby="finished1-tab">
+                                {% if my_tasks_finished %}
+                                {% for t in my_tasks_finished %}
+
+
+                                <li>{{t.name}}
+                                </li>
+                                {% endfor %}
+                                {% else %}
+                                <p>You have no finished tasks!</p>
+                                {% endif%} <br />
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-setbyme" role="tabpanel"
+                        aria-labelledby="v-pills-setbyme-tab">
+
+
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" id="myTab2" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active2" id="active2-tab" data-toggle="tab" href="#active2"
+                                    role="tab" aria-controls="active2" aria-selected="true">Active</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="finished2-tab" data-toggle="tab" href="#finished2" role="tab"
+                                    aria-controls="finished2" aria-selected="false">Finished</a>
+                            </li>
+                        </ul>
+
+
+
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="active2" role="tabpanel" aria-labelledby="active2-tab">
+                                {% if tasks_by_me_overdue %}
+                                <h4 class="card-title">Overdue</h4>
+                                {% for t in tasks_by_me_overdue %}
+
+                                <li>{{t.name}}
+                                    <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
+                                        <button class="btn btn-secondary">Edit</button></a>
+                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        {% csrf_token %}
+                                        <a href="{% url 'delete_task' task_pk=t.pk %}">
+                                            <button class="btn btn-danger"
+                                                onClick="deleteFunction()">Delete</button></a>
+                                    </form>
+                                </li>
+                                {% endfor %}
+                                {% else %}
+                                <p>There are no overdue tasks!</p>
+                                {% endif%} <br />
+
+
+                                {% if tasks_by_me_due %}
+                                <h4 class="card-title">Due</h4>
+                                {% for t in tasks_by_me_due %}
+
+
+                                <li>{{t.name}}
+                                    <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
+                                        <button class="btn btn-secondary">Edit</button></a>
+                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        {% csrf_token %}
+                                        <a href="{% url 'delete_task' task_pk=t.pk %}">
+                                            <button class="btn btn-danger"
+                                                onClick="deleteFunction()">Delete</button></a>
+                                    </form>
+                                </li>
+                                {% endfor %}
+                                {% else %}
+                                <p>You have no tasks to be completed!</p>
+                                {% endif%} <br />
+                            </div>
+                            <div class="tab-pane" id="finished2" role="tabpanel" aria-labelledby="finished2-tab">
+                                {% if tasks_by_me_finished %}
+                                {% for t in tasks_by_me_finished %}
+
+
+                                <li>{{t.name}}
+                                </li>
+                                {% endfor %}
+                                {% else %}
+                                <p>You have no finished tasks!</p>
+                                {% endif%} <br /></div>
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-archive" role="tabpanel"
+                        aria-labelledby="v-pills-archive-tab">
+                        Task archive goes here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

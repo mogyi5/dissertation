@@ -5,10 +5,11 @@ from django.contrib.auth.admin import UserAdmin
 
 # from myhealthdb.forms import CustomUserCreationForm, CustomUserChangeForm
 
-from myhealthdb.models import CustomUser, Patient, PatientDoctor, Hospital, Ward, Staff, Activity, Condition, Document, Event, Immunization, Medication, PatientEm, Symptom, SymptomsSet, Task, Group
+from myhealthdb.models import Weight, CustomUser, Patient, PatientDoctor, Hospital, Ward, Staff, Activity, Condition, Document, Event, Immunization, Medication, PatientEm, Symptom, SymptomsSet, Task, Group
 
 # Register your models here.
 
+admin.site.register(Weight)
 admin.site.register(Group)
 admin.site.register(Patient)
 admin.site.register(Hospital)

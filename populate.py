@@ -35,16 +35,6 @@ def populate():
     for p, p_data in Profiles.items():
         add_patient(CustomUser.objects.get(email = p),p_data['firstname'],p_data['lastname'], p_data["sex"], p_data["dob"], p_data["tel_no"], p_data["ad_line1"], p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"])
 
-# populating the staff also
-    Staff = {
-    "doctor@doctor.com":{'firstname':'dic', 'lastname':'doc',"tel_no": "222222222222"},
-    "doctor2@doctor2.com":{'firstname':'derek', 'lastname':'doo',"tel_no": "1324"},
-    "doctor3@doctor3.com":{'firstname':'drunk', 'lastname':'yoohoo',"tel_no": "07479509090"},
-    }
-
-    for p, p_data in Staff.items():
-        add_staff(CustomUser.objects.get(email = p),p_data['firstname'],p_data['lastname'], p_data["tel_no"])
-
 # populating the hospitals also
     Hospitals = {
     'hospital1':{'name':'hospital1', 'region':'highlands', 'type':'General Practice', "ad_line1":"first", "ad_city":"inverness", "ad_postcode":"iv22 747", "ad_country":"uk"},
@@ -64,6 +54,17 @@ def populate():
     for p, p_data in Wards.items():
         add_ward(p_data['name'], Hospital.objects.get(name = 'hospital1'), p_data["type"])
 
+
+# populating the staff also
+    Staff = {
+    "doctor@doctor.com":{'firstname':'dic', 'lastname':'doc',"tel_no": "222222222222", "ward": "ward"},
+    "doctor2@doctor2.com":{'firstname':'derek', 'lastname':'doo',"tel_no": "1324", "ward": "ward"},
+    "doctor3@doctor3.com":{'firstname':'drunk', 'lastname':'yoohoo',"tel_no": "07479509090",  "ward": "ward2"},
+    }
+
+    for p, p_data in Staff.items():
+        add_staff(CustomUser.objects.get(email = p),p_data['firstname'],p_data['lastname'], p_data["tel_no"], Ward.objects.get(name = p_data['ward']))
+
 ## making a superuser
 def create_super_user(username, email, password):
     try:
@@ -78,8 +79,8 @@ def add_patient(baseuser, firstname, lastname, sex, dob, tel_no, line1, city, po
     p = Patient.objects.get_or_create(baseuser = baseuser, first_name=firstname, last_name=lastname, sex=sex, dob=dob, tel_no=tel_no, ad_line1=line1, ad_city=city, ad_postcode=postcode, ad_country=country)[0]
     return p
 
-def add_staff(baseuser, firstname, lastname, tel_no):
-    p = Staff.objects.get_or_create(baseuser = baseuser, first_name=firstname, last_name=lastname, tel_no=tel_no)[0]
+def add_staff(baseuser, firstname, lastname, tel_no, ward):
+    p = Staff.objects.get_or_create(baseuser = baseuser, first_name=firstname, last_name=lastname, tel_no=tel_no, ward=ward)[0]
     return p
 
 def add_hospital(name, region, type, ad_line1,ad_city, ad_postcode, ad_country):

@@ -1,0 +1,39 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+
+<div class="card">
+    <div class="card-header">
+        <h1>Your Documents</h1>
+    </div>
+    <div class="card-body">
+        {%if object_list%}
+        <ul>
+            {% for p in object_list %}
+            <li>
+                {{ p.name }}
+                <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.file }}</a>
+                <form id='task-delete' method="POST" action="{% url 'delete_document' p.pk %}">
+                    {% csrf_token %}
+                    <a href="{% url 'delete_document' document_pk=p.pk %}">
+                        <button class="btn btn-danger" onClick="deleteFunction()">Delete</button></a>
+                </form>
+                {% comment %} <a href="{% url 'edit_condition' id=profile.baseuser.id condition_pk=p.pk %}">
+                    <button class="btn btn-secondary">Edit</button></a> {% endcomment %}
+                {% comment %} <input data-url="{% url 'medication_done' %}" type="button" id="done{{p.id}}"
+                    class="done btn btn-info" name="{{ p.id }}" value="No longer taking" /> {% endcomment %}
+            </li>
+            {% endfor %}
+        </ul>
+        {%else%}
+        <h4>You have no uploaded documents!</h4>
+        {%endif%}
+
+
+        <a href="{% url 'create_document' id=profile.baseuser.id %}">
+            <button class="btn btn-secondary">Add Document</button></a>
+    </div>
+</div>
+{% endblock %}

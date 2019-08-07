@@ -1,5 +1,10 @@
 <!doctype html>
 {% load staticfiles %}
+{% load bootstrap4 %}   
+{% bootstrap_css %}        
+{% bootstrap_javascript jquery='false' %} 
+{% block extrahead %}       
+{% endblock %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -15,8 +20,10 @@
     <!-- Bootstrap core CSS -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link href="{% static 'css/first_base.css' %}" rel="stylesheet">
+    {% comment %} <!-- Custom styles for this template -->
+    <link href="{% static 'css/first_base.css' %}" rel="stylesheet"> {% endcomment %}
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
     <!-- General JQuery stuff -->
     <script src="{% static 'js/jquery-3.4.1.js' %}"></script>
@@ -24,18 +31,22 @@
     <!-- Particular JQuery stuff -->
     <script src="{% static 'js/myhealthdb_jquery.js' %}"></script>
 
+    <!-- bootstrap js -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
     {% comment %} recaptcha {% endcomment %}
     <script src='https://www.google.com/recaptcha/api.js'></script>
 
   </head>
 
-  <body class="text-center"> 
+  <body class="text-center bg-light"> 
 
     <div class="cover-container d-flex h-100 w-100 p-3 mx-auto flex-column">
       <header class="masthead mb-auto">
         <div class="inner">
           <h3 class="masthead-brand"><a href="{% url 'index' %}">MyHealthDB</a></h3>
           <nav class="nav nav-masthead justify-content-center">
+          <a class="nav-link" href="{% url 'about_this' %}">About</a>
             <a class="nav-link" href="{% url 'account_login' %}">Sign In</a>
             <a class="nav-link" href="#" dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Register..</a>
             <div class="dropdown-menu">
@@ -48,12 +59,20 @@
 
 
       {%block body_block%}{%endblock%}
-
-      <footer class="mastfoot mt-auto">
-        <div class="inner">
-          <p><a href="{% url 'about_this' %}">About this project</a></p>
-        </div>
-      </footer>
+                  <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-inner bg-white">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            Copyright &copy; 2018 Ela Admin
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            Designed by <a href="https://colorlib.com">Colorlib</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <!-- /.site-footer -->
     </div>
 
 

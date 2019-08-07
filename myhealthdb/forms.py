@@ -1,10 +1,43 @@
 from django import forms
-from myhealthdb.models import CustomUser, Patient, Staff, PatientEm, PatientDoctor, Event
+from myhealthdb.models import Task, CustomUser, Patient, Staff, PatientEm, PatientDoctor, Event, Medication, Condition, Document
 from contact_form.forms import ContactForm
 from captcha.fields import CaptchaField
 from django.forms import inlineformset_factory
 from datetimewidget.widgets import DateTimeWidget
-# from haystack.forms import SearchForm
+from bootstrap_datepicker_plus import DatePickerInput, DateTimePickerInput
+from bootstrap_modal_forms.forms import BSModalForm
+from django_select2.forms import Select2MultipleWidget
+from myhealthdb.modelchoices import *
+
+class DocumentForm(forms.ModelForm):
+    class Meta:
+            model = Document
+            fields = ['name','file','description','type']
+
+
+class ConditionForm(forms.ModelForm):
+
+    class Meta:
+        model = Condition
+        fields = ['start','stop','type','reaction','severity','details','title']
+
+class MedicationForm(forms.ModelForm):
+
+    class Meta:
+        model = Medication
+        fields = ['type', 'notes', 'amount', 'frequency','start', 'finish']
+
+class TaskForm(forms.ModelForm):
+    # complete_by = ModelMultipleChoiceField(queryset=Staff.objects.all(), widget=Select2MultipleWidget)
+
+    class Meta:
+        model = Task
+        fields = ['name', 'notes', 'complete_by', 'deadline']
+
+        widgets = {
+            'complete_by':Select2MultipleWidget,
+        }
+
 
 # class PatientSearchForm(SearchForm):
 #     # first_name = forms.CharField(required=False)
@@ -38,7 +71,7 @@ class PatientProfileForm(forms.ModelForm):
 
     first_name = forms.CharField()
     last_name= forms.CharField()
-    sex = forms.ChoiceField(choices = Patient.SEX)
+    sex = forms.ChoiceField(choices = SEX)
     dob = forms.DateField()
     tel_no = forms.CharField(required = False)
     nhs_no = forms.CharField(required = False)
@@ -60,16 +93,24 @@ class StaffProfileForm(forms.ModelForm):
 
 class EventBookingForm(forms.ModelForm):
 
-    title = forms.CharField()
-    date_in = forms.DateTimeField()
-    date_out = forms.DateTimeInput()
-    relation = forms.ModelChoiceField(queryset = PatientDoctor.objects.all()) 
-    type = forms.ChoiceField(choices = Event.TYPE)
-    notes = forms.CharField()
+    # allrelationships = PatientDoctor.objects.filter()
+
+
+    # title = forms.CharField()
+    # date_in = forms.DateTimeField()
+    # relation = forms.ModelChoiceField(queryset = PatientDoctor.objects.all()) #change this one
+    # type = forms.ChoiceField(choices = EVENT_TYPE)
+    # notes = forms.CharField()
 
     class Meta:
         model = Event
-        exclude = ('letter', 'date_out')
+        fields = ('title', 'date_in', 'pd_relation', 'type', 'notes')
+        # exclude = ('letter', 'date_out','done')
+
+        # widgets = {
+        #     'date_in': DateTimePickerInput(),
+        #     'date_out': DateTimePickerInput(),
+        # }
 
 
 class PatientSignupForm(forms.Form):
@@ -89,6 +130,11 @@ class PatientSignupForm(forms.Form):
     ad_city = forms.CharField(max_length=32)
     ad_postcode = forms.CharField(max_length=32)
     ad_country = forms.CharField(max_length=32)    
+
+    class Meta:
+        widgets = {
+            'patient_dob': DatePickerInput(),
+        }
 
     def signup(self, request, user):
 
@@ -124,11 +170,6 @@ class HospitalContactForm(ContactForm):
         else:
             self.fields = OrderedDict((k, self.fields[k]) for k in fields_keyOrder)
  
-    REASON = (
-        ('support', 'Support'),
-        ('feedback', 'Feedback'),
-        ('delete', 'Account deletion')
-    )
     reason = forms.ChoiceField(choices=REASON, label='Reason')
     captcha = CaptchaField()
     template_name = 'contact_form/contact_form.txt'

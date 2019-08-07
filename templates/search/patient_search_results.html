@@ -3,13 +3,25 @@
 {% load crispy_forms_tags %}
 {% block body_block %}
 
-<h4>Matching patients:</h4>
 
-<ul>
-  {% for p in object_list %}
-    <li>
-      {{ p.first_name }}
-    </li>
-  {% endfor %}
-</ul>
+<div class="card">
+  <div class="card-header">
+    <h1>Matching patients:</h1>
+  </div>
+  <div class="card-body">
+
+    {%if object_list%}
+    <ul>
+      {% for p in object_list %}
+      <li>
+        {{ p.first_name }}
+      </li>
+      {% endfor %}
+    </ul>
+
+    {%else%}
+    <h4>No matching patients!</h4>
+    {%endif%}
+  </div>
+</div>
 {% endblock %}

@@ -1,0 +1,9 @@
+{% if groups %}
+  <ul>
+  {% for g in groups %}
+    <li>{{ g.name }}</li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No groups found.</p>
+{% endif %}

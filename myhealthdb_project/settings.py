@@ -56,6 +56,12 @@ INSTALLED_APPS = [
 
     'captcha',
     'datetimewidget',
+    'bootstrap_datepicker_plus',
+    'bootstrap4',
+    'bootstrap_modal_forms',
+    'django_select2',
+    'chartjs',
+
     # 'pysolr',
     # 'elasticsearch',
     # 'elasticsearch2',
@@ -161,13 +167,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+STATICFILES_DIRS = [STATIC_DIR]
 STATIC_URL = '/static/'
 
 # Media
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
 # emaillogin_project/settings.py
@@ -207,6 +213,10 @@ RECAPTCHA_PUBLIC_KEY = '6Ld_ya0UAAAAACdlTzZNLrMDzp_99XUX6lFM7rq4'
 RECAPTCHA_PRIVATE_KEY = '6Ld_ya0UAAAAAAY9-Gw97sL411C1ImaAVoXwPVdC'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+BOOTSTRAP4 = {
+    'include_jquery': True,
+}
 
 # HAYSTACK_CONNECTIONS = {
 #     'default': {

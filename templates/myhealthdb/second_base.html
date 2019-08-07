@@ -1,243 +1,434 @@
-<!DOCTYPE html>
+<!doctype html>
 {% load staticfiles %}
+{% load bootstrap4 %}
+{% load i18n %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='false' %}
+{% block extrahead %}
+{% endblock %}
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
-    <link rel="icon" href="/docs/4.1/assets/img/favicons/favicon.ico" />
-
-    <title>Home</title>
-
-    <link rel="canonical" href="https://getbootstrap.com/docs/4.1/examples/dashboard/" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{%block titleblock%}{%endblock%}</title>
+    <meta name="description" content="Ela Admin - HTML5 Admin Template">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap core CSS -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
 
-    <!-- Custom styles for this template -->
-    <link href="{% static 'css/home_base.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap-datetimepicker-standalone.min.css' %}" rel="stylesheet" />
 
-    <!-- General JQuery stuff -->
-    <script src="{% static 'js/jquery-3.4.1.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css">
+    <script src="https://kit.fontawesome.com/5f32283283.js"></script>
+
+    <link rel="stylesheet" href="{% static 'css/cs-skin-elastic.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+
 </head>
 
 <body>
-    <nav class="navbar navbar-expand navbar-dark bg-dark flex-md-nowrap sticky-top p-0">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{%url 'home_base'%}">MyHealthDB</a>
-        <div class="navbar-collapse collapse">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <p class="navbar-text"> {{ profile.first_name }} {{ profile.last_name }}</p>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Help</a>
-                </li>
-                {%if profile.baseuser.user_type == 1%}
-                <li class="nav-item">
-                    <a class="nav-link" href="{%url 'patient_details' id=profile.baseuser.id%}">My Details</a>
-                </li>
-                {%else%}
-                <li class="nav-item">
-                    <a class="nav-link" href="{%url 'staff_details' id=profile.baseuser.id %}">My Details</a>
-                </li>
-                {%endif%}
-                <li class="nav-item">
-                    <a class="nav-link" href="{%url 'account_logout' %}">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <!-- Left Panel -->
+    <aside id="left-panel" class="left-panel">
+        <nav class="navbar navbar-expand-sm navbar-default">
+            <div id="main-menu" class="main-menu collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="{% url 'home_base'%}"><i class="menu-icon fa fa-home"></i>Home </a>
+                    </li>
 
-    <div class="container-fluid">
-        <div class="row">
-            <nav class="col-md-2 col-sm-3 d-none d-md-block bg-light sidebar">
-                <div class="sidebar-sticky">
                     {%if profile.baseuser.user_type == 1%}
-                    <h6
-                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Search Records</span>
-                        <a class="d-flex align-items-center text-muted" href="#">
-                            <span data-feather="plus-circle"></span>
-                        </a>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Medication
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Conditions
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Immunizations
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Vitals
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Documents
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Activities
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{%url 'events' id=profile.baseuser.id%}">
-                                <span data-feather="file-text"></span>
-                                Events
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Messages
-                            </a>
-                        </li>
-                    </ul>
+                    <li class="menu-title">Search</li><!-- /.menu-title -->
+                    <li>
+                        <a href="#"><i class="menu-icon fa fa-search"></i>Search Records </a>
+                    </li>
 
+                    {% comment %}
+                    <!-- insert search bar--> {% endcomment %}
+
+                    <li class="menu-title">Booking</li><!-- /.menu-title -->
+                    <li>
+                        <a href="#"><i class="menu-icon fa fa-calendar-week"></i>Events </a>
+                    </li>
+                    <li>
+                        <a href="#"><i class="menu-icon fa fa-paper-plane"></i>Messages </a>
+                    </li>
+
+                    <li class="menu-title">Self Diagnosis</li><!-- /.menu-title -->
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false"> <i class="menu-icon fa fa-heartbeat"></i>Vitals</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="fa fa-weight"></i><a
+                                    href="{% url 'weight' id=profile.baseuser.id %}">Weight</a></li>
+                            <li><i class="fa fa-heart-rate"></i><a href="#">Heart Rate</a></li>
+                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Badges</a></li>
+                            <li><i class="fa fa-bars"></i><a href="ui-tabs.html">Tabs</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false"> <i class="menu-icon fa fa-hiking"></i>Activities</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="fa fa-biking"></i><a href="ui-buttons.html">Cycling</a></li>
+                            <li><i class="fa fa-swimmer"></i><a href="ui-badges.html">Swimming</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-title">Records</li><!-- /.menu-title -->
+                    <li>
+                        <a href="{% url 'medication'  id=profile.baseuser.id%}"><i
+                                class="menu-icon fa fa-prescription-bottle-alt"></i>Medication </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'conditions'  id=profile.baseuser.id%}"><i
+                                class="menu-icon fa fa-medkit"></i>Conditions </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'immunizations'  id=profile.baseuser.id%}"><i
+                                class="menu-icon fa fa-syringe"></i>Immunizations </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'documents'  id=profile.baseuser.id%}"><i
+                                class="menu-icon fa fa-file-medical"></i>Documents </a>
+                    </li>
+                    {% comment %} <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false"> <i class="menu-icon fa fa-file-medical"></i>Documents</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents A</a></li>
+                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
+                        </ul>
+                    </li> {% endcomment %}
                     {%else%}
-
-                    <h6
-                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Patient Search</span>
+                    <li class="menu-title">Search</li><!-- /.menu-title -->
+                    <li>
+                        <a href="#"><i class="menu-icon fa fa-search"></i>Patient Search</a>
+                    <li>
                         <form action="{% url 'patient_search_results' id=profile.baseuser.id%}" method="get">
-                            <input name="q" type="text" placeholder="Search by name...">
+                            <input class="input" name="q" type="text" placeholder="Search by name...">
                         </form>
-                    </h6>
-                   {% comment %} <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'advanced_search' id=profile.baseuser.id%}">
-                                <span data-feather="file-text"></span>
-                                Advanced Search
-                            </a>
-                        </li>
-                    </ul> {% endcomment %}
-                    <h6
-                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Tasks</span>
-                        <a class="d-flex align-items-center text-muted" href="#">
-                            <span data-feather="plus-circle"></span>
-                        </a>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Documents
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Messages
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="">
-                                <span data-feather="file-text"></span>
-                                Groups
-                            </a>
+                    </li>
+                    </li>
+                    <li class="menu-title">My Tasks</li><!-- /.menu-title -->
+
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false"> <i class="menu-icon fa fa-tasks"></i>My Tasks</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            {%if tasks%}
+                            {%for t in tasks%}
+                            <li>
+                                <button type="button" class="btn btn-link" data-toggle="modal"
+                                    data-target="#openModaltask{{t.id}}">
+                                    {{t.name}}
+                                </button>
+                                {{t.deadline}} <input data-url="{% url 'task_complete' %}" type="button"
+                                    id="complete{{t.id}}" class="complete" name="{{ t.id }}" value="✓" />
+                            </li>
+
+                            {%endfor%}
+                            {%else%}
+                            <li>You don't have any tasks!</li>
+                            {%endif%}
+
+                            <li>
+                                <a href="{% url 'create_task' id=profile.baseuser.id%}">
+                                    Create Task
+                                </a>
+                                <a href="{% url 'task' id=profile.baseuser.id%}">
+                                    Tasks Home
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false"> <i class="menu-icon fa fa-file-medical"></i>Documents</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents A</a></li>
+                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="menu-icon fa fa-paper-plane"></i>Messages </a>
+                    </li>
+
+
+
+                    <li class="menu-title">Groups</li><!-- /.menu-title -->
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false"> <i class="menu-icon fa fa-users"></i>My Groups</a>
+                        <ul class="sub-menu children dropdown-menu">
                             {%if groups%}
                             {%for g in groups%}
-                            <a class="nav-link" href="{% url 'group' id=profile.baseuser.id slug=g.slug%}">
-                                {{g.name}}
-                            </a>
-                             
+                            <li>
+                                <button type="button" class="btn btn-link" data-toggle="modal"
+                                    data-target="#openModal{{g.id}}">
+                                    {{g.name}}
+                                </button>
+                            </li>
+
                             {%endfor%}
                             {%else%}
                             <p>You are not a member of any groups</p>
                             {%endif%}
-                        </li>
-                    </ul>
+                            {%endif%}
+                            {% comment %} <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents
+                                    A</a></li>
+                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
+                            {% endcomment %}
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="{% url 'groups' id=profile.baseuser.id%}"><i
+                                class="menu-icon fa fa-paper-plane"></i>Groups Home </a>
+                    </li>
 
-                    {%endif%}
+
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </nav>
+    </aside>
+    <!-- /#left-panel -->
+    <!-- Right Panel -->
+    <div id="right-panel" class="right-panel">
+        <!-- Header-->
+        <header id="header" class="header">
+            <div class="top-left">
+                <div class="navbar-header">
+                    <a class="navbar-brand mb-0 h1" href="{%url 'home_base'%}">MyHealthDB</a>
+                    <a class="navbar-brand hidden" href="{%url 'home_base'%}">MyHealthDB</a>
+                    <a id="menuToggle" class="menutoggle"><i class="fa fa-bars"></i></a>
                 </div>
-            </nav>
+            </div>
+            <div class="top-right">
+                <div class="header-menu">
+                    <div class="user-area dropdown float-right">
+                        <div class="header-left">
+                            <button class="btn btn-link">Help</button>
+                        </div>
+                    </div>
+
+                    <div class="user-area dropdown float-right">
+                        <a href="#" class="dropdown-toggle active" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <button class="btn btn-link">{{ profile.first_name }} {{ profile.last_name }}</button>
+                        </a>
+
+                        <div class="user-menu dropdown-menu">
+                            {%if profile.baseuser.user_type == 1%}
+                            <a class="nav-link" href="{%url 'patient_details' id=profile.baseuser.id%}"><i
+                                    class="fa fa- user"></i>My Details</a>
+
+                            {%else%}
+                            <a class="nav-link" href="{%url 'staff_details' id=profile.baseuser.id%}"><i
+                                    class="fa fa- user"></i>My Details</a>
+                            {%endif%}
+
+                            <a class="nav-link" href="{%url 'account_logout' %}"><i
+                                    class="fa fa-power -off"></i>Logout</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+        <!-- /#header -->
+        <!-- Content -->
+        <div class="content">
+
+            {% block body_block %}
+            {% endblock %}
+
+
+            {%if groups%}
+            {%for g in groups%}
+
+            <div class="modal fade" id="openModal{{g.id}}" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">{{g.name}}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            {%for m in g.members.all %}
+                            {{m}}
+                            <br />
+                            {%endfor%}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% comment %} <p style="padding: 0px 20px 5px 20px"><a href="#openModal_{{g.name}}">{{g.name}}</a></p>
+            {% endcomment %}
+            {% comment %}
+            </a> {% endcomment %}
+
+            {%endfor%}
+            {%endif%}
+
+
+            {%if tasks%}
+            {%for t in tasks%}
+
+            <div class="modal fade" id="openModaltask{{t.id}}" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">{{t.name}}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Deadline:
+                            {{t.deadline}} <br />
+                            <hr>
+                            Notes:<br />
+                            {{t.notes}} <br />
+                            <hr>
+                            Task for:
+                            {% for s in t.complete_by.all %}
+                            {{s}}
+                            {% endfor %}
+                            <hr>
+                            Set by:
+                            {{t.set_by}}
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
+                                <button class="btn btn-secondary">Edit</button></a>
+                            <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                {% csrf_token %}
+                                <a href="{% url 'delete_task' task_pk=t.pk %}">
+                                    <button class="btn btn-danger" onClick="deleteFunction()">Delete</button></a>
+                            </form>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% comment %} <p style="padding: 0px 20px 5px 20px"><a href="#openModal_{{g.name}}">{{g.name}}</a></p>
+            {% endcomment %}
+            {% comment %}
+            </a> {% endcomment %}
+
+            {%endfor%}
+            {%endif%}
+
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-inner bg-white">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            Copyright &copy; 2018 Ela Admin
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            Designed by <a href="https://colorlib.com">Colorlib</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <!-- /.site-footer -->
+
         </div>
-    </div>
-
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
 
 
-        {% block body_block %}
-        {% endblock %}
+        <!-- Scripts -->
+
+        <script src="{% static 'js/moment.min.js' %}"></script>
+
+        <!-- General JQuery stuff -->
+        <script src="{% static 'js/jquery-3.4.1.js' %}"></script>
+        <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+
+
+        <!-- bootstrap js -->
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
 
 
-        <!-- Bootstrap core JavaScript
-    ================================================== -->
-        <!-- Placed at the end of the document so the pages load faster -->
-        <script>
-            window.jQuery ||
-                document.write(
-                    '<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>'
-                );
+        <!-- modal django -->
+        <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+
+        <script src="{% static 'js/bootstrap-datetimepicker.min.js' %} "></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.4/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jquery-match-height@0.7.2/dist/jquery.matchHeight.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/moment.min.js"></script>
+
+        <script src="{% static 'js/main.js' %}"></script>
+
+        <!-- chart.js for the vitals charts-->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+        <!-- ajax js -->
+        <script type="text/javascript">
+            window.CSRF_TOKEN = "{{ csrf_token }}";
         </script>
-        <script src=" {% static 'js/jquery-3.3.1.slim.min.js' %} "></script>
-        <script src="  {% static 'js/popper.min.js' %} "></script>
-        <script src=" {% static 'js/bootstrap.min.js' %}"></script>
-        <!-- Icons -->
-        <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-        <script>
-            feather.replace();
-        </script>
+        <script src="{% static 'js/myhealthdb-ajax.js' %}"></script>
 
-        <!-- Graphs -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
         <script>
-            var ctx = document.getElementById("myChart");
-            var myChart = new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels: [
-                        "Sunday",
-                        "Monday",
-                        "Tuesday",
-                        "Wednesday",
-                        "Thursday",
-                        "Friday",
-                        "Saturday"
-                    ],
-                    datasets: [{
-                        data: [15339, 21345, 18483, 24003, 23489, 24092, 12034],
-                        lineTension: 0,
-                        backgroundColor: "transparent",
-                        borderColor: "#007bff",
-                        borderWidth: 4,
-                        pointBackgroundColor: "#007bff"
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: false
-                            }
-                        }]
-                    },
-                    legend: {
-                        display: false
-                    }
+            const user_input = $("#user-input")
+            const search_icon = $('#search-icon')
+            const groups_div = $('#replaceable-content')
+            const endpoint = ''
+            const delay_by_in_ms = 700
+            let scheduled_function = false
+
+            let ajax_call = function (endpoint, request_parameters) {
+                $.getJSON(endpoint, request_parameters)
+                    .done(response => {
+                        // fade out the groups_div, then:
+                        groups_div.fadeTo('fast', 0).promise().then(() => {
+                            // replace the HTML contents
+                            groups_div.html(response['html_from_view'])
+                            // fade-in the div with new contents
+                            groups_div.fadeTo('fast', 1)
+                            // stop animating search icon
+                            search_icon.removeClass('blink')
+                        })
+                    })
+            }
+
+
+            user_input.on('keyup', function () {
+
+                const request_parameters = {
+                    q: $(this).val() // value of user_input: the HTML element with ID user-input
                 }
-            });
+
+                // start animating the search icon with the CSS class
+                search_icon.addClass('blink')
+
+                // if scheduled_function is NOT false, cancel the execution of the function
+                if (scheduled_function) {
+                    clearTimeout(scheduled_function)
+                }
+
+                // setTimeout returns the ID of the function to be executed
+                scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters)
+            })
         </script>
 </body>
 

@@ -1,0 +1,55 @@
+{% extends 'myhealthdb/second_base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block extrahead %}
+{{ form.media }}
+{% endblock %}
+
+{{ form.media.css }}
+{{ form.media.js }}
+
+{% block body_block %}
+<div class="card">
+    <div class="card-header">
+
+        <h1>Add Medication</h1>
+    </div>
+    <div class="card-body">
+
+
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{form|crispy}}
+            {% comment %} <div class="form-row">
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.type|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.amount|as_crispy_field}}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.frequency|as_crispy_field }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.start|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.finish|as_crispy_field }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.notes|as_crispy_field }}
+                </div>
+            </div>  {% endcomment %}
+            <button style="color:black;" class="btn btn-primary" type="submit" name="submit">Submit!</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

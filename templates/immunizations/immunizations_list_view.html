@@ -1,0 +1,26 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+
+<div class="card">
+    <div class="card-header">
+        <h1>Your Immunizations</h1>
+    </div>
+    <div class="card-body">
+        {%if object_list%}
+        <ul>
+            {% for p in object_list %}
+            <li>
+                {{ p.type }}
+            </li>
+            {% endfor %}
+        </ul>
+        {%else%}
+        <h4>You have no immunizations on record!</h4>
+        {%endif%}
+
+    </div>
+</div>
+{% endblock %}

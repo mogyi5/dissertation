@@ -1,0 +1,31 @@
+ {% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %} 
+
+
+    <div class="card">
+        <div class="card-header">
+            <h1>Groups Explorer</h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+
+                {# icon and search-box #}
+                <div class="col-6 align-left">
+                    <i id="search-icon" class="fas fa-search"></i>
+                    <input id="user-input" placeholder="Search">
+                </div>
+
+                {# group-list section #}
+                <div id="replaceable-content" class="col-6">
+                    {% include 'groups/groups_search_results.html' %}
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+
+ {% endblock %} 

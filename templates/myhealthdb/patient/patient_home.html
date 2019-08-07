@@ -24,24 +24,28 @@
     <a href="#" class="card-link">Another link</a>
   </div>
 </div>
-<br/>
+<br />
 <div class="card">
-  <div class="card-block">
-    <h4 class="card-title">Your upcoming appointments</h4>
+
+  <div class="card-header">
+    <h4>Upcoming Appointments</h4>
+  </div>
+  <div class="card-body">
     {% if events %}
     {% for e in events %}
 
     {{e.title}}
     {{e.date_in}}
-    {{e.type}} 
+    {{e.type}}
     <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
     <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
-    <br/>
+    <br />
     {% endfor %}
-     {% else %}
-      <p>You have no pending events!</p>
-    {% endif%}
+    {% else %}
+    <p>You have no pending events!</p>
+    {% endif %}
     <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
   </div>
+
 </div>
 {% endblock %}

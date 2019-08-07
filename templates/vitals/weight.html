@@ -1,0 +1,47 @@
+{% extends 'myhealthdb/second_base.html' %}
+{% load staticfiles %}
+
+
+
+{% block body_block %}
+<h3>Your Weight</h3>
+<canvas id="weightChart"></canvas>
+<canvas id="weightChart2"></canvas>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"></script>
+
+<!-- chart.js for the vitals charts-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+<script type="text/javascript">
+    $.get('{% url "weight_chart_json" %}', function (data) {
+        var ctx = $("#weightChart").get(0).getContext("2d");
+        new Chart(ctx, {
+            type: 'line',
+            data: data,
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    $.get('{% url "weight_chart_json2" %}', function (data) {
+        var ctx = $("#weightChart2").get(0).getContext("2d");
+        new Chart(ctx, {
+            type: 'line',
+            data: data,//{
+                //datasets: [{
+                  //  data: data,
+                   // cubicInterpolationMode: 'monotone',
+                //}]
+            //}
+            //backgroundColor: 'rgba(255,99,132,0.2)'
+            options: {
+                responsive: true,
+                spanGaps: false,
+            }
+        });
+    });
+</script>
+
+{% endblock %}
