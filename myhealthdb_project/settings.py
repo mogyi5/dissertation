@@ -61,6 +61,9 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'django_select2',
     'chartjs',
+    'easy_maps',
+    'postgis',
+    'mapwidgets',
 
     # 'pysolr',
     # 'elasticsearch',
@@ -167,7 +170,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATICFILES_DIRS = [STATIC_DIR]
+STATICFILES_DIRS = [STATIC_DIR,]
 STATIC_URL = '/static/'
 
 # Media
@@ -237,3 +240,33 @@ BOOTSTRAP4 = {
 
 #USER STUFF
 AUTH_USER_MODEL = 'myhealthdb.CustomUser'
+
+# EASY_MAPS_GOOGLE_KEY = 'AIzaSyAJepJxaTHQRGbSPstrE3Pr0VdEnrN2d0o'
+# EASY_MAPS_GOOGLE_KEY = 'AIzaSyATg_isuGSCHIlJamrxAXfkFDTYhIz7ytM'
+EASY_MAPS_GOOGLE_KEY = 'AIzaSyCzCYVvHq7yit0ESbH-OLn8r0dA4WiMb8I'
+
+EASY_MAPS_CENTER = (-41.3, 32)
+
+
+MAP_WIDGETS = {
+    "GooglePointFieldWidget": (
+        ("zoom", 15),
+        ("mapCenterLocationName", "glasgow"),
+        ("GooglePlaceAutocompleteOptions", {'componentRestrictions': {'country': 'uk'}}),
+        ("markerFitZoom", 12),
+    ),
+    "GOOGLE_MAP_API_KEY": "AIzaSyCzCYVvHq7yit0ESbH-OLn8r0dA4WiMb8I"
+}
+
+# GDAL_LIBRARY_PATH = 'C:\OSGeo4W64\bin\gdal204'
+
+if os.name == 'nt':
+    import platform
+    OSGEO4W = r"C:\OSGeo4W"
+    if '64' in platform.architecture()[0]:
+        OSGEO4W += "64"
+    assert os.path.isdir(OSGEO4W), "Directory does not exist: " + OSGEO4W
+    os.environ['OSGEO4W_ROOT'] = OSGEO4W
+    os.environ['GDAL_DATA'] = OSGEO4W + r"\share\gdal"
+    os.environ['PROJ_LIB'] = OSGEO4W + r"\share\proj"
+    os.environ['PATH'] = OSGEO4W + r"\bin;" + os.environ['PATH']

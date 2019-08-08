@@ -5,6 +5,7 @@ from django.utils.text import slugify
 from myhealthdb.modelchoices import *
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from geopy.geocoders import Nominatim
 
 
 class CustomUser(AbstractUser):
@@ -27,11 +28,11 @@ class Patient(models.Model):
         unique=True, max_length=128, blank=True, null=True)
     baseuser = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, primary_key=True, related_name='patient')
-    ad_line1 = models.CharField(max_length=64)
-    ad_line2 = models.CharField(max_length=64, null=True, blank=True)
-    ad_city = models.CharField(max_length=32)
-    ad_postcode = models.CharField(max_length=32)
-    ad_country = models.CharField(max_length=32)
+    address = models.CharField(max_length=256, null=True, blank=True)
+    # ad_line2 = models.CharField(max_length=64, null=True, blank=True)
+    # ad_city = models.CharField(max_length=32)
+    # ad_postcode = models.CharField(max_length=32)
+    # ad_country = models.CharField(max_length=32)
 
     def __str__(self):
         return self.baseuser.email
@@ -45,11 +46,11 @@ class Hospital(models.Model):
     region = models.CharField(max_length=64)
     # address = models.OneToOneField(Address, on_delete=models.PROTECT)
     type = models.CharField(max_length=64, choices=HOSPITAL_TYPE)
-    ad_line1 = models.CharField(max_length=64)
-    ad_line2 = models.CharField(max_length=64, null=True, blank=True)
-    ad_city = models.CharField(max_length=32)
-    ad_postcode = models.CharField(max_length=32)
-    ad_country = models.CharField(max_length=32)
+    address = models.CharField(max_length=256)
+    # ad_line2 = models.CharField(max_length=64, null=True, blank=True)
+    # ad_city = models.CharField(max_length=32)
+    # ad_postcode = models.CharField(max_length=32)
+    # ad_country = models.CharField(max_length=32)
 
     def delete(self, *args, **kwargs):
         super(Hospital, self).delete(*args, **kwargs)
@@ -69,6 +70,7 @@ class Ward(models.Model):
     name = models.CharField(max_length=64)
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
     type = models.CharField(max_length=32)
+    taking_new_pat = models.BooleanField(default=False)
     # w_id = models.AutoField(primary_key=True)
 
     def delete(self, *args, **kwargs):

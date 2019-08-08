@@ -1,4 +1,5 @@
 from django import forms
+# from django.contrib.gis import forms
 from myhealthdb.models import Task, CustomUser, Patient, Staff, PatientEm, PatientDoctor, Event, Medication, Condition, Document
 from contact_form.forms import ContactForm
 from captcha.fields import CaptchaField
@@ -8,6 +9,8 @@ from bootstrap_datepicker_plus import DatePickerInput, DateTimePickerInput
 from bootstrap_modal_forms.forms import BSModalForm
 from django_select2.forms import Select2MultipleWidget
 from myhealthdb.modelchoices import *
+from mapwidgets.widgets import GooglePointFieldWidget
+
 
 class DocumentForm(forms.ModelForm):
     class Meta:
@@ -72,18 +75,33 @@ class PatientProfileForm(forms.ModelForm):
     first_name = forms.CharField()
     last_name= forms.CharField()
     sex = forms.ChoiceField(choices = SEX)
-    dob = forms.DateField()
+    dob = forms.DateField(widget=DatePickerInput)
     tel_no = forms.CharField(required = False)
     nhs_no = forms.CharField(required = False)
-    ad_line1 = forms.CharField()
-    ad_line2 = forms.CharField(required = False)
-    ad_city = forms.CharField()
-    ad_postcode = forms.CharField()
-    ad_country = forms.CharField()    
+    address = forms.CharField(widget=GooglePointFieldWidget())
+
+    # class Meta:
+    #     model = City
+    #     # fields = ("coordinates", "city_hall")
+    #     widgets = {
+    #         'coordinates': GooglePointFieldWidget,
+    #         'city_hall': GooglePointFieldWidget,
+    #     }
+
+
+    # ad_line1 = forms.CharField()
+    # ad_line2 = forms.CharField(required = False)
+    # ad_city = forms.CharField()
+    # ad_postcode = forms.CharField()
+    # ad_country = forms.CharField()    
     
     class Meta:
         model = Patient
         exclude = ('baseuser','weight', 'height')
+        widgets = {
+            'address': GooglePointFieldWidget,
+            # 'city_hall': GooglePointFieldWidget,
+        }
 
 class StaffProfileForm(forms.ModelForm):
     
@@ -125,15 +143,19 @@ class PatientSignupForm(forms.Form):
     patient_sex = forms.ChoiceField(choices = SEX)
     patient_dob = forms.DateField()
     patient_telno = forms.CharField(max_length=50, required=True, strip=True)
-    ad_line1 = forms.CharField(max_length=64)
-    ad_line2 = forms.CharField(max_length=64, required=False)
-    ad_city = forms.CharField(max_length=32)
-    ad_postcode = forms.CharField(max_length=32)
-    ad_country = forms.CharField(max_length=32)    
+    address = forms.CharField(max_length=256, widget=GooglePointFieldWidget() )
+    # ad_line1 = forms.CharField(max_length=64)
+    # ad_line2 = forms.CharField(max_length=64, required=False)
+    # ad_city = forms.CharField(max_length=32)
+    # ad_postcode = forms.CharField(max_length=32)
+    # ad_country = forms.CharField(max_length=32)    
 
     class Meta:
+        model=Patient
+        fields = ['first_name', 'last_name', 'dob','sex', 'telno', 'address']
         widgets = {
             'patient_dob': DatePickerInput(),
+            'address': GooglePointFieldWidget()
         }
 
     def signup(self, request, user):
@@ -148,13 +170,15 @@ class PatientSignupForm(forms.Form):
             sex = self.cleaned_data.get('patient_sex'),
             dob = self.cleaned_data.get('patient_dob'),
             tel_no = self.cleaned_data.get('patient_telno'),
-            ad_line1 = self.cleaned_data.get('ad_line1'),
-            ad_line2 = self.cleaned_data.get('ad_line2'),
-            ad_city = self.cleaned_data.get('ad_city'),
-            ad_postcode = self.cleaned_data.get('ad_postcode'),
-            ad_country = self.cleaned_data.get('ad_country'),
+            address = self.cleaned_data.get('address'),
+            # ad_line1 = self.cleaned_data.get('ad_line1'),
+            # ad_line2 = self.cleaned_data.get('ad_line2'),
+            # ad_city = self.cleaned_data.get('ad_city'),
+            # ad_postcode = self.cleaned_data.get('ad_postcode'),
+            # ad_country = self.cleaned_data.get('ad_country'),
         )
 
+        patient_user.baseuser.user_type=1
         patient_user.baseuser.save()
         patient_user.save()
 

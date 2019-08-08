@@ -25,6 +25,8 @@ from myhealthdb_project.settings import MEDIA_ROOT, MEDIA_URL
 from chartjs.views.lines import BaseLineChartView
 from chartjs.util import date_range, value_or_null
 from django.template.loader import render_to_string, get_template
+from mapwidgets.widgets import GooglePointFieldWidget
+from django.contrib.gis import gdal
 # from haystack.generic_views import SearchView
 
 
@@ -911,8 +913,9 @@ def patient_details(request, id):
 
     profile = Patient.objects.get_or_create(baseuser=baseuser)[0]
     form = PatientProfileForm({'dob': profile.dob, 'first_name': profile.first_name, 'last_name': profile.last_name, 'sex': profile.sex, 'tel_no': profile.tel_no, 'nhs_no': profile.nhs_no,
-                               'ad_line1': profile.ad_line1, 'ad_line2': profile.ad_line2, 'ad_city': profile.ad_city, 'ad_postcode': profile.ad_postcode, 'ad_country': profile.ad_country})
+                               'address': profile.address}) #ad_line1': profile.ad_line1, 'ad_line2': profile.ad_line2, 'ad_city': profile.ad_city, 'ad_postcode': profile.ad_postcode, 'ad_country': profile.ad_country})
     form.fields['dob'].widget = DatePickerInput()
+    form.fields['address'].widget =  GooglePointFieldWidget()
     ecformset = ECSet(instance=request.user.patient)
     pdformset = PDSet(instance=request.user.patient)
 

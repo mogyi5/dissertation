@@ -27,22 +27,22 @@ def populate():
 
 # populating the patients also
     Profiles = {
-    "patient@patient.com":{'firstname':'pat', 'lastname':'pot',"sex": "Female", "dob": "2002-02-02", "tel_no": "111111111111", "ad_line1":"my first line", "ad_city":"glasgow", "ad_postcode":"g22 opp", "ad_country":"uk"},
-    "patient2@patient2.com":{'firstname':'bot', 'lastname':'bat',"sex": "Male", "dob": "2003-03-03", "tel_no": "2222222222222", "ad_line1":"hello hello", "ad_city":"edinburgh", "ad_postcode":"ginaaa", "ad_country":"england"},    
-    "patient3@patient3.com":{'firstname':'yoyo', 'lastname':'whatsup',"sex": "Female", "dob": "2004-04-04", "tel_no": "333333333333", "ad_line1":"i am groot", "ad_city":"wales", "ad_postcode":"binary", "ad_country":"spain"},
+    "patient@patient.com":{'firstname':'pat', 'lastname':'pot',"sex": "Female", "dob": "2002-02-02", "tel_no": "111111111111"}, #, "address":"UK, Birmingham"}, #"ad_line1":"my first line", "ad_city":"glasgow", "ad_postcode":"g22 opp", "ad_country":"uk"},
+    "patient2@patient2.com":{'firstname':'bot', 'lastname':'bat',"sex": "Male", "dob": "2003-03-03", "tel_no": "2222222222222"},# "address":"UK, London"},# "ad_line1":"hello hello", "ad_city":"edinburgh", "ad_postcode":"ginaaa", "ad_country":"england"},    
+    "patient3@patient3.com":{'firstname':'yoyo', 'lastname':'whatsup',"sex": "Female", "dob": "2004-04-04", "tel_no": "333333333333"},# "address":"UK, Glasgow, Rosevale 23"},#  "ad_line1":"i am groot", "ad_city":"wales", "ad_postcode":"binary", "ad_country":"spain"},
     }
 
     for p, p_data in Profiles.items():
-        add_patient(CustomUser.objects.get(email = p),p_data['firstname'],p_data['lastname'], p_data["sex"], p_data["dob"], p_data["tel_no"], p_data["ad_line1"], p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"])
+        add_patient(CustomUser.objects.get(email = p),p_data['firstname'],p_data['lastname'], p_data["sex"], p_data["dob"], p_data["tel_no"])#, p_data['address'])  #p_data["ad_line1"], p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"])
 
 # populating the hospitals also
     Hospitals = {
-    'hospital1':{'name':'hospital1', 'region':'highlands', 'type':'General Practice', "ad_line1":"first", "ad_city":"inverness", "ad_postcode":"iv22 747", "ad_country":"uk"},
-    'hospital2':{'name':'hospital2', 'region':'aberdeen', 'type':'General Hospital', "ad_line1":"line1", "ad_city":"aberdeen", "ad_postcode":"ab56566", "ad_country":"greenland"},
+    'hospital1':{'name':'hospital1', 'region':'highlands', 'type':'General Practice', "address":"UK, Glasgow, Rosevale 23"},   #, "ad_city":"inverness", "ad_postcode":"iv22 747", "ad_country":"uk"},
+    'hospital2':{'name':'hospital2', 'region':'aberdeen', 'type':'General Hospital', "address":"UK, Edinburgh, Lauriston 108"}, #, "ad_city":"aberdeen", "ad_postcode":"ab56566", "ad_country":"greenland"},
     }
 
     for p, p_data in Hospitals.items():
-        add_hospital(p_data['name'],p_data['region'], p_data["type"], p_data["ad_line1"], p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"]) 
+        add_hospital(p_data['name'],p_data['region'], p_data["type"], p_data["address"])#, p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"]) 
 
 # populating the wards also
     Wards = {
@@ -75,16 +75,16 @@ def create_super_user(username, email, password):
 
 
 # make profiles for the patients
-def add_patient(baseuser, firstname, lastname, sex, dob, tel_no, line1, city, postcode, country):
-    p = Patient.objects.get_or_create(baseuser = baseuser, first_name=firstname, last_name=lastname, sex=sex, dob=dob, tel_no=tel_no, ad_line1=line1, ad_city=city, ad_postcode=postcode, ad_country=country)[0]
+def add_patient(baseuser, firstname, lastname, sex, dob, tel_no):#, address):#line1, city, postcode, country):
+    p = Patient.objects.get_or_create(baseuser = baseuser, first_name=firstname, last_name=lastname, sex=sex, dob=dob, tel_no=tel_no)[0]#, address=address)[0] #ad_line1=line1, ad_city=city, ad_postcode=postcode, ad_country=country)[0]
     return p
 
 def add_staff(baseuser, firstname, lastname, tel_no, ward):
     p = Staff.objects.get_or_create(baseuser = baseuser, first_name=firstname, last_name=lastname, tel_no=tel_no, ward=ward)[0]
     return p
 
-def add_hospital(name, region, type, ad_line1,ad_city, ad_postcode, ad_country):
-    p = Hospital.objects.get_or_create(name=name, region=region, type=type, ad_line1=ad_line1, ad_city=ad_city, ad_postcode=ad_postcode, ad_country=ad_country)
+def add_hospital(name, region, type, address): #ad_line1,ad_city, ad_postcode, ad_country):
+    p = Hospital.objects.get_or_create(name=name, region=region, type=type, address=address)[0] #ad_line1=ad_line1, ad_city=ad_city, ad_postcode=ad_postcode, ad_country=ad_country)
     return p
 
 def add_ward(name, hospital, type):

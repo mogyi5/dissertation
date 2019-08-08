@@ -1,9 +1,11 @@
 <!doctype html>
-{% load staticfiles %}
+{% load static %}
 {% load bootstrap4 %}
 {% load i18n %}
 {% bootstrap_css %}
 {% bootstrap_javascript jquery='false' %}
+{% load easy_maps_tags %}
+
 {% block extrahead %}
 {% endblock %}
 <html lang="en">
@@ -246,6 +248,9 @@
 
             {% block body_block %}
             {% endblock %}
+{% comment %} 
+            <!-- Default map with 300x400 dimensions -->
+            {% easy_map "Gordonbush, KW9 6LX" 300 400 %} {% endcomment %}
 
 
             {%if groups%}
@@ -430,6 +435,7 @@
                 scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters)
             })
         </script>
+
 </body>
 
 </html>
