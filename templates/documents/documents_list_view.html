@@ -6,34 +6,65 @@
 
 <div class="card">
     <div class="card-header">
-        <h1>Your Documents</h1>
+        <h3>Your Documents</h3>
     </div>
     <div class="card-body">
+        <hr />
         {%if object_list%}
-        <ul>
-            {% for p in object_list %}
-            <li>
-                {{ p.name }}
-                <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.file }}</a>
-                <form id='task-delete' method="POST" action="{% url 'delete_document' p.pk %}">
-                    {% csrf_token %}
-                    <a href="{% url 'delete_document' document_pk=p.pk %}">
-                        <button class="btn btn-danger" onClick="deleteFunction()">Delete</button></a>
-                </form>
-                {% comment %} <a href="{% url 'edit_condition' id=profile.baseuser.id condition_pk=p.pk %}">
-                    <button class="btn btn-secondary">Edit</button></a> {% endcomment %}
-                {% comment %} <input data-url="{% url 'medication_done' %}" type="button" id="done{{p.id}}"
-                    class="done btn btn-info" name="{{ p.id }}" value="No longer taking" /> {% endcomment %}
-            </li>
-            {% endfor %}
-        </ul>
+        <table class="table table-responsive-sm table-striped ">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">File</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+
+                    <th scope="col"></th>
+
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in object_list %}
+
+
+                <tr>
+                    <th scope="row">{{ p.name }}</th>
+                    <td> <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.file }}</a></td>
+                    <td>{{p.type}}</td>
+                    <td>{{p.description}}</td>
+
+                    <td>
+                        <form id='task-delete' method="POST" action="{% url 'delete_document' p.pk %}">
+                            {% csrf_token %}
+                            {% if form.errors %}
+                            <div class="alert alert-danger">
+                                Please fix the errors in the form below.
+                                {% for error in form.non_field_errors %}
+                                <p class="error">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <a href="{% url 'delete_document' document_pk=p.pk %}">
+                                <button class="btn btn-warning" onClick="deleteFunction()">Delete</button></a>
+                        </form>
+                    </td>
+                </tr>
+
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+
         {%else%}
         <h4>You have no uploaded documents!</h4>
+        <hr />
         {%endif%}
 
 
         <a href="{% url 'create_document' id=profile.baseuser.id %}">
-            <button class="btn btn-secondary">Add Document</button></a>
+            <button class="btn btn-primary btn-block">Add Document</button></a>
     </div>
 </div>
 {% endblock %}

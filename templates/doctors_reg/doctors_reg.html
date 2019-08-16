@@ -1,0 +1,123 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block extrahead%}
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzCYVvHq7yit0ESbH-OLn8r0dA4WiMb8I&callback=initMap">
+</script>
+{{ form.media }}
+{%endblock%}
+
+{% block body_block %}
+
+
+<div class="card">
+    <div class="card-header">
+        <h3>Your Registration</h3>
+    </div>
+    <div class="card-body">
+        
+    <h4>Hospitals taking patients near you:</h4>
+    <hr/>
+    {% if closest%}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Type</th>
+                <th scope="col">Distance</th>
+                <th scope="col">Address</th>
+                <th scope="col">Wards List</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {%for c in closest%}
+
+
+            <tr>
+                <th scope="row">{{c.0.name}}</th>
+                <td>{{c.0.type}}</td>
+                <td>{{c.1|floatformat:"2"}} Mi</td>
+                <td>{{c.0.address}}</td>
+                <td>Wards</td>
+                <td><input data-url="{% url 'register_hospital' %}" type="button" id="register{{c.0.id}}"
+                        class="done btn btn-primary" name="{{ c.0.id }}" value="Register!"
+                        onclick='confirm("Are you sure you want to register with this practice? Your medical data will be shared.");' />
+                </td>
+            </tr>
+
+
+            {% comment %} {{c.0}} {{c.1|floatformat:"2"}} miles
+            <br /> {% endcomment %}
+
+
+            {%endfor%}
+        </tbody>
+    </table>
+    {%endif%}
+
+
+    <div id="map" style="width: 100%; height: 300px;">
+
+    </div>
+</div>
+
+</div>
+<script>
+    function getCoords(s) {
+        var new1 = s.split("(");
+        new1 = new1[1].split(")");
+        new1 = new1[0].split(" ");
+        return new1
+    };
+</script>
+<script type="text/javascript">
+    var locations = [
+
+        ['You', getCoords("{{profile.address}}")[1], getCoords("{{profile.address}}")[0]],
+
+        {% if closest %} 
+        {% for c in closest %}
+
+        ['{{c.0}}', getCoords("{{c.0.address}}")[1], getCoords("{{c.0.address}}")[0]],
+
+        {% endfor %}
+        {% endif %}
+    ];
+
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 12,
+        center: new google.maps.LatLng(getCoords("{{profile.address}}")[1], getCoords("{{profile.address}}")[
+            0]),
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+
+    var infowindow = new google.maps.InfoWindow();
+
+    var marker, i;
+
+    for (i = 0; i < locations.length; i++) {
+        if (locations[i][0] == 'You') {
+            marker = new google.maps.Marker({
+                position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                icon: 'http://maps.google.com/mapfiles/kml/paddle/ylw-stars-lv.png',
+                map: map
+            });
+        } else {
+            marker = new google.maps.Marker({
+                position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                map: map
+            });
+        }
+
+        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+            return function () {
+                infowindow.setContent(locations[i][0]);
+                infowindow.open(map, marker);
+            }
+        })(marker, i));
+    }
+</script>
+
+{% endblock %}

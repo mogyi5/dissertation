@@ -6,6 +6,28 @@ from myhealthdb.modelchoices import *
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from geopy.geocoders import Nominatim
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
+import re
+from phonenumber_field.modelfields import PhoneNumberField
+
+
+def nhs_validator(value):
+    reg = re.compile('^[0-9]*$')
+    #matches = reg.match(value)
+    if (len(value) != 10 or not reg.match(value)):
+        raise ValidationError('Number should be numberic and 10 digits long')
+
+def text_validator(value):
+    reg = re.compile('^[a-zA-Z]*$')
+    #matches = reg.match(value)
+    if (not reg.match(value)):
+        raise ValidationError('Field should be alphabetical')
+
+
+def number_positive_validator(value):
+    if (value < 0):
+        raise ValidationError('%s should not be negative' % value)
 
 
 class CustomUser(AbstractUser):
@@ -18,21 +40,21 @@ class CustomUser(AbstractUser):
 
 class Patient(models.Model):
 
-    first_name = models.CharField(max_length=32)
-    last_name = models.CharField(max_length=32)
+    first_name = models.CharField(max_length=32, validators=[text_validator,])
+    last_name = models.CharField(max_length=32, validators=[text_validator,])
     sex = models.CharField(choices=SEX, max_length=32)
     dob = models.DateField()
-    tel_no = models.CharField(max_length=32, blank=True, null=True)
-    # address = models.OneToOneField(Address, on_delete=models.SET_NULL, null=True, blank=True, related_query_name="specific_pat",)
-    nhs_no = models.CharField(
-        unique=True, max_length=128, blank=True, null=True)
+    tel_no = PhoneNumberField(blank=True, null=True)
+    nhs_no = models.CharField(max_length=128, blank=True, null=True, validators=[nhs_validator,])
     baseuser = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, primary_key=True, related_name='patient')
+    flat_no = models.CharField(max_length=32, null=True, blank=True)
     address = models.CharField(max_length=256, null=True, blank=True)
-    # ad_line2 = models.CharField(max_length=64, null=True, blank=True)
-    # ad_city = models.CharField(max_length=32)
-    # ad_postcode = models.CharField(max_length=32)
-    # ad_country = models.CharField(max_length=32)
+
+    def delete(self, *args, **kwargs):
+        super(Patient, self).delete(*args, **kwargs)
+        base = CustomUser.objects.get(id=self.baseuser.id)
+        base.delete()
 
     def __str__(self):
         return self.baseuser.email
@@ -42,11 +64,12 @@ class Hospital(models.Model):
 
     objects = RandomManager()
 
-    name = models.CharField(max_length=64)
-    region = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, validators=[text_validator,])
+    #region = models.CharField(max_length=64)
     # address = models.OneToOneField(Address, on_delete=models.PROTECT)
     type = models.CharField(max_length=64, choices=HOSPITAL_TYPE)
     address = models.CharField(max_length=256)
+    taking_patients = models.BooleanField(default=True)
     # ad_line2 = models.CharField(max_length=64, null=True, blank=True)
     # ad_city = models.CharField(max_length=32)
     # ad_postcode = models.CharField(max_length=32)
@@ -67,10 +90,10 @@ class Hospital(models.Model):
 
 
 class Ward(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, validators=[text_validator,])
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
     type = models.CharField(max_length=32)
-    taking_new_pat = models.BooleanField(default=False)
+    # taking_new_pat = models.BooleanField(default=False)
     # w_id = models.AutoField(primary_key=True)
 
     def delete(self, *args, **kwargs):
@@ -88,22 +111,21 @@ class Ward(models.Model):
 
 class Staff(models.Model):
 
-    first_name = models.CharField(max_length=32)
-    last_name = models.CharField(max_length=32)
-    tel_no = models.CharField(max_length=32, blank=True, null=True)
+    first_name = models.CharField(max_length=32, validators=[text_validator,])
+    last_name = models.CharField(max_length=32, validators=[text_validator,])
+    tel_no = PhoneNumberField(blank=True, null=True)
     ward = models.ForeignKey(
         Ward, on_delete=models.SET_NULL, blank=True, null=True, related_name='current_ward')
-    baseuser=models.OneToOneField(
-        CustomUser, on_delete = models.CASCADE, primary_key = True, related_name = 'doctor')
-    staffrole=models.CharField(
-        choices = ROLE, max_length = 64, blank = True, null = True)
+    room = models.CharField(max_length=32, blank=True, null=True)
+    baseuser = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, primary_key=True, related_name='doctor')
 
     def save(self, *args, **kwargs):
 
         super(Staff, self).save(*args, **kwargs)
 
-        group=Group.objects.get(name = self.ward.name)
-        group2=Group.objects.get(name = self.ward.hospital.name)
+        group = Group.objects.get(name=self.ward.name)
+        group2 = Group.objects.get(name=self.ward.hospital.name)
         group.members.add(self)
         group2.members.add(self)
 
@@ -116,64 +138,48 @@ class Staff(models.Model):
                 else:
                     mygroups[i].members.remove(self)
 
-
     class Meta:
-        verbose_name_plural="staff"
+        verbose_name_plural = "staff"
 
     def __str__(self):
         return self.baseuser.email
 
 
-DEFAULT_STAFF_ID=0
+DEFAULT_STAFF_ID = 0
 
 
 class Group(models.Model):
-    name=models.CharField(max_length = 128)
-    members=models.ManyToManyField(Staff, blank = True)
-    ad=models.ForeignKey(Staff, on_delete = models.SET_NULL,
-                           related_name = 'admin', blank = True, null = True)  # maybe not needed
-    description=models.CharField(max_length = 256, blank = True, null = True)
-    slug=models.SlugField(blank = True)
+    name = models.CharField(max_length=128)
+    members = models.ManyToManyField(Staff, blank=True)
+    ad = models.ForeignKey(Staff, on_delete=models.SET_NULL,
+                           related_name='admin', blank=True, null=True)  # maybe not needed
+    description = models.CharField(max_length=256, blank=True, null=True)
+    slug = models.SlugField(blank=True)
 
-    #automatic is 0, person created is 1
-    type=models.BooleanField(default=False)
+    # automatic is 0, person created is 1
+    type = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        # Uncomment if you don't want the slug to change every time the name changes
-        # if self.id is None:
-                # self.slug = slugify(self.name)
-        self.slug=slugify(self.name)
+        self.slug = slugify(self.name)
         super(Group, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
 
-class PatientDoctor(models.Model):
-    patient=models.ForeignKey(Patient, on_delete = models.CASCADE)
-    doctor=models.ForeignKey(Staff, on_delete = models.CASCADE)
-    primary=models.BooleanField()
-    pd_id=models.AutoField(primary_key = True)
-    inpatient=models.BooleanField(default = False)
-    note=models.CharField(max_length = 32, blank = True, null = True)
-
-    def save(self, *args, **kwargs):  # watch out for this code######################
-        if self.primary:
-            try:
-                temp=PatientDoctor.objects.get(
-                    primary=True, patient=self.patient)
-                if self != temp:
-                    temp.primary = False
-                    temp.save()
-            except PatientDoctor.DoesNotExist:
-                pass
-        super(PatientDoctor, self).save(*args, **kwargs)
+class PatientHospital(models.Model):
+    patient = models.ForeignKey(
+        Patient, on_delete=models.CASCADE, related_name='patient')
+    hospital = models.ForeignKey(
+        Hospital, on_delete=models.CASCADE, related_name='hospital')
+    status = models.BooleanField(default=False)
+    inpatient = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('patient', 'doctor')
+        unique_together = ('patient', 'hospital')
 
     def __str__(self):
-        return self.patient.first_name
+        return self.patient.first_name + '' + self.hospital.name
 
 
 class Activity(models.Model):
@@ -234,35 +240,31 @@ def submission_delete(sender, instance, **kwargs):
     instance.file.delete(False)
 
 
-# class EmergencyContact(models.Model):
-#     name = models.CharField(max_length=64)
-#     email = models.CharField(max_length=64, blank=True, null=True)
-#     phone1 = models.CharField(primary_key=True, max_length=64)
-#     phone2 = models.CharField(max_length=64, blank=True, null=True)
-
-#     def __str__(self):
-#         return self.name
-
-
 class Event(models.Model):
 
     title = models.CharField(max_length=32)
-    # if letter gets deleted doesn't mean that event will
-    letter = models.ForeignKey(
-        Document, on_delete=models.SET_NULL, blank=True, null=True)
     date_in = models.DateTimeField()
-    date_out = models.DateTimeField(blank=True, null=True)
     pd_relation = models.ForeignKey(
-        PatientDoctor, on_delete=models.PROTECT, related_name='reversepd')  # unsure about this one
+        PatientHospital, on_delete=models.CASCADE, related_name='reversepd')  # unsure about this one
     type = models.CharField(choices=EVENT_TYPE, max_length=32)
     notes = models.CharField(max_length=256, blank=True, null=True)
-    done = models.BooleanField(default=False, null=True, blank=True)
 
     # class Meta:
     #     unique_together = ('date_in', 'pd_relation'),
 
     def __str__(self):
         return self.title
+
+
+class Shift(models.Model):
+    date = models.DateField()
+    start = models.TimeField()
+    end = models.TimeField()
+    staff = models.ForeignKey(
+        Staff, on_delete=models.CASCADE, related_name='staff')
+
+    def __str__(self):
+        return str(self.start.strftime("%H:%M")) + '-' + str(self.end.strftime("%H:%M"))
 
 
 class Immunization(models.Model):
@@ -298,8 +300,8 @@ class PatientEm(models.Model):
         Patient, on_delete=models.CASCADE, related_name='em_pat')
     name = models.CharField(max_length=64)
     email = models.CharField(max_length=64, blank=True, null=True)
-    phone1 = models.CharField(max_length=64)
-    phone2 = models.CharField(max_length=64, blank=True, null=True)
+    phone1 = PhoneNumberField()
+    phone2 = PhoneNumberField(blank=True, null=True)
     p_id = models.AutoField(primary_key=True)
 
     def __str__(self):
@@ -331,7 +333,7 @@ class Task(models.Model):
     deadline = models.DateTimeField()
     notes = models.CharField(max_length=256, blank=True, null=True)
     complete = models.BooleanField(default=False)
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=20)
     set_by = models.ForeignKey(
         Staff, on_delete=models.SET_NULL, null=True, related_name='setter')
     complete_by = models.ManyToManyField(
@@ -347,6 +349,8 @@ class Task(models.Model):
         ordering = ('deadline', 'completion_date')
 
 
+# instead of weight have like vitals measurements - weight, height, heart rate, blood pressure
+
 class Weight(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date = models.DateField()  # auto_now=True)
@@ -357,6 +361,19 @@ class Weight(models.Model):
 
     class Meta:
         ordering = ('date',)
+
+
+class Update(models.Model):
+    patient = models.ForeignKey(
+        Patient, on_delete=models.CASCADE, blank=True, null=True)
+    title = models.CharField(max_length=64, blank=True)
+    body = models.TextField(max_length=256)
+    date = models.DateTimeField(auto_now=True, blank=True)
+    seen = models.BooleanField(default=False, blank=True)
+
+    def __str__(self):
+        return self.title
+
 
 #################################################################################################################################################
 

@@ -1,15 +1,36 @@
 from django import forms
-# from django.contrib.gis import forms
-from myhealthdb.models import Task, CustomUser, Patient, Staff, PatientEm, PatientDoctor, Event, Medication, Condition, Document
+from myhealthdb.models import CustomUser, Shift, Update, Ward, Task, CustomUser, Patient, Staff, PatientEm,Event, Medication, Condition, Document  #PatientDoctor, 
 from contact_form.forms import ContactForm
 from captcha.fields import CaptchaField
 from django.forms import inlineformset_factory
+from django.forms.models import modelformset_factory
 from datetimewidget.widgets import DateTimeWidget
-from bootstrap_datepicker_plus import DatePickerInput, DateTimePickerInput
+from bootstrap_datepicker_plus import DatePickerInput, DateTimePickerInput, TimePickerInput
 from bootstrap_modal_forms.forms import BSModalForm
 from django_select2.forms import Select2MultipleWidget
 from myhealthdb.modelchoices import *
+from datetime import date
 from mapwidgets.widgets import GooglePointFieldWidget
+from phonenumber_field.formfields import PhoneNumberField
+from django.core.exceptions import ValidationError
+
+class ShiftForm(forms.ModelForm):
+
+    class Meta:
+        model=Shift
+        fields = ['date', 'start', 'end', 'staff']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("end")
+        if end < start:
+            raise forms.ValidationError("End should be later than start.")
+
+
+##queryset only ppl in your ward
+EventFormSet = modelformset_factory(Shift, form=ShiftForm, can_delete=True, extra=1,widgets={
+    'date': DatePickerInput(), 'start': TimePickerInput(), 'end': TimePickerInput()})
 
 
 class DocumentForm(forms.ModelForm):
@@ -24,11 +45,26 @@ class ConditionForm(forms.ModelForm):
         model = Condition
         fields = ['start','stop','type','reaction','severity','details','title']
 
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("stop")
+        if end < start:
+            raise forms.ValidationError("Stop should be later than start.")
+
 class MedicationForm(forms.ModelForm):
 
     class Meta:
         model = Medication
         fields = ['type', 'notes', 'amount', 'frequency','start', 'finish']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("finish")
+        if end < start:
+            raise forms.ValidationError("Finish should be later than start.")
+
 
 class TaskForm(forms.ModelForm):
     # complete_by = ModelMultipleChoiceField(queryset=Staff.objects.all(), widget=Select2MultipleWidget)
@@ -42,32 +78,7 @@ class TaskForm(forms.ModelForm):
         }
 
 
-# class PatientSearchForm(SearchForm):
-#     # first_name = forms.CharField(required=False)
-#     # last_name = forms.CharField(required=False)
-#     # dob = forms.DateTimeField(required=False)
-#     # nhs_no = forms.CharField(required=False)
-#     # ad_postcode = forms.CharField(required=False)
-
-#     def search(self):
-#         # First, store the SearchQuerySet received from other processing.
-#         sqs = super(PatientSearchForm, self).search()
-
-#         if not self.is_valid():
-#             return self.no_query_found()
-
-#         # Check to see if a start_date was chosen.
-#         # if self.cleaned_data['first_name']:
-#         #     sqs = sqs.filter(first_name=self.cleaned_data['first_name'])
-
-#         # # Check to see if an end_date was chosen.
-#         # if self.cleaned_data['end_date']:
-#         #     sqs = sqs.filter(pub_date__lte=self.cleaned_data['end_date'])
-
-#         return sqs
-
-
-PDSet = inlineformset_factory(Patient, PatientDoctor, fields = ['doctor', 'primary', 'note'],  can_delete=True, extra=1, max_num=5)
+# PDSet = inlineformset_factory(Patient, PatientDoctor, fields = ['doctor', 'primary', 'note'],  can_delete=True, extra=1, max_num=5)
 ECSet = inlineformset_factory(Patient, PatientEm, fields = ['name', 'email', 'phone1', 'phone2'],  can_delete=True, extra=1, max_num=5)
 
 class PatientProfileForm(forms.ModelForm):
@@ -76,31 +87,16 @@ class PatientProfileForm(forms.ModelForm):
     last_name= forms.CharField()
     sex = forms.ChoiceField(choices = SEX)
     dob = forms.DateField(widget=DatePickerInput)
-    tel_no = forms.CharField(required = False)
+    tel_no = PhoneNumberField(required = False)
     nhs_no = forms.CharField(required = False)
-    address = forms.CharField(widget=GooglePointFieldWidget())
-
-    # class Meta:
-    #     model = City
-    #     # fields = ("coordinates", "city_hall")
-    #     widgets = {
-    #         'coordinates': GooglePointFieldWidget,
-    #         'city_hall': GooglePointFieldWidget,
-    #     }
-
-
-    # ad_line1 = forms.CharField()
-    # ad_line2 = forms.CharField(required = False)
-    # ad_city = forms.CharField()
-    # ad_postcode = forms.CharField()
-    # ad_country = forms.CharField()    
+    flat_no = forms.CharField(required = False)
+    address = forms.CharField(widget=GooglePointFieldWidget())    
     
     class Meta:
         model = Patient
         exclude = ('baseuser','weight', 'height')
         widgets = {
             'address': GooglePointFieldWidget,
-            # 'city_hall': GooglePointFieldWidget,
         }
 
 class StaffProfileForm(forms.ModelForm):
@@ -111,44 +107,36 @@ class StaffProfileForm(forms.ModelForm):
 
 class EventBookingForm(forms.ModelForm):
 
-    # allrelationships = PatientDoctor.objects.filter()
+    
+    def save(self, commit=True):
+
+        event = Event(
+            title=self.cleaned_data.get('title'),
+            date_in=self.cleaned_data.get('date_in'),
+            pd_relation = self.cleaned_data.get('pd_relation'),
+            notes = self.cleaned_data.get('notes'),
+            type = "Consultation"
+        )
+        event.save()
+
+        return event
 
 
-    # title = forms.CharField()
-    # date_in = forms.DateTimeField()
-    # relation = forms.ModelChoiceField(queryset = PatientDoctor.objects.all()) #change this one
-    # type = forms.ChoiceField(choices = EVENT_TYPE)
-    # notes = forms.CharField()
 
     class Meta:
         model = Event
-        fields = ('title', 'date_in', 'pd_relation', 'type', 'notes')
-        # exclude = ('letter', 'date_out','done')
+        fields = ('title', 'date_in', 'pd_relation', 'notes')
 
-        # widgets = {
-        #     'date_in': DateTimePickerInput(),
-        #     'date_out': DateTimePickerInput(),
-        # }
 
 
 class PatientSignupForm(forms.Form):
 
-    SEX  =(
-        ('M', 'Male'),
-        ('F', 'Female')
-    )
-
-    patient_first_name = forms.CharField(max_length=30, required=True, strip=True)
-    patient_second_name =  forms.CharField(max_length=30, required=True, strip=True)
-    patient_sex = forms.ChoiceField(choices = SEX)
-    patient_dob = forms.DateField()
-    patient_telno = forms.CharField(max_length=50, required=True, strip=True)
-    address = forms.CharField(max_length=256, widget=GooglePointFieldWidget() )
-    # ad_line1 = forms.CharField(max_length=64)
-    # ad_line2 = forms.CharField(max_length=64, required=False)
-    # ad_city = forms.CharField(max_length=32)
-    # ad_postcode = forms.CharField(max_length=32)
-    # ad_country = forms.CharField(max_length=32)    
+    patient_first_name = forms.CharField(label='First Name', max_length=30, required=True, strip=True)
+    patient_second_name =  forms.CharField(label='Last Name', max_length=30, required=True, strip=True)
+    patient_sex = forms.ChoiceField(label='Sex', choices = SEX)
+    patient_dob = forms.DateField(label='Date of Birth', widget=DatePickerInput())
+    patient_telno = PhoneNumberField(label='Telephone Number', required=True, strip=True)
+    address = forms.CharField(label='Address', max_length=256, widget=GooglePointFieldWidget() )
 
     class Meta:
         model=Patient
@@ -171,11 +159,6 @@ class PatientSignupForm(forms.Form):
             dob = self.cleaned_data.get('patient_dob'),
             tel_no = self.cleaned_data.get('patient_telno'),
             address = self.cleaned_data.get('address'),
-            # ad_line1 = self.cleaned_data.get('ad_line1'),
-            # ad_line2 = self.cleaned_data.get('ad_line2'),
-            # ad_city = self.cleaned_data.get('ad_city'),
-            # ad_postcode = self.cleaned_data.get('ad_postcode'),
-            # ad_country = self.cleaned_data.get('ad_country'),
         )
 
         patient_user.baseuser.user_type=1
@@ -185,50 +168,48 @@ class PatientSignupForm(forms.Form):
         return patient_user.baseuser
 
 
-class HospitalContactForm(ContactForm):
-    def __init__(self, request, *args, **kwargs):
-        super(HospitalContactForm, self).__init__(request=request, *args, **kwargs)
-        fields_keyOrder = ['reason', 'name', 'email', 'body']
-        if (self.fields.has_key('keyOrder')):
-            self.fields.keyOrder = fields_keyOrder
-        else:
-            self.fields = OrderedDict((k, self.fields[k]) for k in fields_keyOrder)
+class HospitalContactForm(forms.Form):
+
+    # def __init__(self, request, *args, **kwargs):
+    #     super(HospitalContactForm, self).__init__(request=request, *args, **kwargs)
+    #     fields_keyOrder = ['reason', 'name', 'email', 'body']
+    #     if (self.fields.has_key('keyOrder')):
+    #         self.fields.keyOrder = fields_keyOrder
+    #     else:
+    #         self.fields = OrderedDict((k, self.fields[k]) for k in fields_keyOrder)
  
     reason = forms.ChoiceField(choices=REASON, label='Reason')
     captcha = CaptchaField()
-    template_name = 'contact_form/contact_form.txt'
-    subject_template_name = "contact_form/contact_form_subject.txt"
+    # template_name = 'contact_form/contact_form.txt'
+    # subject_template_name = "contact_form/contact_form_subject.txt"
 
 
+class CustomUserForm(forms.ModelForm):
 
+    email = forms.EmailField()
 
+    def save(self, commit=True):
+
+        today = date.today()
+        base = CustomUser(
+            password=self.cleaned_data.get('password'),
+            email=self.cleaned_data.get('email'),
+            user_type = self.cleaned_data.get('user_type'),
+            username = self.cleaned_data.get('email'),
+            date_joined = today
+        )
+        base.save()
+
+        return base
+
+    class Meta:
+        model=CustomUser
+        fields = ['password', 'email', 'user_type']
     
-# class StaffSignupForm(SignupForm):
+class StaffSignupForm(forms.ModelForm):
 
-#     TYPE  =(
-#         ('2', 'Doctor'),
-#         ('3', 'Receptionist')
-#     )
+    user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES)
 
-#     staff_first_name = forms.CharField(max_length=30, required=True, strip=True)
-#     staff_second_name = forms.CharField(max_length=30, required=True, strip=True)
-#     staff_telno = forms.CharField(max_length=50, required=True, strip=True)
-#     user_type_choice = forms.ChoiceField(choices = TYPE)
-
-#     def save(self, request):
-
-#         this_user = super(StaffSignupForm, self).save(request)
-#         this_user.user_type = self.cleaned_data.get('user_type_choice')
-
-#         staff_user = Staff(
-#             baseuser = this_user,
-#             first_name=self.cleaned_data.get('staff_first_name'),
-#             second_name=self.cleaned_data.get('staff_second_name'),
-#             tel_no = self.cleaned_data.get('staff_telno'),
-
-#         )
-
-#         staff_user.baseuser.save()
-#         staff_user.save()
-
-#         return staff_user.baseuser
+    class Meta:
+        model=Staff
+        exclude = ['baseuser',]

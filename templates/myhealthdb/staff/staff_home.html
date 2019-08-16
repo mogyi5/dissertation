@@ -1,16 +1,20 @@
 {% extends 'myhealthdb/second_base.html' %}
 {% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load myhealthdb_extras %}
 
 {% block body_block %}
 <div class="card">
   <div class="card-block">
-    <h4 class="card-title">Your updates</h4>
-    <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-    <a href="#" class="card-link">Card link</a>
-    <a href="#" class="card-link">Another link</a>
+    <h3 class="card-header">Your updates</h3>
+    <div class="card-body">
+      <a href="#" class="card-link">Card link</a>
+      <a href="#" class="card-link">Another link</a>
+    </div>
   </div>
 </div>
-<br />
+
+
 {% comment %} <div class="card">
   <div class="card-block">
     <h4 class="card-title">Your appointments today</h4>
@@ -32,6 +36,8 @@
     {% endif %}
   </div>
 </div> {% endcomment %}
+{% if profile.baseuser.user_type != 4%}
+
 <div class="container">
   <div class="row">
     <div class="col-xs-12 ">
@@ -39,8 +45,13 @@
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
           <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-schedule" role="tab"
             aria-controls="nav-home" aria-selected="true">Schedule</a>
+          {% if profile.baseuser.user_type == 2 %}
           <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-inpatients" role="tab"
             aria-controls="nav-profile" aria-selected="false">Inpatients</a>
+          {% elif profile.baseuser.user_type == 3 %}
+          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-inpatients" role="tab"
+            aria-controls="nav-profile" aria-selected="false">Pending Registration</a>
+          {% endif %}
           {% comment %} <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact"
             role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
           <a class="nav-item nav-link" id="nav-about-tab" data-toggle="tab" href="#nav-about" role="tab"
@@ -49,39 +60,128 @@
       </nav>
       <div class="tab-content py-3 px-3 px-sm-0" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-schedule" role="tabpanel" aria-labelledby="nav-home-tab">
+          {% if profile.baseuser.user_type == 2%}
           <h4 class="card-title">Your appointments today</h4>
+          {% elif profile.baseuser.user_type == 3 %}
+          <h4 class="card-title">Today's appointments</h4>
+
+
+          {% endif %}
+
           {% if events %}
           {% for e in events %}
 
+          {% if profile.baseuser.user_type == 3%}
+          {{e.pd_relation.doctor}}
+          {{e.pd_relation.patient}}
+          {% endif%}
+
           {{e.title}}
-          {{e.date_in}}
+          {{e.date_in.time}}
           {{e.type}}
           <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
           <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
           <br />
           {% endfor %}
-          {% else %} 
+          {% else %}
           <p>You have no pending events!</p>
           {% endif%} <br />
           {% if profile.baseuser.id == 3%}
           <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
           {% endif %}
         </div>
+        {% if profile.baseuser.user_type == 2 %}
         <div class="tab-pane fade" id="nav-inpatients" role="tabpanel" aria-labelledby="nav-profile-tab">
           {% if inpatients %}
           {% for i in inpatients %}
 
           {{i.patient}}
- 
+
           <br />
           {% endfor %}
-          {% else %} 
+          {% else %}
           <p>You have no inpatients!</p>
-          {% endif%} 
+          {% endif%}
         </div>
+        {% elif profile.baseuser.user_type == 3%}
+        <div class="tab-pane fade" id="nav-inpatients" role="tabpanel" aria-labelledby="nav-profile-tab">
+          {% if pending %}
+          {% for i in pending %}
+          <div>
+            {{i.patient}} <input data-url="{% url 'accept_patient' %}" type="button" id="register_pat{{i.id}}"
+              class="register_pat btn btn-info" name="{{ i.id }}" value="Accept!"
+              onclick='confirm("Are you sure you want to register this patient?");' />
+            <input data-url="{% url 'reject_application' %}" type="button" id="reject_pat{{i.id}}"
+              class="reject_pat btn btn-info" name="{{ i.id }}" value="Reject!"
+              onclick='confirm("Are you sure you want to reject this patient?");' />
 
+            <br />
+          </div>
+          {% endfor %}
+          {% else %}
+          <p>There are no patients waiting to be registered!</p>
+          {% endif%}
+        </div>
+        {%endif%}
+
+      </div>
     </div>
   </div>
 </div>
+
+{%else %}
+<div class="card">
+  <div class="card-block">
+    <h3 class="card-header">Schedule</h3>
+    <div class="card-body">
+      {%if staff%}
+
+      <div class="table-responsive-lg">
+        <table class="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">Staff</th>
+              {%if dates%}
+              {%for d in dates%}
+              <th scope="col">{{d}}</th>
+              {%endfor%}
+              {%endif%}
+
+            </tr>
+          </thead>
+          <tbody>
+            {%for s in schedule%}
+
+            {% if s|classname == "Staff" %}
+            <tr>
+              <th scope="row">{{s}}</th>
+              {%elif s|classname == "NoneType"%}
+              <td></td>
+              {%else%}
+              <td><a href="{%url 'edit_shift' id=profile.baseuser.id pk=s.id%}" class="btn btn-secondary btn-lg active"
+                  role="button" aria-pressed="true">{{s}}</a></td>
+              {%endif%}
+
+              {% endfor%}
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+      {%else%}
+      There are no staff to schedule for!
+      {%endif%}
+    </div>
+  </div>
+</div>
+
+<a href="{%url 'add_schedule' id=profile.baseuser.id %}" class="btn btn-primary btn-block active" role="button"
+  aria-pressed="true">Add Shift</a>
+
+
+
+{% endif%}
+
+
 
 {% endblock %}

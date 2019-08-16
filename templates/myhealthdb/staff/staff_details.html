@@ -6,14 +6,22 @@
 
 <div class="card">
     <div class="card-header">
-        <h1>Update your details:</h1>
+        <h3>Update your details:</h3>
     </div>
     <div class="card-body">
 
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                Please fix the errors in the form below.
+                {% for error in form.non_field_errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
             {{ form|crispy }}
-            <button style="color:black;" class="btn btn-primary" type="submit" name="submit">Submit!</button>
+            <button class="btn btn-primary btn-block" type="submit" name="submit">Submit!</button>
         </form>
     </div>
 </div>

@@ -1,0 +1,60 @@
+{% extends 'myhealthdb/second_base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block extrahead %}
+{{ form.media }}
+{% endblock %}
+
+{% block body_block %}
+
+
+<div class="card">
+  <div class="card-block">
+    <h3 class="card-header">Update Details</h3>
+    <div class="card-body">
+      <h4>Personal Details</h4>
+      <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          Please fix the errors in the form below.
+          {% for error in form.non_field_errors %}
+          <p class="error">{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {{form|crispy}}
+
+        <hr />
+
+        <h4>Emergency contacts:</h4>
+        <div id="ecform_set">
+          {{ ecformset.management_form }}
+          <div>
+            {% for f2 in ecformset %}
+            {{f2|crispy}}
+          </div>
+
+
+          {%endfor%}
+          <hr />
+
+          {% if ecformset.non_form_errors %}
+          {% for error in ecformset.non_form_errors %}
+          {{ error|escape }}
+          {% endfor %}
+          {% endif %}
+        </div>
+
+        <button class="btn btn-primary" type="submit" name="submit">Submit!</button>
+
+      </form>
+    </div>
+  </div>
+</div>
+<br />
+
+
+
+{% endblock %}

@@ -23,7 +23,7 @@
         });
     });
 </script>
-
+{% comment %} 
 <script type="text/javascript">
     $.get('{% url "weight_chart_json2" %}', function (data) {
         var ctx = $("#weightChart2").get(0).getContext("2d");
@@ -42,6 +42,6 @@
             }
         });
     });
-</script>
+</script> {% endcomment %}
 
 {% endblock %}

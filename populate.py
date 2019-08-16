@@ -24,7 +24,9 @@ def populate():
     doctor1 = CustomUser.objects.create_user(username='doctor',email='doctor@doctor.com',password='myhealthdb', user_type = '2' )
     doctor2 = CustomUser.objects.create_user(username='doctor2',email='doctor2@doctor2.com',password='myhealthdb', user_type = '2' )
     doctor3 = CustomUser.objects.create_user(username='doctor3',email='doctor3@doctor3.com',password='myhealthdb', user_type = '2' )
-
+    receptionist1 = CustomUser.objects.create_user(username='receptionist1',email='receptionist1@receptionist1.com',password='myhealthdb', user_type = '3' )
+    receptionist2 = CustomUser.objects.create_user(username='receptionist2',email='receptionist2@receptionist2.com',password='myhealthdb', user_type = '3' )
+    itguy = CustomUser.objects.create_user(username='itguy',email='it@it.com',password='myhealthdb', user_type = '4' )
 # populating the patients also
     Profiles = {
     "patient@patient.com":{'firstname':'pat', 'lastname':'pot',"sex": "Female", "dob": "2002-02-02", "tel_no": "111111111111"}, #, "address":"UK, Birmingham"}, #"ad_line1":"my first line", "ad_city":"glasgow", "ad_postcode":"g22 opp", "ad_country":"uk"},
@@ -37,12 +39,12 @@ def populate():
 
 # populating the hospitals also
     Hospitals = {
-    'hospital1':{'name':'hospital1', 'region':'highlands', 'type':'General Practice', "address":"UK, Glasgow, Rosevale 23"},   #, "ad_city":"inverness", "ad_postcode":"iv22 747", "ad_country":"uk"},
-    'hospital2':{'name':'hospital2', 'region':'aberdeen', 'type':'General Hospital', "address":"UK, Edinburgh, Lauriston 108"}, #, "ad_city":"aberdeen", "ad_postcode":"ab56566", "ad_country":"greenland"},
+    'hospital1':{'name':'hospital1', 'type':'General Practice', "address":"(55.865033041338116,-4.185080086179028)"},   #, "ad_city":"inverness", "ad_postcode":"iv22 747", "ad_country":"uk"},
+    'hospital2':{'name':'hospital2', 'type':'General Hospital', "address":"(55.8875669717464,-4.080023323483715)"}, #, "ad_city":"aberdeen", "ad_postcode":"ab56566", "ad_country":"greenland"},
     }
 
     for p, p_data in Hospitals.items():
-        add_hospital(p_data['name'],p_data['region'], p_data["type"], p_data["address"])#, p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"]) 
+        add_hospital(p_data['name'], p_data["type"], p_data['address'])#, p_data["address"])#, p_data["ad_city"],p_data["ad_postcode"], p_data["ad_country"]) 
 
 # populating the wards also
     Wards = {
@@ -60,6 +62,9 @@ def populate():
     "doctor@doctor.com":{'firstname':'dic', 'lastname':'doc',"tel_no": "222222222222", "ward": "ward"},
     "doctor2@doctor2.com":{'firstname':'derek', 'lastname':'doo',"tel_no": "1324", "ward": "ward"},
     "doctor3@doctor3.com":{'firstname':'drunk', 'lastname':'yoohoo',"tel_no": "07479509090",  "ward": "ward2"},
+    "receptionist1@receptionist1.com":{'firstname':'ella', 'lastname':'b',"tel_no": "849002380",  "ward": "ward2"},
+    "receptionist2@receptionist2.com":{'firstname':'recept', 'lastname':'ionist',"tel_no": "7743",  "ward": "ward"},
+    "it@it.com":{'firstname':'itguy', 'lastname':'itguy',"tel_no": "7789798743",  "ward": "ward"},
     }
 
     for p, p_data in Staff.items():
@@ -83,8 +88,8 @@ def add_staff(baseuser, firstname, lastname, tel_no, ward):
     p = Staff.objects.get_or_create(baseuser = baseuser, first_name=firstname, last_name=lastname, tel_no=tel_no, ward=ward)[0]
     return p
 
-def add_hospital(name, region, type, address): #ad_line1,ad_city, ad_postcode, ad_country):
-    p = Hospital.objects.get_or_create(name=name, region=region, type=type, address=address)[0] #ad_line1=ad_line1, ad_city=ad_city, ad_postcode=ad_postcode, ad_country=ad_country)
+def add_hospital(name, type, address): #ad_line1,ad_city, ad_postcode, ad_country):
+    p = Hospital.objects.get_or_create(name=name, type=type)[0]#, address=address)[0] #ad_line1=ad_line1, ad_city=ad_city, ad_postcode=ad_postcode, ad_country=ad_country)
     return p
 
 def add_ward(name, hospital, type):
@@ -92,5 +97,5 @@ def add_ward(name, hospital, type):
     return p
 
 if __name__=='__main__':
-	print("Starting YumYum population script...")
+	print("Starting population script...")
 populate()

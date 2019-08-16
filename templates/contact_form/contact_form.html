@@ -1,14 +1,41 @@
 {% extends 'myhealthdb/first_base.html' %}
 {% load crispy_forms_tags %}
- 
+
 {% block body_block %}
-                        <form role="form" action="" method="post" enctype="multipart/form-data" >{% csrf_token %}
-                            {% for field in form %}
-                                <div class="fieldWrapper">
-                                    {{ field.errors }}
-                                    {{ field.label_tag }} {{ field}}
-                                </div>
+
+
+
+<div class="first-base">
+    <div class="row justify-content-center">
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Contact Us</h3>
+                    <h4>Interested in registering your organization?</h4>
+                </div>
+                <div class="card-body">
+
+                    <form role="form" action="" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Please fix the errors in the form below.
+                            {% for error in form.non_field_errors %}
+                            <p class="error">{{ error }}</p>
                             {% endfor %}
-                            <input type="submit" value="Submit">
-                        </form>
+                        </div>
+                        {% endif %}
+                        {{form|crispy}}
+                        <button class="btn btn-primary primaryAction" type="submit">Submit</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
 {% endblock %}

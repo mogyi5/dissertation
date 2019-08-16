@@ -6,17 +6,36 @@
 
 <div class="card">
     <div class="card-header">
-        <h1>Your Immunizations</h1>
+        <h3>Your Immunizations</h3>
     </div>
     <div class="card-body">
         {%if object_list%}
-        <ul>
-            {% for p in object_list %}
-            <li>
-                {{ p.type }}
-            </li>
-            {% endfor %}
-        </ul>
+        <table class="table table-responsive-sm table-striped ">
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">End</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in object_list %}
+
+                <tr>
+                    <th scope="row">{{ p.type }}</th>
+                    <td>{{p.date}}</td>
+                    <td>{{p.end}}</td>
+                    <td>{{p.amount}}</td>
+                </tr>
+
+
+
+                {% endfor %}
+            </tbody>
+        </table>
+
         {%else%}
         <h4>You have no immunizations on record!</h4>
         {%endif%}

@@ -5,12 +5,14 @@
 {% bootstrap_css %}
 {% bootstrap_javascript jquery='false' %}
 {% load easy_maps_tags %}
+{% load myhealthdb_extras %}
 
 {% block extrahead %}
 {% endblock %}
 <html lang="en">
 
 <head>
+    <title>MyHealthDB</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{%block titleblock%}{%endblock%}</title>
@@ -52,10 +54,7 @@
 
                     <li class="menu-title">Booking</li><!-- /.menu-title -->
                     <li>
-                        <a href="#"><i class="menu-icon fa fa-calendar-week"></i>Events </a>
-                    </li>
-                    <li>
-                        <a href="#"><i class="menu-icon fa fa-paper-plane"></i>Messages </a>
+                        <a href="{%url 'home_base'%}"><i class="menu-icon fa fa-calendar-week"></i>Events </a>
                     </li>
 
                     <li class="menu-title">Self Diagnosis</li><!-- /.menu-title -->
@@ -68,14 +67,6 @@
                             <li><i class="fa fa-heart-rate"></i><a href="#">Heart Rate</a></li>
                             <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Badges</a></li>
                             <li><i class="fa fa-bars"></i><a href="ui-tabs.html">Tabs</a></li>
-                        </ul>
-                    </li>
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false"> <i class="menu-icon fa fa-hiking"></i>Activities</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="fa fa-biking"></i><a href="ui-buttons.html">Cycling</a></li>
-                            <li><i class="fa fa-swimmer"></i><a href="ui-badges.html">Swimming</a></li>
                         </ul>
                     </li>
 
@@ -104,8 +95,12 @@
                             <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
                         </ul>
                     </li> {% endcomment %}
-                    {%else%}
-                    <li class="menu-title">Search</li><!-- /.menu-title -->
+                    {%elif profile.baseuser.user_type == 2 or profile.baseuser.user_type == 3  %}
+                    <li class="menu-title">Patients</li><!-- /.menu-title -->
+                    <li>
+                        <a href="{% url 'patient_list' id=profile.baseuser.id%}"><i
+                                class="menu-icon fa fa-smile"></i>All Patients</a>
+                    <li>
                     <li>
                         <a href="#"><i class="menu-icon fa fa-search"></i>Patient Search</a>
                     <li>
@@ -114,30 +109,56 @@
                         </form>
                     </li>
                     </li>
-                    <li class="menu-title">My Tasks</li><!-- /.menu-title -->
 
-
+                    <li class="menu-title">Documents</li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false"> <i class="menu-icon fa fa-tasks"></i>My Tasks</a>
+                            aria-expanded="false"> <i class="menu-icon fa fa-file-medical"></i>Documents</a>
                         <ul class="sub-menu children dropdown-menu">
-                            {%if tasks%}
-                            {%for t in tasks%}
+                            <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents A</a></li>
+                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
+                        </ul>
+                    </li>
+
+                    {% elif profile.baseuser.user_type == 4%}
+                    <li class="menu-title">Practice Management</li>
+                    <li>
+                        <a href="{% url 'hospital_details' id=profile.baseuser.id%}"><i
+                                class="menu-icon fa fa-smile"></i>Practice & Staff</a>
+                    </li>
+
+
+                    {%endif%}
+                    {%if profile.baseuser.user_type == 2 or profile.baseuser.user_type == 3 or profile.baseuser.user_type == 4 %}
+                    <li class="menu-title">My Tasks</li><!-- /.menu-title -->
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false"> <i class="menu-icon fa fa-tasks"></i> Tasks</a>
+                        <ul class="sub-menu children dropdown-menu">
                             <li>
+                                {%if tasks%}
+                                {%for t in tasks%}
+
                                 <button type="button" class="btn btn-link" data-toggle="modal"
                                     data-target="#openModaltask{{t.id}}">
                                     {{t.name}}
                                 </button>
-                                {{t.deadline}} <input data-url="{% url 'task_complete' %}" type="button"
-                                    id="complete{{t.id}}" class="complete" name="{{ t.id }}" value="✓" />
-                            </li>
+                                <input data-url="{% url 'task_complete' %}" type="button" id="complete{{t.id}}"
+                                    class="btn btn-secondary complete" name="{{ t.id }}" value="✓" />
+                                <br />
 
-                            {%endfor%}
-                            {%else%}
-                            <li>You don't have any tasks!</li>
-                            {%endif%}
 
-                            <li>
+                                {%endfor%}
+                                {%else%}
+
+                                <a href="#">
+                                    No tasks!
+                                </a>
+
+                                {%endif%}
+                                <hr style="margin:0.1em auto;" />
+
+
                                 <a href="{% url 'create_task' id=profile.baseuser.id%}">
                                     Create Task
                                 </a>
@@ -147,21 +168,6 @@
                             </li>
                         </ul>
                     </li>
-
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false"> <i class="menu-icon fa fa-file-medical"></i>Documents</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents A</a></li>
-                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#"><i class="menu-icon fa fa-paper-plane"></i>Messages </a>
-                    </li>
-
-
-
                     <li class="menu-title">Groups</li><!-- /.menu-title -->
 
                     <li class="menu-item-has-children dropdown">
@@ -179,19 +185,13 @@
 
                             {%endfor%}
                             {%else%}
-                            <p>You are not a member of any groups</p>
+                            <li><a href="#">You are not a member of any groups</a></li>
                             {%endif%}
-                            {%endif%}
-                            {% comment %} <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents
-                                    A</a></li>
-                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
-                            {% endcomment %}
                         </ul>
                     </li>
-                    {% comment %} <li>
-                        <a href="{% url 'groups' id=profile.baseuser.id%}"><i
-                                class="menu-icon fa fa-paper-plane"></i>Groups Home </a>
-                    </li> {% endcomment %}
+                    {% endif %}
+
+
 
 
                 </ul>
@@ -228,7 +228,8 @@
                             {%if profile.baseuser.user_type == 1%}
                             <a class="nav-link" href="{%url 'patient_details' id=profile.baseuser.id%}"><i
                                     class="fa fa- user"></i>My Details</a>
-
+                            <a class="nav-link" href="{%url 'doctors_view' id=profile.baseuser.id%}"><i
+                                    class="fa fa- user"></i>My Practices</a>
                             {%else%}
                             <a class="nav-link" href="{%url 'staff_details' id=profile.baseuser.id%}"><i
                                     class="fa fa- user"></i>My Details</a>
@@ -244,11 +245,11 @@
         </header>
         <!-- /#header -->
         <!-- Content -->
-        <div class="content">
+        <div class="content_signup">
 
             {% block body_block %}
             {% endblock %}
-{% comment %} 
+            {% comment %}
             <!-- Default map with 300x400 dimensions -->
             {% easy_map "Gordonbush, KW9 6LX" 300 400 %} {% endcomment %}
 
@@ -261,16 +262,47 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLongTitle">{{g.name}}</h5>
+                            <h3 class="modal-title" id="exampleModalLongTitle">{{g.name}}</h3>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body">
+
+                            <div class="row">
+                                <div class="col">
+                                    <b>Name</b>
+                                </div>
+                                <div class="col">
+                                    <b>Room</b>
+                                </div>
+                                <div class="col">
+                                    <b>Tel No</b>
+                                </div>
+
+
+                            </div>
+                            <hr />
                             {%for m in g.members.all %}
-                            {{m}}
-                            <br />
-                            {%endfor%}
+
+
+
+                            <div class="row">
+                                <div class="col">
+                                    {{m.first_name}} {{m.last_name}}
+                                </div>
+                                <div class="col">
+                                    {{m.room}}
+                                </div>
+                                <div class="col">
+                                    {{m.tel_no}}
+                                </div>
+                            </div>
+                            <hr />
+
+                            {% endfor %}
+
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -295,35 +327,45 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLongTitle">{{t.name}}</h5>
+                            <h3 class="modal-title" id="exampleModalLongTitle">{{t.name}}</h3>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body">
-                            Deadline:
-                            {{t.deadline}} <br />
-                            <hr>
-                            Notes:<br />
-                            {{t.notes}} <br />
-                            <hr>
-                            Task for:
-                            {% for s in t.complete_by.all %}
-                            {{s}}
-                            {% endfor %}
-                            <hr>
-                            Set by:
-                            {{t.set_by}}
+                            <div class="row">
+                                <div class="col">
+                                    <b>Deadline: </b> {{t.deadline}}
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col">
+                                    <b>Set By: </b><br /> {{t.set_by}}
+                                </div>
+                                <div class="col">
+                                    <b>Task For: </b></br> {% for s in t.complete_by.all %}
+                                    {{s}}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <hr/>
+                            <div class="row">
+                                <div class="col">
+                                    <b>Notes: </b> {{t.notes}}
+                                </div>
+                            </div>
+                            
 
 
                         </div>
                         <div class="modal-footer">
                             <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
-                                <button class="btn btn-secondary">Edit</button></a>
+                                <button class="btn btn-primary">Edit</button></a>
                             <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
                                 {% csrf_token %}
                                 <a href="{% url 'delete_task' task_pk=t.pk %}">
-                                    <button class="btn btn-danger" onClick="deleteFunction()">Delete</button></a>
+                                    <button class="btn btn-warning" onClick="deleteFunction()">Delete</button></a>
                             </form>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 
@@ -340,7 +382,7 @@
             {%endif%}
 
             <!-- Footer -->
-            <footer class="site-footer">
+            <footer class="site-footer-signup">
                 <div class="footer-inner bg-white">
                     <div class="row">
                         <div class="col-sm-6">

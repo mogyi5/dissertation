@@ -1,0 +1,119 @@
+{% extends 'myhealthdb/second_base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load easy_maps_tags %}
+
+{% block body_block %}
+{% if hospital%}
+<div class="card">
+    <div class="card-header">
+        <h3>{{hospital.name}}</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                <b>Type: </b>{{hospital.type}}
+            </div>
+            <div class="col">
+                <b>Taking Patients? </b>{{hospital.taking_patients}}
+            </div>
+        </div>
+
+        <hr/>
+        <div class="row">
+            <div class="col">
+                <b># of Wards: </b>{{totalwards}}
+            </div>
+            <div class="col">
+                <b># of Patients: </b>{{patientnumber}}
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="col-4">
+                <b>Address: </b>{{new_address.address}}
+            </div>
+            <div class="col-8">
+                {% easy_map new_address 350 200 %}
+            </div>
+        </div>
+
+
+        <ul class="list-group list-group-flush">
+
+            {% if individualstaff%}
+            {% for w in individualstaff%}
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-12">
+                        <h3>{{w.name}}</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>Type:</b> {{w.type}}
+                    </div>
+                    <div class="col-6">
+                        <b># of Staff:</b> {{w.staffnumber}} <br />
+                    </div>
+                </div>
+                {% if staff %}
+                <div class="row">
+                    <div class="col">
+                        <b>Name</b>
+                    </div>
+                    <div class="col">
+                        <b>Room</b>
+                    </div>
+                    <div class="col">
+                        <b>Tel No</b>
+                    </div>
+                    <div class="col">
+
+                    </div>
+
+                </div>
+                <hr />
+                {% for s in staff%}
+                {% if s.ward.id == w.id %}
+                <div class="row">
+                    <div class="col">
+                        {{s.first_name}} {{s.last_name}}
+                    </div>
+                    <div class="col">
+                        {{s.room}}
+                    </div>
+                    <div class="col">
+                        {{s.tel_no}}
+                    </div>
+                    <div class="col">
+                        {%if s.baseuser.id != profile.baseuser.id %}
+                        <a href="{%url 'delete_staff' id=profile.baseuser.id pk=s.baseuser.id %}"
+                            class="btn btn-warning btn-lg active" role="button" aria-pressed="true">Delete</a>
+                        {%endif%}
+                    </div>
+
+                </div>
+                <hr />
+                {%endif%}
+
+                {% endfor %}
+                {% endif %}
+            
+            </li>
+            {%endfor%}
+            <hr/> 
+            {%else%}
+            There are no wards
+            {% endif%}
+        </ul>
+
+        {% endif%}
+        <a class="btn btn-primary btn-lg" href="{%url 'create_staff' id=profile.baseuser.id%}" role="button">Add
+            Staff</a>
+    </div>
+</div>
+
+
+
+{% endblock %}

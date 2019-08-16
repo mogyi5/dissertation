@@ -3,48 +3,66 @@
 
 
 {% block body_block %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 class="h2">Your Dashboard</h1>
-  <div class="btn-toolbar mb-2 mb-md-0">
-    {% comment %} <div class="btn-group mr-2">
-      <button class="btn btn-sm btn-outline-secondary">Share</button>
-      <button class="btn btn-sm btn-outline-secondary">Export</button>
-    </div>
-    <button class="btn btn-sm btn-outline-secondary dropdown-toggle"> {% endcomment %}
-      <span data-feather="calendar"></span>
-      This week
-    </button>
-  </div>
-</div>
+
 <div class="card">
   <div class="card-block">
-    <h4 class="card-title">Your updates</h4>
-    <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-    <a href="#" class="card-link">Card link</a>
-    <a href="#" class="card-link">Another link</a>
+    <h3 class="card-header">Your updates</h3>
+    <div class="card-body">
+      <a href="#" class="card-link">Card link</a>
+      <a href="#" class="card-link">Another link</a>
+    </div>
   </div>
 </div>
 <br />
 <div class="card">
 
   <div class="card-header">
-    <h4>Upcoming Appointments</h4>
+    <h3>Upcoming Appointments</h3>
   </div>
   <div class="card-body">
     {% if events %}
-    {% for e in events %}
+    <div class="row">
+      <div class="col">
+        <b>Title</b>
+      </div>
+      <div class="col">
+        <b>Time</b>
+      </div>
+      <div class="col">
+        <b>Type</b>
+      </div>
+      <div class="col">
 
-    {{e.title}}
-    {{e.date_in}}
-    {{e.type}}
+      </div>
+
+    </div>
+    <hr />
+    {% for e in events %}
+    <div class="row">
+      <div class="col">
+        {{e.title}}
+      </div>
+      <div class="col">
+        {{e.date_in}}
+      </div>
+      <div class="col">
+        {{e.type}}
+      </div>
+      <div class="col">
+
+      </div>
+
+    </div>
+    <hr />
+
     <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
     <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
     <br />
     {% endfor %}
     {% else %}
-    <p>You have no pending events!</p>
-    {% endif %}
-    <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
+    <p>You have no upcoming appointments!</p>
+    {% endif %} <a href="{%url 'event_create' id=profile.baseuser.id %}">
+      <button class="btn btn-primary btn-block">Book Appointment</button></a>
   </div>
 
 </div>

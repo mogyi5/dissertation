@@ -10,17 +10,46 @@
   </div>
   <div class="card-body">
 
-    {%if object_list%}
-    <ul>
-      {% for p in object_list %}
-      <li>
-        {{ p.first_name }}
-      </li>
-      {% endfor %}
-    </ul>
+     {%if object_list%}
+
+    <div class="row">
+      <div class="col">
+        <b>Patient Name</b>
+      </div>
+      <div class="col">
+        <b>Sex</b>
+      </div>
+      <div class="col">
+        <b>DoB</b>
+      </div>
+      <div class="col">
+        <b>NHS Number</b>
+      </div>
+    </div>
+    <hr/>
+    {% for p in object_list %}
+
+    <div class="row">
+      <div class="col">
+        {{p.first_name}} {{p.last_name}}
+      </div>
+      <div class="col">
+        {{p.sex}}
+      </div>
+      <div class="col">
+        {{p.dob}}
+      </div>
+      <div class="col">
+        {{p.nhs_no}}
+      </div>
+    </div>
+    <hr/>
+
+    {% endfor %}
+
 
     {%else%}
-    <h4>No matching patients!</h4>
+    <h4>No patients match query!</h4>
     {%endif%}
   </div>
 </div>

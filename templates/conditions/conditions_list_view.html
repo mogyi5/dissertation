@@ -6,29 +6,55 @@
 
 <div class="card">
     <div class="card-header">
-        <h1>Your Medical Conditions</h1>
+        <h3>Your Medical Conditions</h3>
     </div>
     <div class="card-body">
+        <hr />
         {%if object_list%}
-        <ul>
-            {% for p in object_list %}
-            <li>
-                {{ p.title }}
-                <a href="{% url 'edit_condition' id=profile.baseuser.id condition_pk=p.pk %}">
-                    <button class="btn btn-secondary">Edit</button></a>
-                {% comment %} <input data-url="{% url 'medication_done' %}" type="button" id="done{{p.id}}"
-                    class="done btn btn-info" name="{{ p.id }}" value="No longer taking" /> {% endcomment %}
-            </li>
-            {% endfor %}
-        </ul>
+        <table class="table table-responsive-sm table-striped ">
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Severity</th>
+                    <th scope="col">Details</th>
+                    <th scope="col">Reaction</th>
+                    <th scope="col">Start</th>
+                    <th scope="col">Stop</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in object_list %}
+
+                <tr>
+                    <th scope="row">{{ p.type }}</th>
+                    <td>{{p.title}}</td>
+                    <td>{{p.severity}}</td>
+                    <td>{{p.details}}</td>
+                    <td>{{p.reaction}}</td>
+                    <td>{{p.start}}</td>
+                    <td>{{p.stop}}</td>
+                    <td> <a href="{% url 'edit_condition' id=profile.baseuser.id condition_pk=p.pk %}">
+                            <button class="btn btn-secondary">Edit</button></a></td>
+                </tr>
+
+
+
+                {% endfor %}
+            </tbody>
+        </table>
+
         {%else%}
         <h4>You have no conditions!</h4>
+        <hr />
         {%endif%}
 
 
-        
+
         <a href="{% url 'create_condition' id=profile.baseuser.id %}">
-            <button class="btn btn-secondary">Add Condition</button></a> 
+            <button class="btn btn-primary btn-block">Add Condition</button></a>
     </div>
 </div>
 {% endblock %}

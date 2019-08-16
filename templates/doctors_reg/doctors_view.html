@@ -1,0 +1,89 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+<div class="card">
+  <div class="card-header">
+    <h3>Your Practices</h3>
+  </div>
+  <div class="card-body">
+    <hr />
+    <h4>Pending Registrations</h4>
+    <hr />
+
+    {%if r_pending%}
+
+    <table class="table table-responsive-sm table-striped ">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Address</th>
+          <th scope="col">Ward List</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+
+
+        {% for p in r_pending %}
+
+        <tr>
+          <th scope="row">{{ p.name }}</th>
+          <td>{{p.type}}</td>
+          <td>{{p.address}}</td>
+          <td>Ward List</td>
+        </tr>
+
+
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {%else%}
+    <p>You have no pending registrations!</p>
+    {%endif%}
+
+    <hr />
+    <h4>Confirmed Registrations</h4>
+    <hr />
+
+    {%if r_confirmed%}
+
+    <table class="table table-responsive-sm table-striped ">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Address</th>
+          <th scope="col">Ward List</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+
+        {% for p in r_confirmed %}
+
+        <tr>
+          <th scope="row">{{ p.name }}</th>
+          <td>{{p.type}}</td>
+          <td>{{p.address}}</td>
+          <td>Ward List</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {%else%}
+    <p>You have no confirmed registrations!</p>
+    {%endif%}
+    <hr />
+
+    <a href="{% url 'doctors_reg' id=profile.baseuser.id %}">
+      <button class="btn btn-primary btn-block">Amend Registrations</button></a>
+  </div>
+</div>
+{% endblock %}

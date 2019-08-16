@@ -6,40 +6,95 @@
 
 <div class="card">
   <div class="card-header">
-    <h1>Your Medication</h1>
+    <h3>Your Medication</h3>
   </div>
   <div class="card-body">
-    <h4>Current Medicine</h4>
+    <h4><b>Current Medicine</b></h4>
+
+    <hr />
     {%if current%}
-    <ul>
-      {% for p in current %}
-      <li>
-        {{ p.type }}
-        <input data-url="{% url 'medication_done' %}" type="button" id="done{{p.id}}" class="done btn btn-info"
-          name="{{ p.id }}" value="No longer taking" />
-      </li>
-      {% endfor %}
-    </ul>
+
+    <table class="table table-responsive-sm table-striped ">
+      <thead>
+        <tr>
+          <th scope="col">Type</th>
+          <th scope="col">Frequency</th>
+          <th scope="col">Amount</th>
+          <th scope="col">Date Started</th>
+          <th scope="col">Date Finished</th>
+          <th scope="col">Notes</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for p in current %}
+
+        <tr>
+          <th scope="row">{{ p.type }}</th>
+          <td>{{p.frequency}}</td>
+          <td>{{p.amount}}</td>
+          <td>{{p.start}}</td>
+          <td>{{p.finish}}</td>
+          <td>{{p.notes}}</td>
+          <td> <input data-url="{% url 'medication_done' %}" type="button" id="done{{p.id}}" class="done btn btn-info"
+              name="{{ p.id }}" value="No longer taking" /></td>
+        </tr>
+
+
+        {% endfor %}
+      </tbody>
+    </table>
+
     {%else%}
     <h4>You have no current medication!</h4>
     {%endif%}
 
-    <h4>Past Medicine</h4>
+    <hr/>
+    <h4><b>Past Medicine</b></h4>
+
+    <hr />
     {%if past%}
-    <ul>
-      {% for p in past %}
-      <li>
-        {{ p.type }}
-      </li>
-      {% endfor %}
-    </ul>
+
+    <table class="table table-striped table-responsive">
+      <thead>
+        <tr>
+          <th scope="col">Type</th>
+          <th scope="col">Frequency</th>
+          <th scope="col">Amount</th>
+          <th scope="col">Date Started</th>
+          <th scope="col">Date Finished</th>
+          <th scope="col">Notes</th>
+
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for p in past %}
+
+
+        <tr>
+          <th scope="row">{{ p.type }}</th>
+          <td>{{p.frequency}}</td>
+          <td>{{p.amount}}</td>
+          <td>{{p.start}}</td>
+          <td>{{p.finish}}</td>
+          <td>{{p.notes}}</td>
+
+        </tr>
+        <tr>
+          {% endfor %}
+      </tbody>
+    </table>
+
     {%else%}
     <h4>You have no past medication!</h4>
     {%endif%}
+    <hr />
 
 
     <a href="{% url 'create_medication' id=profile.baseuser.id %}">
-      <button class="btn btn-secondary">Add Medication</button></a>
+      <button class="btn btn-primary btn-block">Add Medication</button></a>
   </div>
 </div>
 {% endblock %}

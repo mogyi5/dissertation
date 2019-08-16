@@ -1,0 +1,27 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block extrahead %}
+{{ form.media }}
+{% endblock %}
+
+{% block body_block %}
+
+<form method="post" class="mb-4" novalidate>
+  {% csrf_token %}
+  {% if form.errors %}
+  <div class="alert alert-danger">
+    Please fix the errors in the form below.
+    {% for error in form.non_field_errors %}
+    <p class="error">{{ error }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {{form|crispy}}
+
+  <button type="submit" class="btn btn-success">Save changes</button>
+  <a href="{% url 'delete_shift' id=profile.baseuser.id pk=object.id %}" class="btn btn-outline-secondary"
+    role="button">Delete Shift</a>
+  <a href="{% url 'home_base' %}" class="btn btn-outline-secondary" role="button">Cancel</a>
+</form>
+{%endblock%}

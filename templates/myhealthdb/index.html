@@ -1,5 +1,34 @@
 {% extends 'myhealthdb/first_base.html' %}
 {% load staticfiles %}
+
+{% block header_block%}
+{% endblock %}
+
 {% block body_block %}
-      <h1>WELCOME!</h1>
+{% comment %} 
+<div class="row justify-content-center">
+    <div class="col-8">
+        <h3>MyHealthDB: the #1 website for recording your health data - for patients and health professionals!</h3>
+    </div>
+</div> {% endcomment %}
+
+<div class="first-base">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <a href="{% url 'account_login' %}" class="btn btn-primary btn-lg active btn-block" role="button"
+                aria-pressed="true" style="margin-bottom:4px;white-space: normal;">Sign In</a>
+            <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg active btn-block" role="button"
+                aria-pressed="true" style="margin-bottom:4px;white-space: normal;">Register as a Patient</a>
+            <a href=" {% url 'contact_form' %}" class="btn btn-primary btn-lg active btn-block" role="button"
+                aria-pressed="true" style="margin-bottom:4px;white-space: normal;">Register your Hospital</a>
+        </div>
+    </div>
+</div>
+
+
+{% comment %} <div class="row justify-content-center">
+    <div class="col-8">
+        <h3>Harry Potter: 5*</h3>
+    </div>
+</div> {% endcomment %}
 {% endblock %}

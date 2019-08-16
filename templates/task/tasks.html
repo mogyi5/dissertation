@@ -43,29 +43,28 @@
                         <!-- Tab panes -->
                         <div class="tab-content">
                             <div class="tab-pane active" id="active1" role="tabpanel" aria-labelledby="active1-tab">
-                                {% comment %} my_tasks_overdue = Task.objects.filter(complete_by = profile,
-                                deadline__lte = now)
-                                my_tasks_due = Task.objects.filter(complete_by = profile, deadline__gte = now)
-                                my_tasks_finished = Task.objects.filter(complete_by = profile, complete=True)
-                                {% endcomment %}
 
-                                {% if my_tasks_overdue %}
+
                                 <h4 class="card-title">Overdue</h4>
+                                {% if my_tasks_overdue %}
                                 {% for t in my_tasks_overdue %}
 
                                 <div>
-                                    <li>{{t.name}}
-                                        {{t.deadline}}</li> <input data-url="{% url 'task_complete' %}" type="button"
-                                        id="complete{{t.id}}" class="complete" name="{{ t.id }}" value="✓" />
+                                    {{t.name}}
+                                    {{t.deadline}} <input data-url="{% url 'task_complete' %}" type="button"
+                                        id="complete{{t.id}}" class="btn btn-secondary complete" name="{{ t.id }}"
+                                        value="✓" />
                                     <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
-                                        <button class="btn btn-secondary">Edit</button></a>
-                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        <button class="btn btn-primary">Edit</button></a>
+                                    <form style="display: inline-block;" id='task-delete' method="POST"
+                                        action="{% url 'delete_task' t.pk %}">
                                         {% csrf_token %}
                                         <a href="{% url 'delete_task' task_pk=t.pk %}">
-                                            <button class="btn btn-danger"
+                                            <button class="btn btn-warning"
                                                 onClick="deleteFunction()">Delete</button></a>
-                                    </form>
 
+                                    </form>
+                                    <hr />
                                 </div>
                                 {% endfor %}
                                 {% else %}
@@ -73,23 +72,27 @@
                                 {% endif%} <br />
 
 
-                                {% if my_tasks_due %}
+
                                 <h4 class="card-title">Due</h4>
+                                {% if my_tasks_due %}
                                 {% for t in my_tasks_due %}
 
                                 <div>
-                                    <li>{{t.name}}
-                                        {{t.deadline}}</li> <input data-url="{% url 'task_complete' %}" type="button"
-                                        id="complete{{t.id}}" class="complete" name="{{ t.id }}" value="✓" />
+                                    {{t.name}}
+                                    {{t.deadline}} <input data-url="{% url 'task_complete' %}" type="button"
+                                        id="complete{{t.id}}" class="btn btn-secondary complete" name="{{ t.id }}"
+                                        value="✓" />
                                     <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
-                                        <button class="btn btn-secondary">Edit</button></a>
-                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        <button class="btn btn-primary">Edit</button></a>
+                                    <form style="display: inline-block;" id='task-delete' method="POST"
+                                        action="{% url 'delete_task' t.pk %}">
                                         {% csrf_token %}
                                         <a href="{% url 'delete_task' task_pk=t.pk %}">
-                                            <button class="btn btn-danger"
+                                            <button class="btn btn-warning"
                                                 onClick="deleteFunction()">Delete</button></a>
 
                                     </form>
+                                    <hr />
                                 </div>
                                 {% endfor %}
                                 {% else %}
@@ -98,11 +101,34 @@
                             </div>
                             <div class="tab-pane" id="finished1" role="tabpanel" aria-labelledby="finished1-tab">
                                 {% if my_tasks_finished %}
+
+
+                                <div class="row">
+                                    <div class="col">
+                                        <b>Task</b>
+                                    </div>
+                                    <div class="col">
+                                        <b>Done by</b>
+                                    </div>
+                                    <div class="col">
+                                        <b>Done Date</b>
+                                    </div>
+                                </div>
+
                                 {% for t in my_tasks_finished %}
+                                <div class="row">
+                                    <div class="col">
+                                        {{t.name}}
+                                    </div>
+                                    <div class="col">
+                                        {{t.actually_completed.first_name}} {{t.actually_completed.last_name}}
+                                    </div>
+                                    <div class="col">
+                                        {{t.completion_date}}
+                                    </div>
+                                </div>
+                                <hr />
 
-
-                                <li>{{t.name}}
-                                </li>
                                 {% endfor %}
                                 {% else %}
                                 <p>You have no finished tasks!</p>
@@ -133,17 +159,19 @@
                         <!-- Tab panes -->
                         <div class="tab-content">
                             <div class="tab-pane active" id="active2" role="tabpanel" aria-labelledby="active2-tab">
-                                {% if tasks_by_me_overdue %}
+
                                 <h4 class="card-title">Overdue</h4>
+                                {% if tasks_by_me_overdue %}
                                 {% for t in tasks_by_me_overdue %}
 
                                 <li>{{t.name}}
                                     <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
-                                        <button class="btn btn-secondary">Edit</button></a>
-                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        <button class="btn btn-primary">Edit</button></a>
+                                    <form style="display: inline-block;" id='task-delete' method="POST"
+                                        action="{% url 'delete_task' t.pk %}">
                                         {% csrf_token %}
                                         <a href="{% url 'delete_task' task_pk=t.pk %}">
-                                            <button class="btn btn-danger"
+                                            <button class="btn btn-warning"
                                                 onClick="deleteFunction()">Delete</button></a>
                                     </form>
                                 </li>
@@ -153,21 +181,24 @@
                                 {% endif%} <br />
 
 
-                                {% if tasks_by_me_due %}
+
                                 <h4 class="card-title">Due</h4>
+                                {% if tasks_by_me_due %}
                                 {% for t in tasks_by_me_due %}
 
 
-                                <li>{{t.name}}
+                                <div>{{t.name}}
                                     <a href="{% url 'edit_task' id=profile.baseuser.id task_pk=t.pk %}">
-                                        <button class="btn btn-secondary">Edit</button></a>
-                                    <form id='task-delete' method="POST" action="{% url 'delete_task' t.pk %}">
+                                        <button class="btn btn-primary">Edit</button></a>
+                                    <form style="display: inline-block;" id='task-delete' method="POST"
+                                        action="{% url 'delete_task' t.pk %}">
                                         {% csrf_token %}
                                         <a href="{% url 'delete_task' task_pk=t.pk %}">
-                                            <button class="btn btn-danger"
+                                            <button class="btn btn-warning"
                                                 onClick="deleteFunction()">Delete</button></a>
                                     </form>
-                                </li>
+                                </div>
+                                <hr />
                                 {% endfor %}
                                 {% else %}
                                 <p>You have no tasks to be completed!</p>
@@ -175,22 +206,43 @@
                             </div>
                             <div class="tab-pane" id="finished2" role="tabpanel" aria-labelledby="finished2-tab">
                                 {% if tasks_by_me_finished %}
+                                <div class="row">
+                                    <div class="col">
+                                        <b>Task</b>
+                                    </div>
+                                    <div class="col">
+                                        <b>Done by</b>
+                                    </div>
+                                    <div class="col">
+                                        <b>Done Date</b>
+                                    </div>
+                                </div>
+
                                 {% for t in tasks_by_me_finished %}
-
-
-                                <li>{{t.name}}
-                                </li>
+                                <div class="row">
+                                    <div class="col">
+                                        {{t.name}}
+                                    </div>
+                                    <div class="col">
+                                        {{t.actually_completed.first_name}} {{t.actually_completed.last_name}}
+                                    </div>
+                                    <div class="col">
+                                        {{t.completion_date}}
+                                    </div>
+                                </div>
+                                <hr />
                                 {% endfor %}
                                 {% else %}
                                 <p>You have no finished tasks!</p>
-                                {% endif%} <br /></div>
+                                {% endif%} <br />
+                            </div>
                         </div>
 
 
                     </div>
                     <div class="tab-pane fade" id="v-pills-archive" role="tabpanel"
                         aria-labelledby="v-pills-archive-tab">
-                        Task archive goes here
+                        You have no tasks in the archive!
                     </div>
                 </div>
             </div>

@@ -7,7 +7,7 @@ USER_TYPE_CHOICES = (
     (1, 'patient'),
     (2, 'doctor'),
     (3, 'receptionist'),
-    (4, 'admin'),
+    (4, 'IT'),
 )
 
 CONDITION_TYPE = (
@@ -39,11 +39,6 @@ UNIT = (
     ('Mi', 'Mi'),
 )
 
-ROLE = (
-    ('Staff', 'Staff'),
-    ('IT', 'IT'),
-)
-
 HOSPITAL_TYPE = (
     ('General Practice', 'General Practice'),
     ('General Hospital', 'General Hospital'),
@@ -67,8 +62,10 @@ DOC_TYPE = (
 EVENT_TYPE = (
     ('Surgery', 'Surgery'),
     ('Consultation', 'Consultation'),
-    ('Imunization', 'Immunization'),
+    ('Immunization', 'Immunization'),
     ('Emergency', 'Emergency'),
+    ('Special', 'Special'),
+    ('Shift', 'Shift'),
 )
 
 IMM_TYPE = (

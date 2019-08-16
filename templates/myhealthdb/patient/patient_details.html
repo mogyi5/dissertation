@@ -1,137 +1,93 @@
 {% extends 'myhealthdb/second_base.html' %}
-{% load staticfiles %}
-{% load crispy_forms_tags %}
 
-{% block extrahead %} 
-{{ form.media }} 
+{% load crispy_forms_tags %}
+{% block extrahead %}
+{{ form.media }}
 {% endblock %}
+{% load easy_maps_tags %}
 
 {% block body_block %}
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li class="{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-<h4>Personal details:</h4>
-<form action="" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{form|crispy}}
+<div class="card">
+    <div class="card-header">
+        <h3>Your Details</h3>
+    </div>
+    <div class="card-body">
+    <h4>Personal Details</h4>
+    <hr/>
 
-    {% comment %} <div class="form-row">
-        <div class="form-group col-md-6 mb-0">
-            {{ form.first_name|as_crispy_field }}
-        </div>
-        <div class="form-group col-md-6 mb-0">
-            {{ form.last_name|as_crispy_field }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6 mb-0">
-            {{ form.sex|as_crispy_field }}
-        </div>
-        <div class="form-group col-md-6 mb-0">
-            {{ form.dob|as_crispy_field }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6 mb-0">
-            {{ form.tel_no|as_crispy_field }}
-        </div>
-        <div class="form-group col-md-6 mb-0">
-            {{ form.nhs_no|as_crispy_field }}
-        </div>
-    </div>
-    <h6>Address:</h6>
-    <div class="form-row">
-        <div class="form-group col-md-6 mb-0">
-            {{ form.ad_line1|as_crispy_field }}
-        </div>
-        <div class="form-group col-md-6 mb-0">
-            {{ form.ad_line2|as_crispy_field }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6 mb-0">
-            {{ form.ad_city|as_crispy_field }}
-        </div>
-        <div class="form-group col-md-6 mb-0">
-            {{ form.ad_postcode|as_crispy_field }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-12 mb-0">
-            {{ form.ad_country|as_crispy_field }}
-        </div>
-    </div> {% endcomment %}
 
-    <hr />
-    <h4>Doctors:</h4>
-    <div id="pdform_set">
-        {{ pdformset.management_form }}
-        {% for f in pdformset %}
-        <div>
-        {{ f|crispy}}
-        </div>
-        {% comment %} <div>
-            <div class="form-row">
-                <div class="form-group col-md-6 mb-0">
-                    {{ f.doctor|as_crispy_field }}
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <b>Name:</b> {{profile.first_name}} {{profile.last_name}}
                 </div>
-                <div class="form-group col-md-6 mb-0">
-                    {{ f.note|as_crispy_field }}
+                <div class="col">
+                    <b>DoB:</b> {{profile.dob}}
                 </div>
-                {{ f.primary|as_crispy_field }}
             </div>
-        </div> {% endcomment %}
-        {%endfor%}
+            <hr />
+            <div class="row">
+                <div class="col">
+                    <b>Tel No:</b> {{profile.tel_no}}
+                </div>
+                <div class="col">
+                    <b>NHS No:</b> {{profile.nhs_no}}
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col">
+                    <b>Email:</b> {{profile.email}}
+                </div>
+                <div class="col">
+                    <b>Flat No:</b> {{profile.flat_no}}
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-4">
+                    <b>Address:</b><br/> {{new_address}}
+                </div>
+                <div class="col-8">
+                    {% easy_map new_address 375 250 %}
+                </div>
+            </div>
 
-        {% if pdformset.non_form_errors %}
-        {% for error in pdformset.non_form_errors %}
-        {{ error|escape }}
-        {% endfor %}
-        {% endif %}
-    </div>
-    <hr />
-    <h4>Emergency contacts:</h4>
-    <div id="ecform_set">
-        {{ ecformset.management_form }}
-<div>
-        {% for f2 in ecformset %}
-        {{f2|crispy}}
+            <hr/>
         </div>
-        {% comment %} <div class="form-row">
-            <div class="form-group col-md-12 mb-0">
-                {{ f2.name|as_crispy_field }}
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-12 mb-0">
-                {{ f2.email|as_crispy_field }}
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6 mb-0">
-                {{ f2.phone1|as_crispy_field }}
-            </div>
-            <div class="form-group col-md-6 mb-0">
-                {{ f2.phone2|as_crispy_field }}
-            </div>
-        </div> {% endcomment %}
-
-        {%endfor%}
+        <h4>Emergency Contacts</h4>
         <hr/>
 
-        {% if ecformset.non_form_errors %}
-        {% for error in ecformset.non_form_errors %}
-        {{ error|escape }}
-        {% endfor %}
-        {% endif %}
+        {%if pem%}
+        {%for p in pem%}
+        <div class="row">
+                <div class="col">
+                    <b>Name:</b> {{p.name}}
+                </div>
+                <div class="col">
+                    <b>Email:</b> {{p.email}}
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col">
+                    <b>Phone 1:</b> {{p.phone1}}
+                </div>
+                <div class="col">
+                    <b>Phone 2:</b> {{p.phone2}}
+                </div>
+            </div>
+            <hr />
+        {%endfor%}
+        {%else%}
+        <p>You have no emergency contacts!</p>
+        <hr/>
+        {%endif%}
+
+
+        <a href="{%url 'patient_details_update' id=profile.baseuser.id%}">
+            <button class="btn btn-primary btn-block">Update Details</button></a>
     </div>
+</div>
 
-    <button style="color:black;" class="btn btn-primary" type="submit" name="submit">Submit!</button>
-
-</form>
-
-{% endblock %}
+{%endblock%}

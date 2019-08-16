@@ -1,45 +1,59 @@
 {% extends 'myhealthdb/first_base.html' %}
 {% load staticfiles %}
+
+{% block headerblock%}
+{% comment %} <div class="header-left">
+      <a class="nav-link" href="{% url 'account_login' %}">
+            Sign In</a>
+      {% comment %} <button class="btn btn-link" href="{% url 'account_login' %}">Sign In</button> {% endcomment %}
+{% comment %} </div>
+<a href="#" class="dropdown-toggle active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <button class="btn btn-link">Register... </button>
+</a>
+
+<div class="dropdown-menu">
+
+      <a class="nav-link" href="{%url 'account_signup'%}">as a
+            Patient</a>
+      <a class="nav-link" href="{%url 'contact_form' %}">my
+            Hospital</a>
+
+</div> {% endcomment %}
+{% endblock %}
+
+
 {% block body_block %}
+<div class="first-base">
+      <div class="row justify-content-center">
+            <div class="col-12">
+                  <div class="container">
+                        <div class="card">
+                              <div class="card-header">
+                                    <h3 class="card-title">About</h3>
+                              </div>
+                              <div class="card-body">
 
+                                    <p class="card-text">This is an MSc project completed in the summer of 2019, in
+                                          accordance
+                                          with the rules of
+                                          the School of Computing at the University of Glasgow. The primary aim of this
+                                          project is to try to
+                                          eliminate unnecessary data duplication between the patients' and health
+                                          professionals' data. The app
+                                          aims to simplify interactions between patients and staff, as well as
+                                          interactons
+                                          between the front and
+                                          back ends. <br />
+                                          MyHealthDB was written in Python using the Django framework. The libraries
+                                          have made
+                                          it much easier to work with and create.
 
-<div class="sufee-login d-flex align-content-center flex-wrap">
-      <div class="container">
-            <div class="login-content">
-                  <div class="login-form">
-                  <p>This is a project completed in accordance with the University of Glasgow rules. etc..</p>
-                        {% comment %} <form>
-                              <div class="form-group">
-                                    <label>Email address</label>
-                                    <input type="email" class="form-control" placeholder="Email">
+                                    </p>
                               </div>
-                              <div class="form-group">
-                                    <label>Password</label>
-                                    <input type="password" class="form-control" placeholder="Password">
-                              </div>
-                              <div class="checkbox">
-                                    <label>
-                                          <input type="checkbox"> Remember Me
-                                    </label>
-                                    <label class="pull-right">
-                                          <a href="#">Forgotten Password?</a>
-                                    </label>
-                              </div>
-                              <button type="submit" class="btn btn-success btn-flat m-b-30 m-t-30">Sign in</button>
-                              <div class="social-login-content">
-                                    <div class="social-button">
-                                          <button type="button" class="btn social facebook btn-flat btn-addon mb-3"><i
-                                                      class="ti-facebook"></i>Sign in with facebook</button>
-                                          <button type="button" class="btn social twitter btn-flat btn-addon mt-2"><i
-                                                      class="ti-twitter"></i>Sign in with twitter</button>
-                                    </div>
-                              </div>
-                              <div class="register-link m-t-15 text-center">
-                                    <p>Don't have account ? <a href="#"> Sign Up Here</a></p>
-                              </div>
-                        </form> {% endcomment %}
+                        </div>
                   </div>
             </div>
       </div>
 </div>
+
 {% endblock %}

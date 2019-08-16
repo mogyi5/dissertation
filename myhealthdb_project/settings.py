@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'easy_maps',
     'postgis',
     'mapwidgets',
+    'phonenumber_field'
 
     # 'pysolr',
     # 'elasticsearch',
@@ -198,6 +199,7 @@ ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_LOGOUT_ON_GET = True
 
 LOGIN_REDIRECT_URL = 'home_base'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'index'
@@ -257,6 +259,8 @@ MAP_WIDGETS = {
     ),
     "GOOGLE_MAP_API_KEY": "AIzaSyCzCYVvHq7yit0ESbH-OLn8r0dA4WiMb8I"
 }
+
+# SECURE_SSL_REDIRECT=FALSE
 
 # GDAL_LIBRARY_PATH = 'C:\OSGeo4W64\bin\gdal204'
 

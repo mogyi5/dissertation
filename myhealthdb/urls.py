@@ -1,13 +1,19 @@
 from django.urls import path
+from django.views.generic import TemplateView
+from contact_form.views import ContactFormView
+from .forms import HospitalContactForm
 from . import views 
 
 urlpatterns = [
+    path('contact/', ContactFormView.as_view(form_class=HospitalContactForm), name='contact_form'),
+    path('contact/sent/', TemplateView.as_view(template_name='contact_form/contact_form_sent.html'), name='contact_form_sent'),
     path('', views.index, name='index'),
     path('about/', views.about, name='about_this'),
     path('home-base/', views.home_base, name='home_base'),
     path('patient-home/<int:id>/', views.patient_home, name='patient_home'),
     path('staff-home/<int:id>/', views.staff_home, name='staff_home'),
     path('patient-details/<int:id>/', views.patient_details, name='patient_details'),
+    path('patient-details/<int:id>/update/', views.patient_details_update, name='patient_details_update'),
     path('staff-details/<int:id>/', views.staff_details, name='staff_details' ),
     path('profile/<int:id>/create-event/', views.event_create, name='event_create' ),
     path('profile/<int:id>/events/<int:event_pk>/update-event/', views.EventUpdateView.as_view(), name='edit_event'),
@@ -34,11 +40,23 @@ urlpatterns = [
     path('profile/<int:id>/weight/', views.weightview, name='weight'),
     path('weight_chart_json/', views.WeightChartJSONView.as_view(), name='weight_chart_json'),
     path('profile/<int:id>/groups/', views.autocompleteGroup, name='groups'),
-    # path('profile/<int:id>/groups_search/', views.autocompleteGroup, name='ajax_group_search'),
+    path('profile/<int:id>/doctors/', views.doctors_view, name='doctors_view'),
+    path('profile/<int:id>/doctors/register/', views.doctors_reg, name='doctors_reg'),
+    path('register-hospital/', views.register_hospital, name='register_hospital'),   
+    path('accept-patient/', views.accept_patient, name='accept_patient'),
+    path('reject-application/', views.reject_patient, name='reject_application'),
+    path('profile/<int:id>/patients/', views.PatientView.as_view(), name='patient_list'),
+    path('profile/<int:id>/hospital-details/', views.hospital_details, name='hospital_details'),
+    path('profile/<int:id>/create-staff/', views.StaffCreateView, name='create_staff'),
+    path('profile/<int:id>/staff/<int:pk>/delete-staff/', views.StaffDeleteView.as_view(), name='delete_staff'),
+    path('profile/<int:id>/add-schedule/', views.add_schedule, name='add_schedule'),
+    path('profile/<int:id>/shifts/<int:pk>/edit-shift/', views.ShiftUpdateView.as_view(), name='edit_shift'),
+    path('profile/<int:id>/shifts/<int:pk>/delete-shift/', views.ShiftDeleteView.as_view(), name='delete_shift'),
+    path('profile/<int:id>/patients/<int:pk>/', views.patient_view, name='patient_view'),
 
+    
+    # path('profile/<int:id>/groups_search/', views.autocompleteGroup, name='ajax_group_search'),
     # path('weight_chart_json2/', views.WeightChartJSON2View.as_view(), name='weight_chart_json2'),
 
-
-
-     # path('profile/<int:id>/advanced-search/', views.AdvancedSearchView.as_view(), name='advanced_search'),
+    # path('profile/<int:id>/advanced-search/', views.AdvancedSearchView.as_view(), name='advanced_search'),
 ]

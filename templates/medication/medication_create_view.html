@@ -16,6 +16,15 @@
         <h1>Add Medication</h1>
     </div>
     <div class="card-body">
+    
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please fix the errors in the form below.
+            {% for error in form.non_field_errors %}
+            <p class="error">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
 
 
         <form action="" method="post" enctype="multipart/form-data">
@@ -45,7 +54,7 @@
                 <div class="form-group col-md-12 mb-0">
                     {{ form.notes|as_crispy_field }}
                 </div>
-            </div> 
+            </div>
             <button style="color:black;" class="btn btn-primary" type="submit" name="submit">Submit!</button>
         </form>
     </div>

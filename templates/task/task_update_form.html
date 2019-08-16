@@ -1,17 +1,37 @@
 {% extends 'myhealthdb/second_base.html' %}
 
 {% load crispy_forms_tags %}
-{% block extrahead %} 
-{{ form.media }} 
+{% block extrahead %}
+{{ form.media }}
 {% endblock %}
 
 {% block body_block %}
 
-<form method="post" class="mb-4" novalidate>
-    {% csrf_token %}
-    {{form|crispy}}
+<div class="card">
+  <div class="card-header">
 
-    <button type="submit" class="btn btn-success">Save changes</button>
-    <a href="{% url 'home_base' %}" class="btn btn-outline-secondary" role="button">Cancel</a>
-  </form>
-  {%endblock%}
+    <h1>Update Task</h1>
+  </div>
+  <div class="card-body">
+
+
+    <form method="post" class="mb-4" novalidate>
+      {% csrf_token %}
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        Please fix the errors in the form below.
+        {% for error in form.non_field_errors %}
+        <p class="error">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {{form|crispy}}
+
+      <button class="btn btn-primary " type="submit" name="submit">Submit!</button>
+      <a href="{% url 'home_base' %}" class="btn btn-outline-secondary" role="button">Cancel</a>
+    </form>
+  </div>
+</div>
+
+
+{%endblock%}

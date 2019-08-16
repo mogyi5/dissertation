@@ -1,0 +1,233 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+<div class="card">
+    <div class="card-header">
+        <h3> {{patient.first_name}} {{patient.last_name}}</h3>
+    </div>
+    <div class="card-body">
+
+        {% if patient %}
+
+        <h4>Personal Details</h4>
+        <hr />
+
+
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <b>Name:</b> {{patient.first_name}} {{patient.last_name}}
+                </div>
+                <div class="col">
+                    <b>DoB:</b> {{patient.dob}}
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col">
+                    <b>Tel No:</b> {{patient.tel_no}}
+                </div>
+                <div class="col">
+                    <b>NHS No:</b> {{patient.nhs_no}}
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col">
+                    <b>Email:</b> {{patient.email}}
+                </div>
+                <div class="col">
+                    <b>Flat No:</b> {{patient.flat_no}}
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-4">
+                    <b>Address:</b><br /> {{patient.address}}
+                </div>
+            </div>
+
+            <hr />
+        </div>
+        <h4>Emergency Contacts</h4>
+        <hr />
+        {%if patientem%}
+        {%for p in patientem%}
+        <div class="row">
+            <div class="col">
+                <b>Name:</b> {{p.name}}
+            </div>
+            <div class="col">
+                <b>Email:</b> {{p.email}}
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col">
+                <b>Phone 1:</b> {{p.phone1}}
+            </div>
+            <div class="col">
+                <b>Phone 2:</b> {{p.phone2}}
+            </div>
+        </div>
+        <hr />
+        {%endfor%}
+        {%else%}
+        <p>Patient has no emergency contacts!</p>
+        <hr />
+        {%endif%}
+
+        {%if request.user.user_type == 2 %}
+
+
+        <h4>Conditions</h4>
+        <hr />
+        {%if conditions%}
+        <table class="table table-responsive-sm table-striped ">
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Severity</th>
+                    <th scope="col">Details</th>
+                    <th scope="col">Reaction</th>
+                    <th scope="col">Start</th>
+                    <th scope="col">Stop</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in conditions %}
+
+                <tr>
+                    <th scope="row">{{ p.type }}</th>
+                    <td>{{p.title}}</td>
+                    <td>{{p.severity}}</td>
+                    <td>{{p.details}}</td>
+                    <td>{{p.reaction}}</td>
+                    <td>{{p.start}}</td>
+                    <td>{{p.stop}}</td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {%else%}
+        <p>Patient has no conditions!</p>
+        <hr />
+        {%endif%}
+
+        <h4>Medication</h4>
+        <hr />
+        {%if medications%}
+
+        <table class="table table-responsive-sm table-striped ">
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Frequency</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Date Started</th>
+                    <th scope="col">Date Finished</th>
+                    <th scope="col">Notes</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in medications %}
+
+                <tr>
+                    <th scope="row">{{ p.type }}</th>
+                    <td>{{p.frequency}}</td>
+                    <td>{{p.amount}}</td>
+                    <td>{{p.start}}</td>
+                    <td>{{p.finish}}</td>
+                    <td>{{p.notes}}</td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {%else%}
+        <p>Patient has no recorded medication!</p>
+        <hr />
+        {%endif%}
+
+        <h4>Documents</h4>
+        <hr />
+        {%if documents%}
+        <table class="table table-responsive-sm table-striped ">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">File</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in documents %}
+
+
+                <tr>
+                    <th scope="row">{{ p.name }}</th>
+                    <td> <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.file }}</a></td>
+                    <td>{{p.type}}</td>
+                    <td>{{p.description}}</td>
+                </tr>
+
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {%else%}
+        <p>Patient has no uploaded documents!</p>
+        <hr />
+        {%endif%}
+
+        <h4>Immunizations</h4>
+        <hr />
+        {%if immunizations%}
+        <table class="table table-responsive-sm table-striped ">
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">End</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in object_list %}
+
+                <tr>
+                    <th scope="row">{{ p.type }}</th>
+                    <td>{{p.date}}</td>
+                    <td>{{p.end}}</td>
+                    <td>{{p.amount}}</td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {%else%}
+        <p>Patient has no immunizations on record!</p>
+        <hr />
+        {%endif%}
+
+        {% endif%}
+
+        {%else%}
+        <p>Patient does not exist</p>
+        {%endif%}
+    </div>
+</div>
+{% endblock %}
