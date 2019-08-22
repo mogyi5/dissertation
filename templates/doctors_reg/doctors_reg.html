@@ -26,7 +26,6 @@
                 <th scope="col">Name</th>
                 <th scope="col">Type</th>
                 <th scope="col">Distance</th>
-                <th scope="col">Address</th>
                 <th scope="col">Wards List</th>
                 <th scope="col"></th>
             </tr>
@@ -39,18 +38,18 @@
                 <th scope="row">{{c.0.name}}</th>
                 <td>{{c.0.type}}</td>
                 <td>{{c.1|floatformat:"2"}} Mi</td>
-                <td>{{c.0.address}}</td>
-                <td>Wards</td>
+                <td>
+                
+                {%for w in c.2 %}
+                {{w.name}}<br />
+           
+            {%endfor%}
+            
+                </td>
                 <td><input data-url="{% url 'register_hospital' %}" type="button" id="register{{c.0.id}}"
-                        class="done btn btn-primary" name="{{ c.0.id }}" value="Register!"
-                        onclick='confirm("Are you sure you want to register with this practice? Your medical data will be shared.");' />
+                        class="register btn btn-primary" name="{{ c.0.id }}" value="Register!" />
                 </td>
             </tr>
-
-
-            {% comment %} {{c.0}} {{c.1|floatformat:"2"}} miles
-            <br /> {% endcomment %}
-
 
             {%endfor%}
         </tbody>

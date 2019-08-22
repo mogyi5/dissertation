@@ -30,7 +30,7 @@
 
     <div class="row">
       <div class="col">
-        {{p.first_name}} {{p.last_name}}
+      <a href="{% url 'patient_view'  id=profile.baseuser.id pk=p.baseuser.id%}">{{p.first_name}} {{p.last_name}}</a>
       </div>
       <div class="col">
         {{p.sex}}

@@ -1,12 +1,9 @@
 from django import forms
-from myhealthdb.models import CustomUser, Shift, Update, Ward, Task, CustomUser, Patient, Staff, PatientEm,Event, Medication, Condition, Document  #PatientDoctor, 
+from myhealthdb.models import Vital, CustomUser, Shift, Ward, Task, CustomUser, Patient, Staff, PatientEm,Event, Medication, Condition, Document, PatientHospital, Immunization  #PatientDoctor, 
 from contact_form.forms import ContactForm
-from captcha.fields import CaptchaField
 from django.forms import inlineformset_factory
 from django.forms.models import modelformset_factory
-from datetimewidget.widgets import DateTimeWidget
 from bootstrap_datepicker_plus import DatePickerInput, DateTimePickerInput, TimePickerInput
-from bootstrap_modal_forms.forms import BSModalForm
 from django_select2.forms import Select2MultipleWidget
 from myhealthdb.modelchoices import *
 from datetime import date
@@ -14,44 +11,144 @@ from mapwidgets.widgets import GooglePointFieldWidget
 from phonenumber_field.formfields import PhoneNumberField
 from django.core.exceptions import ValidationError
 
+
+#form for entering weight
+class WeightForm(forms.ModelForm):
+
+    #a custom field
+    value = forms.DecimalField(label = 'Weight', help_text='weight in kg')
+
+    #meta values, the model created is 'Vital', and there is only one field: 'value'
+    class Meta:
+        model = Vital
+        fields = ['value']
+
+#form for entering height
+class HeightForm(forms.ModelForm):
+
+    value = forms.DecimalField(label = 'Height', help_text='height in cm')
+
+    class Meta:
+        model = Vital
+        fields = ['value']
+
+#form for staff to input immunizations
+class ImmunizationForm(forms.ModelForm):
+
+    #get the patient from the context in the views, call it user, set the patient choicefield to only include the patient passed through
+    def __init__(self, user, *args,**kwargs):
+        self.user = user
+        self.pat = Patient.objects.filter(baseuser=self.user.baseuser)
+        super(ImmunizationForm,self ).__init__(*args,**kwargs) 
+        self.fields['patient'].queryset = self.pat
+
+    class Meta:
+        model = Immunization
+        fields = ['date', 'end', 'type', 'amount', 'patient']
+
+
+#form for entering shifts when doctors are working
 class ShiftForm(forms.ModelForm):
 
     class Meta:
         model=Shift
         fields = ['date', 'start', 'end', 'staff']
 
+    #clean the data to ensure the start date is not after the end date
     def clean(self):
         cleaned_data = super().clean()
         start = cleaned_data.get("start")
         end = cleaned_data.get("end")
-        if end < start:
-            raise forms.ValidationError("End should be later than start.")
+        if end and start:
+            if end < start:
+                raise forms.ValidationError("End should be later than start.")
 
-
-##queryset only ppl in your ward
+#formset for creating shifts as the IT admin, for all the staff
 EventFormSet = modelformset_factory(Shift, form=ShiftForm, can_delete=True, extra=1,widgets={
     'date': DatePickerInput(), 'start': TimePickerInput(), 'end': TimePickerInput()})
 
+#form for doctor to add a document to a patient
+class DocDocumentForm(forms.ModelForm):
 
+    class Meta:
+        model = Document
+        fields = ['name','pdf_file','description','type', 'patient']
+
+    #pass patient to initial form, set choicefield to patient
+    def __init__(self, user, *args,**kwargs):
+        self.user = user
+        self.ph = Patient.objects.filter(baseuser=self.user.baseuser)
+        super(DocDocumentForm,self ).__init__(*args,**kwargs) 
+        self.fields['patient'].queryset = self.ph
+
+#form for patient to upload a document
 class DocumentForm(forms.ModelForm):
     class Meta:
             model = Document
-            fields = ['name','file','description','type']
+            fields = ['name','pdf_file','description','type']
+
+#form for doctor to enter a condition
+class DoctorConditionForm(forms.ModelForm):
+
+    class Meta:
+        model = Condition
+        fields = ['start','stop','type','reaction','severity','details','title', 'patient']
 
 
+    #clean the data to ensure the start date is not after the end date
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("stop")
+        if end and start:
+            if end < start:
+                raise forms.ValidationError("Stop should be later than start.")
+
+    #pass patient to initial form, set choicefield to patient
+    def __init__(self, user, *args,**kwargs):
+        self.user = user
+        self.ph = Patient.objects.filter(baseuser=self.user.baseuser)
+        super(DoctorConditionForm,self ).__init__(*args,**kwargs) 
+        self.fields['patient'].queryset = self.ph
+
+#form for patient to enter condition
 class ConditionForm(forms.ModelForm):
 
     class Meta:
         model = Condition
         fields = ['start','stop','type','reaction','severity','details','title']
 
+    #clean the data to ensure the start date is not after the end date
     def clean(self):
         cleaned_data = super().clean()
         start = cleaned_data.get("start")
         end = cleaned_data.get("stop")
-        if end < start:
-            raise forms.ValidationError("Stop should be later than start.")
+        if end and start:
+            if end < start:
+                raise forms.ValidationError("Stop should be later than start.")
 
+#form for staff to add medication to patient's data
+class DoctorMedicationForm(forms.ModelForm):
+
+    class Meta:
+        model = Medication
+        fields = ['type', 'notes', 'amount', 'frequency','start', 'finish', 'patient']
+
+    def __init__(self, user, *args,**kwargs):
+        self.user = user
+        self.ph = Patient.objects.filter(baseuser=self.user.baseuser)
+        super(DoctorMedicationForm,self ).__init__(*args,**kwargs) 
+        self.fields['patient'].queryset = self.ph
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("finish")
+        if end and start:
+            if end < start:
+                raise forms.ValidationError("Finish should be later than start.")
+
+#form for patient to input medication taken
 class MedicationForm(forms.ModelForm):
 
     class Meta:
@@ -62,25 +159,27 @@ class MedicationForm(forms.ModelForm):
         cleaned_data = super().clean()
         start = cleaned_data.get("start")
         end = cleaned_data.get("finish")
-        if end < start:
-            raise forms.ValidationError("Finish should be later than start.")
+        if end and start:
+            if end < start:
+                raise forms.ValidationError("Finish should be later than start.")
 
-
+#form for creating a task for staff
 class TaskForm(forms.ModelForm):
-    # complete_by = ModelMultipleChoiceField(queryset=Staff.objects.all(), widget=Select2MultipleWidget)
 
     class Meta:
         model = Task
         fields = ['name', 'notes', 'complete_by', 'deadline']
 
+        #add a multiple select widget to the 'complete_by' field
         widgets = {
             'complete_by':Select2MultipleWidget,
         }
 
 
-# PDSet = inlineformset_factory(Patient, PatientDoctor, fields = ['doctor', 'primary', 'note'],  can_delete=True, extra=1, max_num=5)
-ECSet = inlineformset_factory(Patient, PatientEm, fields = ['name', 'email', 'phone1', 'phone2'],  can_delete=True, extra=1, max_num=5)
+#formset for creating emergency contacts for the patient. it allows multiple object creation
+ECSet = inlineformset_factory(Patient, PatientEm, fields = ['name', 'email', 'phone1', 'phone2'],  can_delete=True, extra=2, max_num=2)
 
+#form for patient to update their information
 class PatientProfileForm(forms.ModelForm):
 
     first_name = forms.CharField()
@@ -95,21 +194,50 @@ class PatientProfileForm(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ('baseuser','weight', 'height')
+        #using the address widget
         widgets = {
             'address': GooglePointFieldWidget,
         }
 
+#form for staff to update their information
 class StaffProfileForm(forms.ModelForm):
     
     class Meta:
         model = Staff
-        exclude = ('baseuser',)
+        #include all other fields from the model but these
+        exclude = ('baseuser', 'ward')
 
+#form for event booking for staff, such as appointments
+class StaffEventBookingForm(forms.ModelForm):
+    
+    #custom field
+    pd_relation = forms.ModelChoiceField(label='Patient', required=True, queryset=None)
+
+    #set the queryset for the patienthospital to show only patients from the staff's hospital
+    def __init__(self, hospital, *args,**kwargs):
+        self.hospital = hospital
+        self.ph = PatientHospital.objects.filter(hospital=self.hospital, status=True)
+        super(StaffEventBookingForm,self ).__init__(*args,**kwargs) 
+        self.fields['pd_relation'].queryset = self.ph
+
+    class Meta:
+        model = Event
+        fields = ('title', 'date_in', 'pd_relation', 'notes', 'type')
+
+#form for event booking for staff, such as appointments
 class EventBookingForm(forms.ModelForm):
 
-    
-    def save(self, commit=True):
+    pd_relation = forms.ModelChoiceField(label='Practice', required=True, queryset=None)
 
+    #set the queryset for the patienthospital to show only hospitals which the patient is registered with
+    def __init__(self, user, *args,**kwargs):
+        self.user = user
+        self.ph = PatientHospital.objects.filter(patient=self.user, status=True)
+        super(EventBookingForm,self ).__init__(*args,**kwargs) 
+        self.fields['pd_relation'].queryset = self.ph
+
+    #when saving, set the type to consultation - patients can only book appointments not surgeries
+    def save(self, commit=True):
         event = Event(
             title=self.cleaned_data.get('title'),
             date_in=self.cleaned_data.get('date_in'),
@@ -121,14 +249,11 @@ class EventBookingForm(forms.ModelForm):
 
         return event
 
-
-
     class Meta:
         model = Event
         fields = ('title', 'date_in', 'pd_relation', 'notes')
 
-
-
+#form for patients to sign up, including all of their details
 class PatientSignupForm(forms.Form):
 
     patient_first_name = forms.CharField(label='First Name', max_length=30, required=True, strip=True)
@@ -146,9 +271,8 @@ class PatientSignupForm(forms.Form):
             'address': GooglePointFieldWidget()
         }
 
+    #create a customuser (parent user) to the patient, as well as the patient object
     def signup(self, request, user):
-
-        #this_user = super(PatientSignupForm, self).save(request)
         user.user_type =1
 
         patient_user = Patient(
@@ -167,29 +291,19 @@ class PatientSignupForm(forms.Form):
 
         return patient_user.baseuser
 
-
+#form for hospitals to conatct 
 class HospitalContactForm(forms.Form):
-
-    # def __init__(self, request, *args, **kwargs):
-    #     super(HospitalContactForm, self).__init__(request=request, *args, **kwargs)
-    #     fields_keyOrder = ['reason', 'name', 'email', 'body']
-    #     if (self.fields.has_key('keyOrder')):
-    #         self.fields.keyOrder = fields_keyOrder
-    #     else:
-    #         self.fields = OrderedDict((k, self.fields[k]) for k in fields_keyOrder)
  
     reason = forms.ChoiceField(choices=REASON, label='Reason')
-    captcha = CaptchaField()
-    # template_name = 'contact_form/contact_form.txt'
-    # subject_template_name = "contact_form/contact_form_subject.txt"
 
-
+#form for creating just the customuser
 class CustomUserForm(forms.ModelForm):
 
     email = forms.EmailField()
 
     def save(self, commit=True):
 
+        #set the date joined to be today
         today = date.today()
         base = CustomUser(
             password=self.cleaned_data.get('password'),
@@ -206,6 +320,7 @@ class CustomUserForm(forms.ModelForm):
         model=CustomUser
         fields = ['password', 'email', 'user_type']
     
+#form for staff to be signed up by the it_guy
 class StaffSignupForm(forms.ModelForm):
 
     user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES)

@@ -18,6 +18,7 @@
                     <th scope="col">File</th>
                     <th scope="col">Type</th>
                     <th scope="col">Description</th>
+                    <th scope="col">Added By</th>
 
                     <th scope="col"></th>
 
@@ -30,11 +31,17 @@
 
                 <tr>
                     <th scope="row">{{ p.name }}</th>
-                    <td> <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.file }}</a></td>
+                    <td> <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.pdf_file }}</a></td>
                     <td>{{p.type}}</td>
                     <td>{{p.description}}</td>
-
+                    {%if p.added_by.id == profile.baseuser.id%}
+                    <td>You</td>
+                    {% else %}
+                    <td>Staff</td>
+                    {%endif%}
                     <td>
+                        {% if p.added_by.user_type == 1 %}
+
                         <form id='task-delete' method="POST" action="{% url 'delete_document' p.pk %}">
                             {% csrf_token %}
                             {% if form.errors %}
@@ -48,6 +55,8 @@
                             <a href="{% url 'delete_document' document_pk=p.pk %}">
                                 <button class="btn btn-warning" onClick="deleteFunction()">Delete</button></a>
                         </form>
+
+                        {%endif%}
                     </td>
                 </tr>
 

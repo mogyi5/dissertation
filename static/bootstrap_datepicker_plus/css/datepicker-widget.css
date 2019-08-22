@@ -10,8 +10,8 @@
 
 .glyphicon {
     position: relative;
-    top: 1px;
-    display: inline-block;
+    /* top: 1px; */
+    /* display: inline-block; */
     font-family: 'Glyphicons Halflings';
     font-style: normal;
     font-weight: normal;
@@ -19,6 +19,33 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+.glyphicon-calendar{
+    position: relative;
+    display: inline-block;
+    font-size: 1.6em;
+    left: -0.45em;
+}
+
+.input-group-text {
+    position: relative;
+    display: inline-block;
+    display: none;
+    /* padding: 0px 0px 0px 0px; */
+    height:0em;
+    width:0em;
+    border-style: none;
+    margin: 0 auto;
+}
+
+.input-group-addon {
+    border-style:none;
+    /* width:2em; */
+}
+
+/* .input-group-append{
+    border-style:none;
+} */
 
 .glyphicon-time:before {
     content: "\e023";

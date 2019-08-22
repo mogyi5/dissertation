@@ -1,0 +1,37 @@
+{% extends 'myhealthdb/second_base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block extrahead %}
+{{ form.media }}
+{% endblock %}
+
+{{ form.media.css }}
+{{ form.media.js }}
+
+{% block body_block %}
+<div class="card">
+    <div class="card-header">
+
+        <h1>Add your Weight</h1>
+    </div>
+    <div class="card-body">
+
+
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                Please fix the errors in the form below.
+                {% for error in form.non_field_errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {{form|crispy}}
+            <button class="btn btn-primary btn-block" type="submit" name="submit">Submit!</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

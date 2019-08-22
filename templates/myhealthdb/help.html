@@ -1,0 +1,20 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+{% load staticfiles %}
+
+<div style="padding:25px;" class="row">
+
+    <div class="col">
+                <h1 style=font-size:125px>⬅</h1> As a Doctor, you can search for patients here and view their details, as well as see your Tasks and Groups. <br/> <hr/>If you're a Patient, you can see categories of your data and explore each separately.
+    </div>
+    <div class="col">
+     <img src="{% static 'images/puppy.jpg' %}" alt="Hi!" />
+    </div>
+    <div class="col">
+        <h1 style=font-size:125px>⬈</h1>You can find all of your personal details in the top right corner. If you're a Patient, you can register with practices under the 'My Practices' tab.
+    </div>
+</div>
+
+{% endblock %}

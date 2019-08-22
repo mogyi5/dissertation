@@ -21,10 +21,7 @@
 
    <!-- Bootstrap core CSS -->
    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-   {% comment %}
 
-   <!-- Custom styles for this template -->
-   <link href="{% static 'css/first_base.css' %}" rel="stylesheet"> {% endcomment %}
 
    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
@@ -45,8 +42,8 @@
        <header id="header" class="header">
          <div class="top-left">
            <div class="navbar-header">
-             <a class="navbar-brand mb-0 h1" href="{%url 'index'%}">MyHealthDB</a>
-             <a class="navbar-brand hidden" href="{%url 'index'%}">MyHealthDB</a>
+             <a class="navbar-brand mb-0 h1" href="{%url 'home_base'%}">MyHealthDB</a>
+             <a class="navbar-brand hidden" href="{%url 'home_base'%}">MyHealthDB</a>
            </div>
          </div>
          <div class="top-right">
@@ -93,10 +90,14 @@
      <footer class="site-footer">
        <div class="footer-inner bg-white">
          <div class="row">
-           <div class="col-sm-6">
+           <div class="col-sm-4">
              Copyright &copy; 2018 Ela Admin
            </div>
-           <div class="col-sm-6 text-right">
+           <div class="col-sm-4 text-center">
+             <b><a style="color:#344e86" href="https://app.termly.io/document/privacy-notice/60ba3efc-0d8c-410b-8736-e87cab7f2e8a">Privacy
+               Policy</a></b>
+           </div>
+           <div class="col-sm-4 text-right">
              Designed by <a href="https://colorlib.com">Colorlib</a>
            </div>
          </div>
@@ -127,10 +128,7 @@
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/jquery-match-height@0.7.2/dist/jquery.matchHeight.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/moment.min.js"></script>
-
-
-   {% comment %} recaptcha {% endcomment %}
-   <script src='https://www.google.com/recaptcha/api.js'></script>
+   
    <script>
      window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')
    </script>

@@ -34,10 +34,10 @@
           <div>
             {% for f2 in ecformset %}
             {{f2|crispy}}
+            <hr/>
+            {%endfor%}
           </div>
 
-
-          {%endfor%}
           <hr />
 
           {% if ecformset.non_form_errors %}

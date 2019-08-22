@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from allauth.account.views import SignupView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from myhealthdb.forms import EventFormSet, CustomUserForm, StaffSignupForm, TaskForm, PatientSignupForm, PatientProfileForm, StaffProfileForm, HospitalContactForm, ECSet,  EventBookingForm, MedicationForm, ConditionForm, DocumentForm  # PDSet,
-from myhealthdb.models import Shift, Task, Ward, CustomUser, Patient, Staff, PatientEm, Event, Group, Medication, Condition, Immunization, Document, Weight, PatientHospital, Hospital  # PatientDoctor,
+from myhealthdb.forms import HeightForm, WeightForm, StaffEventBookingForm, EventFormSet, CustomUserForm, StaffSignupForm, DocDocumentForm, DoctorMedicationForm, TaskForm, DoctorConditionForm, ImmunizationForm, PatientSignupForm, PatientProfileForm, StaffProfileForm, HospitalContactForm, ECSet,  EventBookingForm, MedicationForm, ConditionForm, DocumentForm  # PDSet,
+from myhealthdb.models import Vital, Shift, Task, Ward, CustomUser, Patient, Staff, PatientEm, Event, Group, Medication, Condition, Immunization, Document, PatientHospital, Hospital  # PatientDoctor,
 from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.views.generic import DetailView, TemplateView
@@ -17,24 +17,31 @@ from datetime import date, datetime, timedelta
 from django.contrib.postgres.search import SearchVector
 from bootstrap_datepicker_plus import DatePickerInput, DateTimePickerInput, TimePickerInput
 from django_select2.forms import Select2MultipleWidget
-from bootstrap_modal_forms.generic import BSModalCreateView
 from django.http import HttpResponse, HttpResponseRedirect, FileResponse, Http404, JsonResponse
 try:
     from django.utils import simplejson as json
 except ImportError:
     import json
 from myhealthdb_project.settings import MEDIA_ROOT, MEDIA_URL
-from chartjs.views.lines import BaseLineChartView
-from chartjs.util import date_range, value_or_null
 from django.template.loader import render_to_string, get_template
 from mapwidgets.widgets import GooglePointFieldWidget
 from django.contrib.gis import gdal
 from geopy.geocoders import Nominatim, GoogleV3
 from geopy import distance
-from math import sin, cos, sqrt, atan2, radians
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, permissions
+from django.contrib.auth.models import User
+from django.db.models import Q
 
 
+# the key for the google api, to use maps
 geolocator = GoogleV3(api_key="AIzaSyCzCYVvHq7yit0ESbH-OLn8r0dA4WiMb8I")
+
+# ----------------------------view checks, to ensure right person view the right view------------------------
+
+# check privileges based on the customuser user_type, which determines whether a user is staff or patient
 
 
 def patient_check(user):
@@ -49,18 +56,324 @@ def staff_check(user):
     return False
 
 
+def it_check(user):
+    if user.user_type == 4:
+        return True
+    return False
+
+
 def request_user_check(user):
     if id == request.user.id:
         return True
     return False
 
+# --------------------------------------actual views------------------------------------------------------
+# most of these views have some similarities, such as getting the baseuser id and firguring out which user to pass to context.
+# therefore i will only comment on things that you may see for the first time, but not all of it (it's 2000 lines of code.)
+# hope it makes sense, the logic is not that difficult with these views!
 
-# Create your views here.
+
+def help(request, id):
+
+    context = {}
+
+    # if you are trying to look at someone else's help page, redirect to home_base
+    if id != request.user.id:
+        return redirect('home_base')
+
+    # if id does not exist, go back to index
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
+
+    # get the patient or staff profile
+    try:
+        profile = Patient.objects.get(baseuser=baseuser)
+    except Patient.DoesNotExist:
+        profile = Staff.objects.get(baseuser=baseuser)
+
+    # add profile to context
+    context['profile'] = profile
+
+    # return a response, including the context.
+    response = render(request, 'myhealthdb/help.html', context)
+
+    return response
 
 
+@user_passes_test(patient_check, redirect_field_name='home_base')
+def WeightCreateView(request, id):
+
+    context = {}
+    if id != request.user.id:
+        return redirect('home_base')
+
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
+
+    profile = Patient.objects.get_or_create(baseuser=baseuser)[0]
+
+    # set the form to be weight form
+    form = WeightForm()
+
+    if request.method == 'POST':
+
+        # yesterday = today-1day
+        yesterday = timezone.now() - timedelta(days=1)
+
+        # if there was already a weight submitted today, redirect witout doing anything, can only post once per day.
+        if Vital.objects.filter(patient=profile, type='Weight', date__gt=yesterday).exists():
+            return redirect('home_base')
+
+        # set form to requets post
+        form = WeightForm(request.POST or None,
+                          request.FILES or None)
+
+        # if form is valid, set the patient to be the currently logged in patient, the type to weight, then save it and redirect
+        if form.is_valid():
+            weight = form.save(commit=False)
+            weight.patient = profile
+            weight.type = 'Weight'
+            weight.save()
+            return redirect('vitals', id=id)
+        else:
+            # if form is not valid, print errors
+            form = WeightForm(request.GET or None)
+            print(form.errors)
+
+    # add data to context
+    context['form'] = form
+    context['profile'] = profile
+
+    response = render(
+        request, 'vitals/weight_create_view.html', context)
+
+    return response
+
+
+# same as the weight view, just for the height - can post more than once a day though
+@user_passes_test(patient_check, redirect_field_name='home_base')
+def HeightCreateView(request, id):
+
+    context = {}
+    if id != request.user.id:
+        return redirect('home_base')
+
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
+
+    profile = Patient.objects.get_or_create(baseuser=baseuser)[0]
+
+    form = HeightForm()
+
+    if request.method == 'POST':
+        form = HeightForm(request.POST or None,
+                          request.FILES or None)
+
+        if form.is_valid():
+            height = form.save(commit=False)
+            height.patient = profile
+            height.type = 'Height'
+            height.save()
+            return redirect('vitals', id=id)
+        else:
+            form = HeightForm(request.GET or None)
+            print(form.errors)
+
+    context['form'] = form
+    context['profile'] = profile
+
+    response = render(
+        request, 'vitals/height_create_view.html', context)
+
+    return response
+
+# this view passes the weight data for the graph in vitals.
+# part of the django restful api
+
+
+class WeightData(APIView):
+
+    # do not need any classes for this, it's only a graph
+    authentication_classes = []
+    permission_classes = []
+
+    def put(self, request, *args, **kwargs):
+        id = kwargs.get('id', 'Default')
+
+    # get all the information here
+
+    def get(self, request, *args, **kwargs):
+        id = kwargs.get('id', 'Default')
+
+        # get the logged in profile info
+        baseuser = CustomUser.objects.get(id=id)
+        profile = Patient.objects.get(baseuser=baseuser)
+
+        start_date = {}
+        end_date = {}
+        try:
+            # get the earliest and latest date for the weights of the patient
+            start_date = Vital.objects.filter(
+                patient=profile, type='Weight').order_by('date')[0].date
+            end_date = Vital.objects.filter(
+                patient=profile, type='Weight').order_by('-date')[0].date
+        except Vital.DoesNotExist:
+            pass
+
+        # calculate the time period between the start and end dates, and add the days inbetween to the graph labels
+        labels = []
+        difference = end_date-start_date
+        for i in range(difference.days + 1):
+            labels.append(start_date + timedelta(days=i))
+
+        # the result is an array, the same length as the labels. if there was a weight recorded on that label day, add the value, else add 'None', so the graph remains continuous
+        result = []
+        weight = Vital.objects.filter(patient=profile, type="Weight")
+
+        for i in range(len(labels)):
+            for j in range(len(weight)):
+                if labels[i] == weight[j].date:
+                    result.append(weight[j].value)
+                    break
+                elif j == len(weight)-1:
+                    result.append(None)
+
+        data = {
+            "labels": labels,
+            "default": result,
+        }
+        return Response(data)
+
+# a class based view, supposed to make life much easier. it does not.
+# it is a deleteview which deletes an object, and the userpassestestmixin means that the user must pass a test (staff_check) to proceed to this page
+
+
+class PatientHospitalDeleteView(UserPassesTestMixin, DeleteView):
+
+    # deleting from patienthospital
+    model = PatientHospital
+    template_name = 'doctors_reg/doctors_delete.html'
+
+    # when done, redirect here
+    success_url = reverse_lazy('home_base')
+
+    # the test the user must pass
+    def test_func(self):
+        return staff_check(self.request.user)
+
+    # get the context data for the staff, their profile, groups and tasks in the sidebar.
+    def get_context_data(self, **kwargs):
+        context = super(PatientHospitalDeleteView,
+                        self).get_context_data(**kwargs)
+        context['event'] = self.object
+        if self.request.user.user_type == 1:
+            profile = Patient.objects.get_or_create(
+                baseuser=self.request.user)[0]
+        else:
+            profile = Staff.objects.get_or_create(
+                baseuser=self.request.user)[0]
+        try:
+            groups = Group.objects.filter(members=profile)
+            context['groups'] = groups
+        except Group.DoesNotExist:
+            pass
+
+        try:
+            tasks = Task.objects.filter(complete_by=profile, complete=False)
+            context['tasks'] = tasks
+        except Task.DoesNotExist:
+            pass
+
+        context['profile'] = profile
+        return context
+
+
+@user_passes_test(staff_check, redirect_field_name='home_base')
+def ImmunizationCreateView(request, id, pk):
+
+    context = {}
+    if id != request.user.id:
+        return redirect('home_base')
+
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
+
+    profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
+
+    # pass the staff's groups and tasks to the template to be shown in the sidebar.
+    try:
+        groups = Group.objects.filter(members=profile)
+        context['groups'] = groups
+    except Group.DoesNotExist:
+        pass
+
+    try:
+        tasks = Task.objects.filter(complete_by=profile, complete=False)
+        context['tasks'] = tasks
+    except Task.DoesNotExist:
+        pass
+
+    # get the patient object from the pk, same as staff but a different number so we can refer to it when creating the immunization object
+    patient = {}
+    try:
+        base = CustomUser.objects.get(id=pk)
+        try:
+            patient = Patient.objects.get(baseuser=base)
+        except Patient.DoesNotExist:
+            return redirect('home_base')
+
+    except CustomUser.DoesNotExist:
+        return redirect('home_base')
+
+    # create the form, set the widgets for the dates to be datepickerinput, and set their minimum and maximum dates.
+    form = ImmunizationForm(user=patient)
+    form.fields['date'].widget = DatePickerInput(options={
+        # the date the injection was given, makes sense to input past injections but not future ones.
+        'maxDate': ((datetime.today() + timedelta(hours=1)).strftime('%Y-%m-%d')),
+    })
+    form.fields['end'].widget = DatePickerInput(options={
+        # the best before date of the injection, probably will last for at least 4 weeks
+        'minDate': ((datetime.today() + timedelta(weeks=4)).strftime('%Y-%m-%d')),
+    })
+
+    # standard post form methods
+    if request.method == 'POST':
+        form = ImmunizationForm(patient, request.POST)
+
+        if form.is_valid():
+            # form.save()
+            newimmu = form.save(commit=False)
+            newimmu.added_by = profile.baseuser
+            newimmu.save()
+            return redirect('patient_view', id=id, pk=pk)
+        else:
+            form = ImmunizationForm(user=patient)
+            print(form.errors)
+
+    context['form'] = form
+    context['profile'] = profile
+
+    response = render(
+        request, 'immunizations/immunizations_create_view.html', context)
+
+    return response
+
+# patient details view
+
+
+@user_passes_test(staff_check, redirect_field_name='home_base')
 def patient_view(request, id, pk):
     context = {}
 
+    # get the staff
     if id != request.user.id:
         return redirect('home_base')
 
@@ -72,37 +385,63 @@ def patient_view(request, id, pk):
     profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
     context['profile'] = profile
 
+    # get the staff's groups and tasks in the sidebar
+    try:
+        groups = Group.objects.filter(members=profile)
+        context['groups'] = groups
+    except Group.DoesNotExist:
+        pass
+
+    try:
+        tasks = Task.objects.filter(complete_by=profile, complete=False)
+        context['tasks'] = tasks
+    except Task.DoesNotExist:
+        pass
+
     patient = {}
-    pathospitals = PatientHospital.objects.filter(
-        hospital=profile.ward.hospital).values('patient')[0]
 
-
+    # try to get the patient object, if it doesn't exist, go to home base
     try:
         patient = Patient.objects.get(baseuser_id=pk)
 
-        if patient.baseuser_id == pathospitals['patient']:
+        try:
+            pathospitals = PatientHospital.objects.get(
+                hospital=profile.ward.hospital, patient=patient, status=True)
+
+            # pass all of the patients data to this template for the doctor to see.
+            context['pathospitals'] = pathospitals
             context['patient'] = patient
-            context['patientem'] = PatientEm.objects.filter(patient = patient)
-            context['conditions'] = Condition.objects.filter(patient = patient)
-            context['medications'] = Medication.objects.filter(patient = patient)
-            context['immunizations'] = Immunization.objects.filter(patient = patient)
-            context['documents'] = Document.objects.filter(patient = patient)
-        else:
-            pass
+            context['patientem'] = PatientEm.objects.filter(patient=patient)
+            context['conditions'] = Condition.objects.filter(patient=patient)
+            context['medications'] = Medication.objects.filter(patient=patient)
+            height = Vital.objects.filter(patient=patient, type='Height')[0]
+            context['height'] = height
+            weight = Vital.objects.filter(
+                patient=patient, type="Weight").order_by('-id')[0]
+            context['weight'] = weight
+            context['immunizations'] = Immunization.objects.filter(
+                patient=patient)
+            context['documents'] = Document.objects.filter(patient=patient)
+        except PatientHospital.DoesNotExist:
+            return redirect('home_base')
 
     except Patient.DoesNotExist:
-
         return redirect('home_base')
 
     response = render(request, 'search/patient_details.html', context)
 
     return response
 
+# seen similar before!
 
-class ShiftDeleteView(DeleteView):
+
+class ShiftDeleteView(UserPassesTestMixin, DeleteView):
     model = Shift
     template_name = "admin_things/shift_delete_view.html"
     success_url = reverse_lazy('home_base')
+
+    def test_func(self):
+        return it_check(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(ShiftDeleteView, self).get_context_data(**kwargs)
@@ -111,17 +450,17 @@ class ShiftDeleteView(DeleteView):
         context['profile'] = profile
         return context
 
+# seen similar before!
 
-class ShiftUpdateView(UpdateView):
+
+class ShiftUpdateView(UserPassesTestMixin, UpdateView):
     model = Shift
     fields = ('start', 'end', 'date', 'staff')
     template_name = 'admin_things/shift_update_form.html'
     success_url = reverse_lazy('home_base')
-    # pk_url_kwarg = 'condition_pk'
-    # context_object_name = 'event'
 
-    # def get_queryset(self):
-    #     return CustomUser.objects.filter(id=self.request.user.id)
+    def test_func(self):
+        return it_check(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(ShiftUpdateView, self).get_context_data(**kwargs)
@@ -131,11 +470,7 @@ class ShiftUpdateView(UpdateView):
         context['profile'] = profile
         return context
 
-    # def form_valid(self, form):
-    #     condition = form.save(commit=False)
-    #     condition.save()
-    #     return redirect('home_base')  # event_pk=event.id)
-
+    # get the form data from the template and change the widgets to sexier ones.
     def get_form(self):
         form = super().get_form()
         form.fields['date'].widget = DatePickerInput()
@@ -143,8 +478,10 @@ class ShiftUpdateView(UpdateView):
         form.fields['end'].widget = TimePickerInput()
         return form
 
+# user must be it guy
 
-# needs to be it guy
+
+@user_passes_test(it_check, redirect_field_name='home_base')
 def add_schedule(request, id):
 
     if id != request.user.id:
@@ -160,6 +497,8 @@ def add_schedule(request, id):
         'profile': profile,
     }
 
+    # similar to previous forms, but here it is a formset instead - many forms in one,
+    # so we have to loop over each form and save it individually
     efformset = EventFormSet(prefix="foo",)
 
     if request.method == 'POST':
@@ -171,13 +510,10 @@ def add_schedule(request, id):
             for f in efformset:
                 f.save()
 
-            # efformset.save()
-
             return HttpResponseRedirect(reverse_lazy('home_base'))
 
         else:
             efformset = EventFormSet(request.GET or None, prefix="foo")
-            # print(form.errors)
 
     context['efformset'] = efformset
 
@@ -185,11 +521,16 @@ def add_schedule(request, id):
 
     return response
 
+# seen similar before!
 
-class StaffDeleteView(DeleteView):
+
+class StaffDeleteView(UserPassesTestMixin, DeleteView):
     model = Staff
     template_name = "admin_things/staff_delete_view.html"
     success_url = reverse_lazy('home_base')
+
+    def test_func(self):
+        return it_check(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(StaffDeleteView, self).get_context_data(**kwargs)
@@ -198,7 +539,10 @@ class StaffDeleteView(DeleteView):
         context['profile'] = profile
         return context
 
+# user must be an it person
 
+
+@user_passes_test(it_check, redirect_field_name='home_base')
 def StaffCreateView(request, id):
     if id != request.user.id:
         return redirect('home_base')
@@ -213,6 +557,7 @@ def StaffCreateView(request, id):
         'profile': profile,
     }
 
+    # similar to before, but here there are two forms, both are created and used with post methods, then saved.
     form = StaffSignupForm()
     baseform = CustomUserForm()
 
@@ -228,9 +573,8 @@ def StaffCreateView(request, id):
             staff = form.save(commit=False)
             staff.baseuser = base
             staff.save()
-            # form.save()
 
-            return redirect('home_base')
+            return redirect('hospital_details', id=id)
 
         else:
             form = StaffSignupForm(request.GET or None)
@@ -246,19 +590,7 @@ def StaffCreateView(request, id):
     return response
 
 
-# class StaffCreateView(CreateView):
-#     template_name = 'admin_things/staff_create_form.html'
-#     form_class = StaffSignupForm
-#     success_url = reverse_lazy('home_base')
-
-#     def get_context_data(self, **kwargs):
-#         context = super(StaffCreateView, self).get_context_data(**kwargs)
-#         profile = Staff.objects.get_or_create(baseuser=self.request.user)[0]
-#         context['profile'] = profile
-#         return context
-
-
-# need to be it guy!
+@user_passes_test(it_check, redirect_field_name='home_base')
 def hospital_details(request, id):
     if id != request.user.id:
         return redirect('home_base')
@@ -276,12 +608,17 @@ def hospital_details(request, id):
     hospital = Hospital.objects.get(id=profile.ward.hospital.id)
 
     wards = Ward.objects.filter(hospital=hospital)
+
+    # total number of wards in the hospital
     totalwards = wards.count()
     context['totalwards'] = totalwards
 
+    # what staff are in what wards
     individualstaff = wards.annotate(
         staffnumber=Count('current_ward')).values()
     context['individualstaff'] = individualstaff
+
+    # how many staff altogether in the hospital?
     totalstaff = individualstaff.aggregate(Sum('staffnumber'))
     context['totalstaff'] = totalstaff
 
@@ -289,6 +626,7 @@ def hospital_details(request, id):
 
     context['staff'] = staff
 
+    # change the format of the address, it is stored like POINT(2.4454 4.5564) but we want 4.5564, 2.4454 for the geopy api to work
     prev_address = hospital.address
     prev_address = prev_address[7:-1]
     splits = prev_address.split(" ")
@@ -308,18 +646,24 @@ def hospital_details(request, id):
 
     return response
 
+# a list view of all the patients in the hospital
 
-class PatientView(ListView):
+
+class PatientView(UserPassesTestMixin, ListView):
     model = Patient
     template_name = "search/patient_view.html"
-    #paginate_by = 10
+
+    def test_func(self):
+        return staff_check(self.request.user)
 
     def get_queryset(self):
+        # get the object of the user's current hospital
         hospital = Hospital.objects.get(
             name=self.request.user.doctor.ward.hospital.name)
         patienthospitals = PatientHospital.objects.filter(
             hospital=hospital, status=True).values('patient')
         if patienthospitals:
+            # only get the patiets in this hospital
             new_context = Patient.objects.filter(
                 baseuser_id__in=patienthospitals).order_by('last_name')
         else:
@@ -330,69 +674,62 @@ class PatientView(ListView):
         context = super(PatientView, self).get_context_data(**kwargs)
         profile = Staff.objects.get_or_create(
             baseuser=self.request.user)[0]
+        try:
+            groups = Group.objects.filter(members=profile)
+            context['groups'] = groups
+        except Group.DoesNotExist:
+            pass
+
+        try:
+            tasks = Task.objects.filter(complete_by=profile, complete=False)
+            context['tasks'] = tasks
+        except Task.DoesNotExist:
+            pass
         context['profile'] = profile
         return context
 
+# json response for rejecting a patient, comes up with an alert
 
+
+@user_passes_test(staff_check, redirect_field_name='home_base')
 def reject_patient(request):
 
     if request.method == 'POST':
-        # user = request.user
-        # patient = Patient.objects.get_or_create(baseuser=user)[0]
+
         id = request.POST.get('id', None)
         patienthospital = PatientHospital.objects.get_or_create(id=id)[0]
 
+        # delete patienthospital completely, as the patient is rejected
         patienthospital.delete()
         message = 'The patient has been rejected'
-        # exists = False
-        # try:
-        #     existing = PatientHospital.objects.get(id=id)
-        #     exists = True
-        # except PatientHospital.DoesNotExist:
-        #     pass
-
-        # if exists:
-        #     message = 'You are already registered with this hospital.'
-        # else:
-        # ph = PatientHospital(patient=patient, hospital=hospital)
-        # ph.save()
-        # message = 'You have sent your details to the practice.'
 
     ctx = {'message': message}
-    # use mimetype instead of content_type if django < 5
+
     return HttpResponse(json.dumps(ctx), content_type='application/json')
 
+# json response for accepting a patient, comes up with an alert
 
+
+@user_passes_test(staff_check, redirect_field_name='home_base')
 def accept_patient(request):
 
     if request.method == 'POST':
-        # user = request.user
-        # patient = Patient.objects.get_or_create(baseuser=user)[0]
+
         id = request.POST.get('id', None)
         patienthospital = PatientHospital.objects.get_or_create(id=id)[0]
 
+        # set patienthospital status to true = the user has been accepted
         patienthospital.status = True
         patienthospital.save()
         message = 'The patient has been registered'
-        # exists = False
-        # try:
-        #     existing = PatientHospital.objects.get(id=id)
-        #     exists = True
-        # except PatientHospital.DoesNotExist:
-        #     pass
-
-        # if exists:
-        #     message = 'You are already registered with this hospital.'
-        # else:
-        # ph = PatientHospital(patient=patient, hospital=hospital)
-        # ph.save()
-        # message = 'You have sent your details to the practice.'
 
     ctx = {'message': message}
-    # use mimetype instead of content_type if django < 5
+
     return HttpResponse(json.dumps(ctx), content_type='application/json')
 
 
+# another json reponse, here the patient tries to register with the hospital
+@user_passes_test(patient_check, redirect_field_name='home_base')
 def register_hospital(request):
 
     if request.method == 'POST':
@@ -410,17 +747,21 @@ def register_hospital(request):
             pass
 
         if exists:
+            # if there is a patienthospital object alreayd with the hospital, do nothing, just an alert
             message = 'You are already registered with this hospital.'
         else:
+            # else create a new patienthospital object, with status=false by default
             ph = PatientHospital(patient=patient, hospital=hospital)
             ph.save()
-            message = 'You have sent your details to the practice.'
+            message = 'You have sent your details to the practice. They will get back to you shortly.'
 
     ctx = {'message': message}
-    # use mimetype instead of content_type if django < 5
     return HttpResponse(json.dumps(ctx), content_type='application/json')
 
+# view for patient to see all their patienthospital objects
 
+
+@user_passes_test(patient_check, redirect_field_name='home_base')
 def doctors_view(request, id):
     if id != request.user.id:
         return redirect('home_base')
@@ -435,11 +776,16 @@ def doctors_view(request, id):
         'profile': profile,
     }
 
+    # separate pending and confirmed registrations
     try:
         pending_hosp = PatientHospital.objects.filter(
             patient=profile, status=False).values('hospital')
         r_pending = Hospital.objects.filter(id__in=pending_hosp)
         context['r_pending'] = r_pending
+
+        # get the wards in each of the hospitals for display
+        wards = Ward.objects.filter(hospital__in=pending_hosp)
+        context['w_pending'] = wards
     except PatientHospital.DoesNotExist:
         pass
 
@@ -448,43 +794,21 @@ def doctors_view(request, id):
             patient=profile, status=True).values('hospital')
         r_confirmed = Hospital.objects.filter(id__in=confirmed_hosp)
         context['r_confirmed'] = r_confirmed
+
+        # get the wards in each of the hospitals for display
+        c_wards = Ward.objects.filter(hospital__in=confirmed_hosp)
+        context['w_confirmed'] = c_wards
     except PatientHospital.DoesNotExist:
         pass
-
-    # try:
-    #     hospitalrelations = PatientHospital.objects.filter(patient=profile)
-    #     context['hospitalrelations'] = hospitalrelations
-    # except PatientHospital.DoesNotExist:
-    #     pass
-
-    # try:
-    #     pdrelations = PatientDoctor.objects.get(patient=profile)
-    #     events = pdrelations.reversepd.filter(date_in__gte=timezone.now())
-
-    #     context['events'] = events
-
-    # except PatientDoctor.DoesNotExist:
-    #     pass
 
     response = render(request, 'doctors_reg/doctors_view.html', context)
 
     return response
 
-
-def distance2(lat0, long0, lat1, long1):
-    rad = 6373.0
-
-    longitude_dist = long1-long0
-    latitude_dist = lat1-lat0
-
-    a = sin(latitude_dist / 2)**2 + cos(lat0) * \
-        cos(lat1) * sin(longitude_dist / 2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    dist = c*rad
-    return dist
+# the view which shows the nearest hospitals, passes the hospital objects to it and shows distance.
 
 
+@user_passes_test(patient_check, redirect_field_name='home_base')
 def doctors_reg(request, id):
 
     if id != request.user.id:
@@ -500,32 +824,42 @@ def doctors_reg(request, id):
         'profile': profile,
     }
 
+    # change the address, like before, to be fit for use in geopy.
     profileaddress = profile.address
     profilecutaddress = profileaddress[7:-1]
     profilecutaddress = profilecutaddress.replace(" ", ",")
     location = geolocator.reverse(profilecutaddress)
 
+    # list of all hospitals
     openhospitals = Hospital.objects.filter(taking_patients=True)
 
     closest = []
     largest = 0
     largestmember = ''
-    maxim = 5
+
+    # shows the 10 closest hospitals
+    maxim = 10
+
+    # a method which takes each hospital in turn,
     for i in range(0, len(openhospitals)):
 
+        # fixes their address to be good to use,
         data_array = {}
         address = openhospitals[i].address
         cutaddress = address[7:-1]
-        print(cutaddress)
         cutaddress = cutaddress.replace(" ", ",")
-        print(cutaddress)
 
+        # calculate the distance to the patient's address,
         thedistance = distance.distance(
             profilecutaddress, cutaddress).miles  # change from km to miles
-        data_array[0] = openhospitals[i]
-        # for_display = str(thedistance)[0:3]
-        data_array[1] = thedistance
 
+        # add all data to an array,
+        c_wards = Ward.objects.filter(hospital=openhospitals[i])
+        data_array[0] = openhospitals[i]
+        data_array[1] = thedistance
+        data_array[2] = c_wards
+
+        # then loop through the existing hospitals in the 'closest' array and slot it in to the right place,  i.e. smaller distance than the next one but greater than the previous one.
         if closest:
             for k in range(0, len(closest)):
                 if len(closest) < maxim:
@@ -542,28 +876,11 @@ def doctors_reg(request, id):
             closest.append(data_array)
     context['closest'] = closest
 
-    # pdformset = PDSet(instance=request.user.patient)
-
-    # if request.method == 'POST':
-    #     pdformset = PDSet(request.POST or None,
-    #                       request.FILES or None, instance=request.user.patient)
-
-    #     if pdformset.is_valid():
-
-    #         pdformset.save()
-
-    #         return redirect('home_base')
-
-    #     else:
-    #         pdformset = PDSet(request.GET or None,
-    #                           instance=request.user.patient)
-    #         # print(form.errors)
-
-    # context['pdformset'] = pdformset
-
     response = render(request, 'doctors_reg/doctors_reg.html', context)
 
     return response
+
+# show groups, send data in json format
 
 
 def autocompleteGroup(request, id):
@@ -601,82 +918,13 @@ def autocompleteGroup(request, id):
 
     return render(request, "groups/groups_list_view.html", context=ctx)
 
-
-# class GroupsListView(ListView):
-#     model = Group
-#     template_name = 'groups/groups_list_view.html'
-#     paginate_by = 25
-
-#     def get_context_data(self, **kwargs):
-#         context = super(GroupsListView,
-#                         self).get_context_data(**kwargs)
-#         profile = Staff.objects.get_or_create(
-#             baseuser=self.request.user)[0]
-#         context['profile'] = profile
-#         return context
-
-class WeightChartJSONView(BaseLineChartView):
-    def get_labels(self):
-        """Return 7 labels for the x-axis."""
-        return ["January", "February", "March", "April", "May", "June", "July"]
-
-    def get_providers(self):
-        """Return names of datasets."""
-        return ["Central", "Eastside", "Westside"]
-
-    def get_data(self):
-        """Return 3 datasets to plot."""
-        return [[75, 44, 92, 11, 44, 95, 35],
-                [41, 92, 18, 3, 73, 87, 92],
-                [87, 21, 94, 3, 90, 13, 65]]
-
-    # def get_options(self):
-    #     options = {
-    #         "elements": {
-    #             "point": {
-    #                 "pointStyle": "rectRounded",
-    #                 "radius": 10,
-    #             },
-    #         },
-    #         "scales": {
-    #             "xAxes": [{
-    #                 "display":'true',
-    #                 "type": 'time',
-    #                 "distribution": 'series'
-    #             }]
-    #         },
-    #         'responsive': 'True',
-    #     }
-    #     return options
-
-
-line_chart = TemplateView.as_view(template_name='line_chart.html')
-line_chart_json = WeightChartJSONView.as_view()
-
-
-# class WeightChartJSON2View(BaseLineChartView):
-#     start_date = Weight.objects.earliest('date').date
-#     end_date = Weight.objects.latest('date').date
-#     print(end_date)
-
-#     def get_providers(self):
-#         return ["Weight"]
-
-#     def get_labels(self):
-#         return [dt for dt in date_range(self.start_date, self.end_date)]
-
-#     def get_data(self):
-#         result = []
-#         weight = Weight.objects.all()
-#         data = [item for item in value_or_null(self.start_date, self.end_date, weight, "date", "value")]
-#         result.append(data)
-#         return result
-
-# line_chart_json2 = WeightChartJSON2View.as_view()
+# view which shows the vitals, the height and weight
 
 
 @user_passes_test(patient_check, redirect_field_name='home_base')
-def weightview(request, id):
+def vitalsview(request, id):
+
+    context = {}
 
     if id != request.user.id:
         return redirect('home_base')
@@ -687,17 +935,35 @@ def weightview(request, id):
         return redirect('index')
 
     profile = Patient.objects.get_or_create(baseuser=baseuser)[0]
-    context = {
-        'profile': profile,
-    }
-    # try:
-    #     pdrelations = PatientDoctor.objects.get(patient=profile)
-    #     events = pdrelations.reversepd.filter(date_in__gte=timezone.now())
+    context['profile'] = profile
 
-    #     context['events'] = events
+    # calculate yesterday's date
+    yesterday = timezone.now() - timedelta(days=1)
+    height = {}
+    weight = {}
 
-    # except PatientDoctor.DoesNotExist:
-    #     pass
+    try:
+        height = Vital.objects.get(patient=profile, type='Height')
+        context['height'] = height
+    except Vital.DoesNotExist:
+        pass
+
+    try:
+        # get most recent weight
+        weight = Vital.objects.filter(
+            patient=profile, type="Weight").order_by('-date')[0]
+        context['weight'] = weight
+
+        # pass a context to the view which controls if the button to add your weight should be there, you should only add weight once a day.
+        if Vital.objects.filter(patient=profile, type='Weight', date__gt=yesterday).exists():
+            context['already'] = 'already'
+    except Vital.DoesNotExist:
+        pass
+
+    # calculate the bmi from height and weight; bmi = w/h^2
+    if height and weight:
+        bmi = weight.value/((height.value/100)*(height.value/100))
+        context['bmi'] = bmi
 
     response = render(request, 'vitals/weight.html', context)
 
@@ -705,8 +971,10 @@ def weightview(request, id):
 
 # ----------------------------------file open/download----------------------------------------
 
+# when a pdf is clicked, it is opened/downloaded in firefox
 
-# fixfixfix
+
+@login_required(redirect_field_name='index')
 def pdf_view(request, id, pdfid):
 
     if id != request.user.id:
@@ -716,23 +984,26 @@ def pdf_view(request, id, pdfid):
         document = Document.objects.get(id=pdfid)
     except Document.DoesNotExist:
         return redirect('home_base')
-    print(str(document.file))
 
+    # try to find file and open it
     try:
         return FileResponse(open(MEDIA_ROOT + '/' + str(document.file), 'rb'), content_type='application/pdf')
     except FileNotFoundError:
         raise Http404()
 
-
 # ---------------------------------------------------------------------------------------------
 
-class DocumentDeleteView(DeleteView):
+
+class DocumentDeleteView(LoginRequiredMixin, DeleteView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'home_base'
+
     model = Document
-    # success_url = HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     success_url = reverse_lazy('home_base')
     pk_url_kwarg = 'document_pk'
 
 
+# a view to see all documents for a patient
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def DocumentsView(request, id):
 
@@ -760,8 +1031,79 @@ def DocumentsView(request, id):
     response = render(request, 'documents/documents_list_view.html', context)
     return response
 
+# a form view which allows doctors to add documents for patients
 
-class DocumentCreateView(CreateView):
+
+@user_passes_test(staff_check, redirect_field_name='home_base')
+def DoctorDocumentCreateView(request, id, pk):
+
+    # context user stuff
+    context = {}
+    if id != request.user.id:
+        return redirect('home_base')
+
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
+
+    profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
+
+    try:
+        groups = Group.objects.filter(members=profile)
+        context['groups'] = groups
+    except Group.DoesNotExist:
+        pass
+
+    try:
+        tasks = Task.objects.filter(complete_by=profile, complete=False)
+        context['tasks'] = tasks
+    except Task.DoesNotExist:
+        pass
+
+    patient = {}
+    try:
+        base = CustomUser.objects.get(id=pk)
+        try:
+            patient = Patient.objects.get(baseuser=base)
+        except Patient.DoesNotExist:
+            return redirect('home_base')
+
+    except CustomUser.DoesNotExist:
+        return redirect('home_base')
+
+    # form stuff
+    form = DocDocumentForm(patient, data=request.POST or None)
+
+    if request.method == 'POST':
+        form = DocDocumentForm(patient, request.POST or None,
+                               request.FILES or None)
+
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.added_by = profile.baseuser
+            document.save()
+            return redirect('patient_view', id=id,  pk=pk)
+        else:
+            form = DocDocumentForm(patient, request.GET or None)
+            print(form.errors)
+
+    context['form'] = form
+    context['profile'] = profile
+
+    response = render(
+        request, 'documents/document_create_view.html', context)
+
+    return response
+
+# loginrequiredmixin means that the user should be logged in, otherwise they cannot see the content
+# a view to create documents
+
+
+class DocumentCreateView(LoginRequiredMixin, CreateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'home_base'
+
     template_name = 'documents/document_create_view.html'
     form_class = DocumentForm
     success_url = reverse_lazy('home_base')
@@ -775,10 +1117,14 @@ class DocumentCreateView(CreateView):
         return context
 
     def form_valid(self, form):
+        # the patient is the user, and added by the user too.
         self.obj = form.save(commit=False)
         self.obj.patient = self.request.user.patient
+        self.obj.added_by = self.request.user
         self.obj.save()
         return super(DocumentCreateView, self).form_valid(form)
+
+# similar to before
 
 
 @user_passes_test(patient_check, redirect_field_name='home_base')
@@ -809,6 +1155,8 @@ def ImmunizationsView(request, id):
         request, 'immunizations/immunizations_list_view.html', context)
     return response
 
+# similar to before
+
 
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def ConditionsView(request, id):
@@ -835,26 +1183,31 @@ def ConditionsView(request, id):
         pass
 
     response = render(request, 'conditions/conditions_list_view.html', context)
+
     return response
+
+# similar to before
 
 
 @method_decorator(login_required, name='dispatch')
-class ConditionUpdateView(UpdateView):
+class ConditionUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'home_base'
+
     model = Condition
     fields = ('stop', 'reaction', 'severity', 'details')
     template_name = 'conditions/condition_update_form.html'
     pk_url_kwarg = 'condition_pk'
-    # context_object_name = 'event'
-
-    # def get_queryset(self):
-    #     return CustomUser.objects.filter(id=self.request.user.id)
 
     def get_context_data(self, **kwargs):
         context = super(ConditionUpdateView, self).get_context_data(**kwargs)
         context['condition'] = self.object
-        profile = Patient.objects.get_or_create(
-            baseuser=self.request.user)[0]
-        context['profile'] = profile
+        try:
+            profile = Patient.objects.get(baseuser=self.request.user)
+            context['profile'] = profile
+        except Patient.DoesNotExist:
+            profile = Staff.objects.get(baseuser=self.request.user)
+            context['profile'] = profile
         return context
 
     def form_valid(self, form):
@@ -867,8 +1220,81 @@ class ConditionUpdateView(UpdateView):
         form.fields['stop'].widget = DatePickerInput()
         return form
 
+# a view for a doctor to create a condition
 
-class ConditionCreateView(CreateView):
+
+@user_passes_test(staff_check, redirect_field_name='home_base')
+def DoctorConditionCreateView(request, id, pk):
+
+    # context stuff
+    context = {}
+    if id != request.user.id:
+        return redirect('home_base')
+
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
+
+    profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
+
+    try:
+        groups = Group.objects.filter(members=profile)
+        context['groups'] = groups
+    except Group.DoesNotExist:
+        pass
+
+    try:
+        tasks = Task.objects.filter(complete_by=profile, complete=False)
+        context['tasks'] = tasks
+    except Task.DoesNotExist:
+        pass
+
+    patient = {}
+    try:
+        base = CustomUser.objects.get(id=pk)
+        try:
+            patient = Patient.objects.get(baseuser=base)
+        except Patient.DoesNotExist:
+            return redirect('home_base')
+
+    except CustomUser.DoesNotExist:
+        return redirect('home_base')
+
+    # form stuff
+    form = DoctorConditionForm(user=patient)
+
+    # set form widgets
+    form.fields['start'].widget = DatePickerInput()
+    form.fields['stop'].widget = DatePickerInput()
+
+    if request.method == 'POST':
+        form = DoctorConditionForm(patient, request.POST)
+
+        if form.is_valid():
+            condition = form.save(commit=False)
+            condition.added_by = profile.baseuser
+            condition.save()
+            return redirect('patient_view', id=id, pk=pk)
+        else:
+            form = DoctorConditionForm(user=patient)
+            print(form.errors)
+
+    context['form'] = form
+    context['profile'] = profile
+
+    response = render(
+        request, 'conditions/condition_create_view.html', context)
+
+    return response
+
+# similar to before
+
+
+class ConditionCreateView(LoginRequiredMixin, CreateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'home_base'
+
     template_name = 'conditions/condition_create_view.html'
     form_class = ConditionForm
     success_url = reverse_lazy('home_base')
@@ -884,6 +1310,7 @@ class ConditionCreateView(CreateView):
     def form_valid(self, form):
         self.obj = form.save(commit=False)
         self.obj.patient = self.request.user.patient
+        self.obj.added_by = self.request.user
         self.obj.save()
         return super(ConditionCreateView, self).form_valid(form)
 
@@ -892,6 +1319,8 @@ class ConditionCreateView(CreateView):
         form.fields['start'].widget = DatePickerInput()
         form.fields['stop'].widget = DatePickerInput()
         return form
+
+# similar to before
 
 
 @user_passes_test(patient_check, redirect_field_name='home_base')
@@ -915,7 +1344,9 @@ def MedicationView(request, id):
     try:
         medication = Medication.objects.filter(patient=profile)
         past = medication.filter(finish__lte=now)
-        current = medication.filter(finish__gt=now)
+
+        # the Q lets the queryset choose between the two constraints, so this returns medication which has a finish date in the future, or which does not have a finish date at all
+        current = medication.filter(Q(finish__gt=now) | Q(finish=None))
 
         context['object_list'] = medication
         context['past'] = past
@@ -927,20 +1358,76 @@ def MedicationView(request, id):
     response = render(request, 'medication/medication_list_view.html', context)
     return response
 
-    # model = Medication
-    # template_name = 'medication/medication_list_view.html'
-    # paginate_by = 20
+# view for doctor to add medication for a patient
+@user_passes_test(staff_check, redirect_field_name='home_base')
+def DoctorMedicationCreateView(request, id, pk):
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(MedicationView,
-    #                     self).get_context_data(**kwargs)
-    #     profile = Patient.objects.get_or_create(
-    #         baseuser=self.request.user)[0]
-    #     context['profile'] = profile
-    #     return context
+    #context stuff
+    context = {}
+    if id != request.user.id:
+        return redirect('home_base')
 
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
 
-class MedicationCreateView(CreateView):
+    profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
+
+    try:
+        groups = Group.objects.filter(members=profile)
+        context['groups'] = groups
+    except Group.DoesNotExist:
+        pass
+
+    try:
+        tasks = Task.objects.filter(complete_by=profile, complete=False)
+        context['tasks'] = tasks
+    except Task.DoesNotExist:
+        pass
+
+    patient = {}
+    try:
+        base = CustomUser.objects.get(id=pk)
+        try:
+            patient = Patient.objects.get(baseuser=base)
+        except Patient.DoesNotExist:
+            return redirect('home_base')
+
+    except CustomUser.DoesNotExist:
+        return redirect('home_base')
+
+    #form stuff
+    form = DoctorMedicationForm(user=patient)
+    form.fields['start'].widget = DatePickerInput()
+    form.fields['finish'].widget = DatePickerInput()
+
+    if request.method == 'POST':
+        form = DoctorMedicationForm(patient, request.POST)
+
+        if form.is_valid():
+            # form.save()
+            condition = form.save(commit=False)
+            condition.added_by = profile.baseuser
+            condition.save()
+            return redirect('patient_view', id=id, pk=pk)
+        else:
+            form = DoctorMedicationForm(user=patient)
+            print(form.errors)
+
+    context['form'] = form
+    context['profile'] = profile
+
+    response = render(
+        request, 'medication/medication_create_view.html', context)
+
+    return response
+
+#patient can record medication
+class MedicationCreateView(LoginRequiredMixin, CreateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'home_base'
+
     template_name = 'medication/medication_create_view.html'
     form_class = MedicationForm
     success_url = reverse_lazy('home_base')
@@ -956,6 +1443,7 @@ class MedicationCreateView(CreateView):
     def form_valid(self, form):
         self.obj = form.save(commit=False)
         self.obj.patient = self.request.user.patient
+        self.obj.added_by = self.request.user
         self.obj.save()
         return super(MedicationCreateView, self).form_valid(form)
 
@@ -965,62 +1453,41 @@ class MedicationCreateView(CreateView):
         form.fields['finish'].widget = DatePickerInput()
         return form
 
-
+#when someone is done with medication they press a button and it sets the finish date to today's date. ajax.
 def medication_done(request):
 
+    #context stuff
     if request.method == 'POST':
         user = request.user
-        patient = Patient.objects.get_or_create(baseuser=user)[0]
+        try:
+            patient = Patient.objects.get(baseuser=user)
+        except Patient.DoesNotExist:
+            staff = Staff.objects.get(baseuser=user)
         id = request.POST.get('id', None)
         medication = Medication.objects.get_or_create(id=id)[0]
 
+        #actual logic
         now = date.today()
 
-        # medicine has been stopped
         medication.finish = now
         medication.save()
         message = 'You are no longer taking this.'
 
     ctx = {'message': message}
-    # use mimetype instead of content_type if django < 5
     return HttpResponse(json.dumps(ctx), content_type='application/json')
 
-    # return redirect('home_base')
+#delete a task, deleteview
+class TaskDeleteView(UserPassesTestMixin, DeleteView):
 
-    # def get_queryset(self):  # new
-    #     query = self.request.GET.get('q', '')
+    def test_func(self):
+        return staff_check(self.request.user)
 
-    #     vector = SearchVector('first_name', 'last_name')
-
-    #     my_patients = Patient.objects.all()  # have this not all()
-    #     object_list = my_patients.annotate(search=vector).filter(search=query)
-
-    # Patient.objects.filter(SearchVector('first_name', 'last_name') = query)
-    # object_list = Patient.objects.filter(
-    #     Q(first_name__icontains=query) | Q(last_name__icontains=query)
-    # )
-    # return object_list
-
-
-class TaskDeleteView(DeleteView):
     model = Task
-    # success_url = HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
     success_url = reverse_lazy('home_base')
     pk_url_kwarg = 'task_pk'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(EventDeleteView, self).get_context_data(**kwargs)
-    #     context['event'] = self.object
-    #     if self.request.user.user_type == 1:
-    #         profile = Patient.objects.get_or_create(
-    #             baseuser=self.request.user)[0]
-    #     else:
-    #         profile = Staff.objects.get_or_create(
-    #             baseuser=self.request.user)[0]
-    #     context['profile'] = profile
-    #     return context
-
-
+#complete a task, ajax view, after a button press
 def task_complete(request):
 
     if request.method == 'POST':
@@ -1031,30 +1498,36 @@ def task_complete(request):
 
         now = timezone.now()
 
-        # task completed by specific user
+        #task completed by specific user
         task.complete = True
         task.actually_completed = staff
+
+        #task completed now
         task.completion_date = now
         task.save()
         message = 'You completed this'
 
     ctx = {'complete': staff.first_name, 'message': message}
-    # use mimetype instead of content_type if django < 5
     return HttpResponse(json.dumps(ctx), content_type='application/json')
 
-
-class TaskCreateView(CreateView):
+#a view for creating a task
+class TaskCreateView(UserPassesTestMixin, CreateView):
     template_name = 'task/task_create_form.html'
     form_class = TaskForm
     success_url = reverse_lazy('home_base')
 
+    #user must be staff
+    def test_func(self):
+        return staff_check(self.request.user)
+
+    #if the form is valid add 'set_by' to user
     def form_valid(self, form):
         self.obj = form.save(commit=False)
         self.obj.set_by = self.request.user.doctor
         self.obj.save()
-
         return super(TaskCreateView, self).form_valid(form)
 
+    #set widget for deadline to be datetimepickerinput
     def get_form(self):
         form = super().get_form()
         form.fields['deadline'].widget = DateTimePickerInput(options={
@@ -1062,23 +1535,33 @@ class TaskCreateView(CreateView):
         })
         return form
 
+    #pass relevant context data to the template
     def get_context_data(self, **kwargs):
         context = super(TaskCreateView, self).get_context_data(**kwargs)
         profile = Staff.objects.get_or_create(baseuser=self.request.user)[0]
+        try:
+            groups = Group.objects.filter(members=profile)
+            context['groups'] = groups
+        except Group.DoesNotExist:
+            pass
+
+        try:
+            tasks = Task.objects.filter(complete_by=profile, complete=False)
+            context['tasks'] = tasks
+        except Task.DoesNotExist:
+            pass
         context['profile'] = profile
         return context
 
-
-@method_decorator(login_required, name='dispatch')
-class TaskUpdateView(UpdateView):
+#update a task if needed
+class TaskUpdateView(UserPassesTestMixin, UpdateView):
     model = Task
     form_class = TaskForm
     template_name = 'task/task_update_form.html'
     pk_url_kwarg = 'task_pk'
-    # context_object_name = 'event'
 
-    # def get_queryset(self):
-    #     return CustomUser.objects.filter(id=self.request.user.id)
+    def test_func(self):
+        return staff_check(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(TaskUpdateView, self).get_context_data(**kwargs)
@@ -1086,45 +1569,72 @@ class TaskUpdateView(UpdateView):
         profile = Staff.objects.get_or_create(
             baseuser=self.request.user)[0]
         context['profile'] = profile
+        try:
+            groups = Group.objects.filter(members=profile)
+            context['groups'] = groups
+        except Group.DoesNotExist:
+            pass
+
+        try:
+            tasks = Task.objects.filter(complete_by=profile, complete=False)
+            context['tasks'] = tasks
+        except Task.DoesNotExist:
+            pass
+
         return context
 
     def form_valid(self, form):
         task = form.save(commit=False)
         task.save()
-        return redirect('home_base')
+        return redirect('task', id=id)
 
-
-# @user_passes_test(staff_check, redirect_field_name='home_base') ##add these ok
-class PatientSearchResultsView(ListView):
+#view the search results
+class PatientSearchResultsView(UserPassesTestMixin, ListView):
     model = Patient
     template_name = 'search/patient_search_results.html'
     paginate_by = 25
 
+    def test_func(self):
+        return staff_check(self.request.user)
+
+    #pass relevant context data, as usual
     def get_context_data(self, **kwargs):
         context = super(PatientSearchResultsView,
                         self).get_context_data(**kwargs)
         profile = Staff.objects.get_or_create(
             baseuser=self.request.user)[0]
+        try:
+            groups = Group.objects.filter(members=profile)
+            context['groups'] = groups
+        except Group.DoesNotExist:
+            pass
+
+        try:
+            tasks = Task.objects.filter(complete_by=profile, complete=False)
+            context['tasks'] = tasks
+        except Task.DoesNotExist:
+            pass
         context['profile'] = profile
         return context
 
-    def get_queryset(self):  # new
+    #use postgres search vector to search through the database and return the object list
+    def get_queryset(self):  
         query = self.request.GET.get('q', '')
 
+        #relevant columns
         vector = SearchVector('first_name', 'last_name', 'dob', 'nhs_no')
 
+        #only patients registered at this hospital
         relevant_patients = PatientHospital.objects.filter(
-            hospital=self.request.user.doctor.ward.hospital).values('patient')
+            hospital=self.request.user.doctor.ward.hospital, status=True).values('patient')
         my_patients = Patient.objects.filter(baseuser_id__in=relevant_patients)
+
+        #actually do the search
         object_list = my_patients.annotate(search=vector).filter(search=query)
 
-        # Patient.objects.filter(SearchVector('first_name', 'last_name') = query)
-        # object_list = Patient.objects.filter(
-        #     Q(first_name__icontains=query) | Q(last_name__icontains=query)
-        # )
         return object_list
 
-
+#pass nothing
 def index(request):
 
     context_dict = {}
@@ -1132,7 +1642,7 @@ def index(request):
 
     return response
 
-
+#pass nothing
 def about(request):
 
     context_dict = {}
@@ -1140,7 +1650,7 @@ def about(request):
 
     return response
 
-
+#a view for all events, such as appointments
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def events(request, id):
 
@@ -1156,8 +1666,9 @@ def events(request, id):
 
     profile = Patient.objects.get_or_create(baseuser=baseuser)[0]
 
+    #separate the events based on if they are still to happen or they have happened in the past.
     new_events = Event.objects.filter(date_in__gte=now)
-    past_events = Event.objects.filter(date_in__lte=now)
+    past_events = Event.objects.filter(date_in__lt=now)
 
     context_dict = {
         'profile': profile,
@@ -1168,12 +1679,15 @@ def events(request, id):
 
     return response
 
-
-class EventDeleteView(DeleteView):
+#similar to before
+class EventDeleteView(UserPassesTestMixin, DeleteView):
     model = Event
     template_name = 'event/event_delete_form.html'
     pk_url_kwarg = 'event_pk'
-    success_url = reverse_lazy('home_base')
+    success_url = reverse_lazy('task', id=id)
+
+    def test_func(self):
+        return staff_check(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(EventDeleteView, self).get_context_data(**kwargs)
@@ -1187,17 +1701,16 @@ class EventDeleteView(DeleteView):
         context['profile'] = profile
         return context
 
-
+#similar to before
 @method_decorator(login_required, name='dispatch')
-class EventUpdateView(UpdateView):
+class EventUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'home_base'
+
     model = Event
-    fields = ('letter', 'date_in', 'pd_relation', 'notes', 'done')
+    fields = ('title', 'date_in', 'notes')
     template_name = 'event/event_update_form.html'
     pk_url_kwarg = 'event_pk'
-    # context_object_name = 'event'
-
-    # def get_queryset(self):
-    #     return CustomUser.objects.filter(id=self.request.user.id)
 
     def get_context_data(self, **kwargs):
         context = super(EventUpdateView, self).get_context_data(**kwargs)
@@ -1213,19 +1726,66 @@ class EventUpdateView(UpdateView):
 
     def form_valid(self, form):
         event = form.save(commit=False)
-        # event.updated_by = self.request.profile
         event.save()
-        return redirect('home_base')  # event_pk=event.id)
+        return redirect('home_base') 
 
     def get_form(self):
         form = super().get_form()
-        form.fields['date_in'].widget = DateTimePickerInput()
+        form.fields['date_in'].widget = DateTimePickerInput(options={
+            'minDate': (datetime.datetime.today()).strftime('%Y-%m-%d %H:%M:%S'),
+            'enabledHours': [8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+        })
         return form
 
+#staff can create an event too
+@user_passes_test(staff_check, redirect_field_name='home_base')
+def staff_event_create(request, id):
 
+    #context stuff
+    if id != request.user.id:
+        return redirect('home_base')
+
+    try:
+        baseuser = CustomUser.objects.get(id=id)
+    except CustomUser.DoesNotExist:
+        return redirect('index')
+
+    profile = Staff.objects.get(baseuser=baseuser)
+
+    form = StaffEventBookingForm(profile.ward.hospital)
+    form.fields['date_in'].widget = DateTimePickerInput(options={
+        #min time is not, so cannot create it in the past
+        'minDate': ((datetime.today() - timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S')),
+    })
+
+    #form stuff
+    if request.method == 'POST':
+        form = StaffEventBookingForm(
+            profile.ward.hospital, request.POST or None)
+
+        if form.is_valid():
+            newevent = form.save(commit=False)
+            newevent.save()
+            return redirect('home_base')
+        else:
+            form = StaffEventBookingForm(
+                profile.ward.hospital, request.GET or None)
+            print(form.errors)
+
+    context = {
+        'form': form,
+        'profile': profile,
+    }
+
+    response = render(request, 'event/event_create_form.html', context)
+
+    return response
+
+#patient event create
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def event_create(request, id):
 
+    #context stuff
     if id != request.user.id:
         return redirect('home_base')
 
@@ -1239,22 +1799,23 @@ def event_create(request, id):
     else:
         profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
 
-    form = EventBookingForm()
+    #form stuff
+    form = EventBookingForm(user=profile)
     form.fields['date_in'].widget = DateTimePickerInput(options={
         'minDate': ((datetime.today() - timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S')),
-        'maxDate': ((datetime.today() + timedelta(days=7)).strftime('%Y-%m-%d 23:59:59'))
+        'maxDate': ((datetime.today() + timedelta(days=7)).strftime('%Y-%m-%d 23:59:59')),
+        'enabledHours': [8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
     })
 
     if request.method == 'POST':
         form = EventBookingForm(request.POST)
 
         if form.is_valid():
-            # form.save()
             newevent = form.save(commit=False)
             newevent.save()
             return redirect('home_base')
         else:
-            form = EventBookingForm()
+            form = EventBookingForm(user=profile)
             print(form.errors)
 
     context = {
@@ -1266,7 +1827,7 @@ def event_create(request, id):
 
     return response
 
-
+#passing values to patient_home
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def patient_home(request, id):
 
@@ -1283,10 +1844,12 @@ def patient_home(request, id):
         'profile': profile,
     }
     try:
-        pdrelations = PatientHospital.objects.filter(patient=profile)
+        #get all relevant events by accumulating the hospital registrations the patient has
+        pdrelations = PatientHospital.objects.filter(
+            patient=profile, status=True)
+        context['pdrelations'] = pdrelations
         events = Event.objects.filter(
             pd_relation__in=pdrelations, date_in__gte=timezone.now())
-
         context['events'] = events
 
     except PatientHospital.DoesNotExist:
@@ -1296,7 +1859,7 @@ def patient_home(request, id):
 
     return response
 
-
+#staff home has a lot of data to be passed since there are 3 types of staff with all different data needs
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def staff_home(request, id):
 
@@ -1307,14 +1870,16 @@ def staff_home(request, id):
     last_monday = now - timedelta(days=now.weekday())
     next_monday = last_monday + timedelta(days=6)
 
+    #get the days of the current week for the it guy table
     dates = []
     dates.append(last_monday)
     for i in range(1, 7):
         next = last_monday + timedelta(days=i)
         dates.append(next)
 
-    context['dates'] = dates  # DISPLAY THIS
+    context['dates'] = dates
 
+    #get the current user
     if id != request.user.id:
         return redirect('home_base')
 
@@ -1326,6 +1891,7 @@ def staff_home(request, id):
     profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
     context['profile'] = profile
 
+    #pass groups and tasks in the side bar
     try:
         groups = Group.objects.filter(members=profile)
         context['groups'] = groups
@@ -1338,10 +1904,11 @@ def staff_home(request, id):
     except Task.DoesNotExist:
         pass
 
+    #if staff is a doctor, we pass events and inpatients
     if profile.baseuser.user_type == 2:
         try:
             pdrelations = PatientHospital.objects.filter(
-                hospital=profile.ward.hospital)
+                hospital=profile.ward.hospital, status=True)
 
             try:
                 events = Event.objects.filter(
@@ -1351,8 +1918,9 @@ def staff_home(request, id):
                 pass
 
             try:
-                inpatients = PatientHospital.objects.filter(
-                    inpatient=True, hospital=profile.ward.hospital)
+                ph = PatientHospital.objects.filter(
+                    inpatient=True, hospital=profile.ward.hospital).values('patient')
+                inpatients = Patient.objects.filter(baseuser__in=ph)
                 context['inpatients'] = inpatients
             except PatientHospital.DoesNotExist:
                 pass
@@ -1360,10 +1928,11 @@ def staff_home(request, id):
         except PatientHospital.DoesNotExist:
             pass
 
+    #if staff is receptionist, we pass events and pending registrations
     elif profile.baseuser.user_type == 3:
         try:
             pdrelations = PatientHospital.objects.filter(
-                hospital=profile.ward.hospital)
+                hospital=profile.ward.hospital, status=True)
             try:
                 events = Event.objects.filter(date_in__date=date.today())
                 events = events.filter(pd_relation__in=pdrelations)
@@ -1380,6 +1949,7 @@ def staff_home(request, id):
         except PatientHospital.DoesNotExist:
             pass
 
+    #if staff is itguy, we pass events and the schedule for staff with shifts
     elif profile.baseuser.user_type == 4:
 
         staff = {}
@@ -1413,9 +1983,7 @@ def staff_home(request, id):
 
     return response
 
-#################################################################################################################################
-
-
+#patient looks at own details
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def patient_details(request, id):
 
@@ -1433,6 +2001,7 @@ def patient_details(request, id):
 
     context['profile'] = profile
 
+    #change the address format so geopy can work out the text address from the coordinates
     prev_address = profile.address
     prev_address = prev_address[7:-1]
     splits = prev_address.split(" ")
@@ -1452,7 +2021,7 @@ def patient_details(request, id):
         request, 'myhealthdb/patient/patient_details.html', context)
     return response
 
-
+#form for patient to update her details
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def patient_details_update(request, id):
 
@@ -1465,8 +2034,10 @@ def patient_details_update(request, id):
         return redirect('index')
 
     profile = Patient.objects.get_or_create(baseuser=baseuser)[0]
+
+    #form stuff, there is a form and a formset, both get passed as post data and saved.
     form = PatientProfileForm({'dob': profile.dob, 'first_name': profile.first_name, 'last_name': profile.last_name, 'sex': profile.sex, 'tel_no': profile.tel_no, 'nhs_no': profile.nhs_no,
-                               'address': profile.address})  # ad_line1': profile.ad_line1, 'ad_line2': profile.ad_line2, 'ad_city': profile.ad_city, 'ad_postcode': profile.ad_postcode, 'ad_country': profile.ad_country})
+                               'address': profile.address}) 
     form.fields['dob'].widget = DatePickerInput()
     form.fields['address'].widget = GooglePointFieldWidget()
     ecformset = ECSet(instance=request.user.patient)
@@ -1477,7 +2048,6 @@ def patient_details_update(request, id):
                           request.FILES or None, instance=request.user.patient)
 
         if form.is_valid() and ecformset.is_valid():
-            # form.save()
             profile = form.save(commit=False)
             profile.save()
 
@@ -1501,9 +2071,11 @@ def patient_details_update(request, id):
         request, 'myhealthdb/patient/patient_details_update.html', context)
     return response
 
-
+#displays all the tasks for the staff
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def task_home(request, id):
+
+    context = {}
 
     if id != request.user.id:
         return redirect('home_base')
@@ -1517,6 +2089,9 @@ def task_home(request, id):
 
     profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
 
+    #separate the tasks into: my tasks, i.e. tasks i have to complete, and tasks by me, i.e tasks i have set. 
+    #further separate them into 3 categories each, due, overdue, and finished.
+
     my_tasks_overdue = Task.objects.filter(
         complete=False, complete_by=profile, deadline__lte=now)
     my_tasks_due = Task.objects.filter(
@@ -1529,22 +2104,36 @@ def task_home(request, id):
         complete=False, set_by=profile, deadline__gte=now)
     tasks_by_me_finished = Task.objects.filter(set_by=profile, complete=True)
 
-    context = {
-        'profile': profile,
-        'my_tasks_overdue': my_tasks_overdue,
-        'my_tasks_due': my_tasks_due,
-        'my_tasks_finished': my_tasks_finished,
-        'tasks_by_me_overdue': tasks_by_me_overdue,
-        'tasks_by_me_due': tasks_by_me_due,
-        'tasks_by_me_finished': tasks_by_me_finished,
-    }
+    try:
+        groups = Group.objects.filter(members=profile)
+        context['groups'] = groups
+    except Group.DoesNotExist:
+        pass
+
+    try:
+        tasks = Task.objects.filter(complete_by=profile, complete=False)
+        context['tasks'] = tasks
+    except Task.DoesNotExist:
+        pass
+
+    #pass everything to context
+    context['profile'] = profile
+    context['my_tasks_overdue'] = my_tasks_overdue
+    context['my_tasks_due'] = my_tasks_due
+    context['my_tasks_finished'] = my_tasks_finished
+    context['tasks_by_me_overdue'] = tasks_by_me_overdue
+    context['tasks_by_me_due'] = tasks_by_me_due
+    context['tasks_by_me_finished'] = tasks_by_me_finished
 
     response = render(request, 'task/tasks.html', context)
     return response
 
-
+#staff details is a form, prepopulated
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def staff_details(request, id):
+    
+    #context stuff
+    context = {}
 
     if id != request.user.id:
         return redirect('home_base')
@@ -1555,14 +2144,28 @@ def staff_details(request, id):
         return redirect('index')
 
     profile = Staff.objects.get_or_create(baseuser=baseuser)[0]
-    form = StaffProfileForm({'tel_no': profile.tel_no, 'first_name': profile.first_name,
-                             'last_name': profile.last_name, 'ward': profile.ward})
 
+    #we prefill the fields of the form
+    form = StaffProfileForm({'tel_no': profile.tel_no, 'first_name': profile.first_name,
+                             'last_name': profile.last_name})  # , 'ward': profile.ward
+
+    try:
+        groups = Group.objects.filter(members=profile)
+        context['groups'] = groups
+    except Group.DoesNotExist:
+        pass
+
+    try:
+        tasks = Task.objects.filter(complete_by=profile, complete=False)
+        context['tasks'] = tasks
+    except Task.DoesNotExist:
+        pass
+
+    #form stuff
     if request.method == 'POST':
         form = StaffProfileForm(request.POST, instance=request.user.doctor)
 
         if form.is_valid():
-            # form.save()
             profile = form.save(commit=False)
             profile.save()
             return redirect('staff_home', id)
@@ -1570,19 +2173,20 @@ def staff_details(request, id):
             form = StaffProfileForm(instance=request.user.staff)
             print(form.errors)
 
-    context = {
-        'form': form,
-        'profile': profile,
-    }
+    context['form'] = form
+    context['profile'] = profile
 
     response = render(request, 'myhealthdb/staff/staff_details.html', context)
     return response
 
-
+#home base is the view the redirects requests depending on who the user is. if he is a patient, we redirect to patient_home etc
 @login_required(redirect_field_name='index')
 def home_base(request):
 
     thisid = request.user.id
+    if thisid == None:
+        return redirect('index')
+
     if request.user.is_superuser:
         return redirect('admin:index')
 
@@ -1592,6 +2196,7 @@ def home_base(request):
         return redirect("staff_home", id=thisid)
 
 
+#view for the contact form
 class HospitalContactFormView(FormView):
     form_class = HospitalContactForm
     template_name = 'contact_form/contact_form.html'

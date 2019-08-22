@@ -22,6 +22,9 @@
                 {% for error in form.non_field_errors %}
                 <p class="error">{{ error }}</p>
                 {% endfor %}
+                {% for error in form.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
             </div>
             {% endif %}
             {{form|crispy}}

@@ -565,6 +565,18 @@ canvas {
 /* Global Styles */
 /* Main Styles */
 
+.tab-content {
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  padding: 10px 10px;
+}
+
+/* .tab-pane {
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  border: 1px solid #e0dfdf;
+} */
+
 .navbar .input {
   border-radius: 4px;
   width: 100% !important;

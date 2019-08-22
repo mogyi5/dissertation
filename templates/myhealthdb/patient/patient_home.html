@@ -4,16 +4,21 @@
 
 {% block body_block %}
 
-<div class="card">
-  <div class="card-block">
-    <h3 class="card-header">Your updates</h3>
-    <div class="card-body">
-      <a href="#" class="card-link">Card link</a>
-      <a href="#" class="card-link">Another link</a>
-    </div>
+
+{%if pdrelations%}
+{%else%}
+<div class="card text-white bg-primary ">
+  <div class="card-header">
+    <h3>Register with a Practice!</h3>
+  </div>
+  <div class="card-body">
+    Make the most of MyHealthDB by registering with a Hospital or Practice!
+    Click on your name in the top-right corner and see 'My Practices', or click <a
+      href="{% url 'doctors_reg' id=profile.baseuser.id%}" style="color:yellow;">here</a>.
   </div>
 </div>
-<br />
+{%endif%}
+
 <div class="card">
 
   <div class="card-header">
@@ -22,16 +27,19 @@
   <div class="card-body">
     {% if events %}
     <div class="row">
-      <div class="col">
+      <div class="col-md">
         <b>Title</b>
       </div>
-      <div class="col">
+      <div class="col-md">
         <b>Time</b>
       </div>
-      <div class="col">
+      <div class="col-md">
+        <b>Practice</b>
+      </div>
+      <div class="col-md">
         <b>Type</b>
       </div>
-      <div class="col">
+      <div class="col-sm">
 
       </div>
 
@@ -39,29 +47,36 @@
     <hr />
     {% for e in events %}
     <div class="row">
-      <div class="col">
+      <div class="col-md">
         {{e.title}}
       </div>
-      <div class="col">
+      <div class="col-md">
         {{e.date_in}}
       </div>
-      <div class="col">
+      <div class="col-md">
+        <b>{{e.pd_relation.hospital}}</b>
+      </div>
+      <div class="col-md">
         {{e.type}}
       </div>
-      <div class="col">
-
+      <div class="col-sm">
+        <a class="btn btn-primary active" role="button" aria-pressed="true"
+          href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit</a>
+        <a class="btn btn-secondary active" role="button" aria-pressed="true"
+          href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete</a>
       </div>
+
 
     </div>
     <hr />
 
-    <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
-    <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
+
     <br />
     {% endfor %}
     {% else %}
     <p>You have no upcoming appointments!</p>
-    {% endif %} <a href="{%url 'event_create' id=profile.baseuser.id %}">
+    {% endif %}
+     <a href="{%url 'event_create' id=profile.baseuser.id %}">
       <button class="btn btn-primary btn-block">Book Appointment</button></a>
   </div>
 

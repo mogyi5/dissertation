@@ -19,7 +19,6 @@
         <tr>
           <th scope="col">Name</th>
           <th scope="col">Type</th>
-          <th scope="col">Address</th>
           <th scope="col">Ward List</th>
         </tr>
       </thead>
@@ -33,8 +32,15 @@
         <tr>
           <th scope="row">{{ p.name }}</th>
           <td>{{p.type}}</td>
-          <td>{{p.address}}</td>
-          <td>Ward List</td>
+          <td>
+            {%if w_pending%}
+            {%for w in w_pending%}
+            {%if w.hospital == p%}
+            {{w.name}}<br />
+            {%endif%}
+            {%endfor%}
+            {%endif%}
+          </td>
         </tr>
 
 
@@ -57,7 +63,6 @@
         <tr>
           <th scope="col">Name</th>
           <th scope="col">Type</th>
-          <th scope="col">Address</th>
           <th scope="col">Ward List</th>
         </tr>
       </thead>
@@ -70,8 +75,15 @@
         <tr>
           <th scope="row">{{ p.name }}</th>
           <td>{{p.type}}</td>
-          <td>{{p.address}}</td>
-          <td>Ward List</td>
+          <td>
+            {%if w_confirmed%}
+            {%for w in w_confirmed%}
+            {%if w.hospital == p%}
+            {{w.name}}<br />
+            {%endif%}
+            {%endfor%}
+            {%endif%}
+          </td>
         </tr>
         {% endfor %}
       </tbody>

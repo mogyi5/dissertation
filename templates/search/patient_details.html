@@ -79,8 +79,31 @@
         <hr />
         {%endif%}
 
+        <a href="{% url 'delete_relation'  id=profile.baseuser.id pk=pathospitals.pk%}"
+            class="btn btn-warning btn-lg active" role="button" aria-pressed="true">Delete Patient Relation</a>
+
+        <hr />
         {%if request.user.user_type == 2 %}
 
+        <h4>Measurements</h4>
+        <hr />
+        <div class="row">
+            <div class="col">
+                {%if height%}
+                <b>Height:</b> {{height.value}}cm
+                {%else%}
+                <p>No height recorded!</p>
+                {%endif%}
+            </div>
+            <div class="col">
+                {%if weight%}
+                <b>Weight:</b> {{weight.value}}kg
+                {%else%}
+                <p>No weight recorded!</p>
+                {%endif%}
+            </div>
+        </div>
+        <hr />
 
         <h4>Conditions</h4>
         <hr />
@@ -95,6 +118,8 @@
                     <th scope="col">Reaction</th>
                     <th scope="col">Start</th>
                     <th scope="col">Stop</th>
+                    <th scope="col">Added By</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
 
@@ -109,6 +134,10 @@
                     <td>{{p.reaction}}</td>
                     <td>{{p.start}}</td>
                     <td>{{p.stop}}</td>
+                    <td>{{p.added_by}}</td>
+                    <td> <a class="btn btn-primary"
+                            href="{% url 'edit_condition' id=profile.baseuser.id condition_pk=p.id%}" role="button">Edit
+                            Condition</a></td>
                 </tr>
 
                 {% endfor %}
@@ -119,7 +148,9 @@
         <p>Patient has no conditions!</p>
         <hr />
         {%endif%}
-
+        <a class="btn btn-primary" href="{% url 'doc_create_condition' id=profile.baseuser.id pk=patient.baseuser.id%}"
+            role="button">Record Condition</a>
+        <hr />
         <h4>Medication</h4>
         <hr />
         {%if medications%}
@@ -133,6 +164,7 @@
                     <th scope="col">Date Started</th>
                     <th scope="col">Date Finished</th>
                     <th scope="col">Notes</th>
+                    <th scope="col">Added By</th>
                 </tr>
             </thead>
 
@@ -146,6 +178,7 @@
                     <td>{{p.start}}</td>
                     <td>{{p.finish}}</td>
                     <td>{{p.notes}}</td>
+                    <td>{{p.added_by}}</td>
                 </tr>
 
                 {% endfor %}
@@ -156,6 +189,9 @@
         <p>Patient has no recorded medication!</p>
         <hr />
         {%endif%}
+        <a class="btn btn-primary" href="{% url 'doc_create_medication' id=profile.baseuser.id pk=patient.baseuser.id%}"
+            role="button">Record Medication</a>
+        <hr />
 
         <h4>Documents</h4>
         <hr />
@@ -167,6 +203,8 @@
                     <th scope="col">File</th>
                     <th scope="col">Type</th>
                     <th scope="col">Description</th>
+                    <th scope="col">Added By</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
 
@@ -179,6 +217,22 @@
                     <td> <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.file }}</a></td>
                     <td>{{p.type}}</td>
                     <td>{{p.description}}</td>
+                    <td>{{p.added_by}}</td>
+                    <td>
+                        <form id='task-delete' method="POST" action="{% url 'delete_document' p.pk %}">
+                            {% csrf_token %}
+                            {% if form.errors %}
+                            <div class="alert alert-danger">
+                                Please fix the errors in the form below.
+                                {% for error in form.non_field_errors %}
+                                <p class="error">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <a href="{% url 'delete_document' document_pk=p.pk %}">
+                                <button class="btn btn-warning" onClick="deleteFunction()">Delete</button></a>
+                        </form>
+                    </td>
                 </tr>
 
 
@@ -190,6 +244,9 @@
         <p>Patient has no uploaded documents!</p>
         <hr />
         {%endif%}
+        <a class="btn btn-primary" href="{% url 'doc_create_document' id=profile.baseuser.id pk=patient.baseuser.id%}"
+            role="button">Upload Document</a>
+        <hr />
 
         <h4>Immunizations</h4>
         <hr />
@@ -201,17 +258,19 @@
                     <th scope="col">Date</th>
                     <th scope="col">End</th>
                     <th scope="col">Amount</th>
+                    <th scope="col">Added By</th>
                 </tr>
             </thead>
 
             <tbody>
-                {% for p in object_list %}
+                {% for p in immunizations%}
 
                 <tr>
                     <th scope="row">{{ p.type }}</th>
                     <td>{{p.date}}</td>
                     <td>{{p.end}}</td>
                     <td>{{p.amount}}</td>
+                    <td>{{p.added_by}}</td>
                 </tr>
 
                 {% endfor %}
@@ -222,6 +281,9 @@
         <p>Patient has no immunizations on record!</p>
         <hr />
         {%endif%}
+        <a class="btn btn-primary"
+            href="{% url 'doc_create_immunization' id=profile.baseuser.id pk=patient.baseuser.id%}" role="button">Record
+            Immunization</a>
 
         {% endif%}
 

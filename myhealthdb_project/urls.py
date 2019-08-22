@@ -18,16 +18,12 @@ from django.contrib import admin
 
 from django.conf import settings
 from django.conf.urls.static import static
-# from registration.backends.default.views import RegistrationView
 from myhealthdb import views
 
 urlpatterns = [
-    path('captcha/', include('captcha.urls')),
-    path('myhealthdb/', include('myhealthdb.urls')),
+    path('', include('myhealthdb.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('contact/', include('contact_form.urls')),
     path('select2/', include('django_select2.urls')),
-    #path('search/', include('haystack.urls')),
-    #path('accounts/signup/staff/',views.staff_signup, name='signup-staff'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

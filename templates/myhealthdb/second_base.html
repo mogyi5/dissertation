@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="{% static 'css/cs-skin-elastic.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Chart.css' %}">
 
 </head>
 
@@ -44,10 +45,6 @@
                     </li>
 
                     {%if profile.baseuser.user_type == 1%}
-                    <li class="menu-title">Search</li><!-- /.menu-title -->
-                    <li>
-                        <a href="#"><i class="menu-icon fa fa-search"></i>Search Records </a>
-                    </li>
 
                     {% comment %}
                     <!-- insert search bar--> {% endcomment %}
@@ -58,16 +55,8 @@
                     </li>
 
                     <li class="menu-title">Self Diagnosis</li><!-- /.menu-title -->
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false"> <i class="menu-icon fa fa-heartbeat"></i>Vitals</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="fa fa-weight"></i><a
-                                    href="{% url 'weight' id=profile.baseuser.id %}">Weight</a></li>
-                            <li><i class="fa fa-heart-rate"></i><a href="#">Heart Rate</a></li>
-                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Badges</a></li>
-                            <li><i class="fa fa-bars"></i><a href="ui-tabs.html">Tabs</a></li>
-                        </ul>
+                    <li>
+                        <a href="{%url 'vitals' id=profile.baseuser.id %}"><i class="menu-icon fa fa-heartbeat"></i>Vitals </a>
                     </li>
 
                     <li class="menu-title">Records</li><!-- /.menu-title -->
@@ -87,14 +76,7 @@
                         <a href="{% url 'documents'  id=profile.baseuser.id%}"><i
                                 class="menu-icon fa fa-file-medical"></i>Documents </a>
                     </li>
-                    {% comment %} <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false"> <i class="menu-icon fa fa-file-medical"></i>Documents</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents A</a></li>
-                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
-                        </ul>
-                    </li> {% endcomment %}
+
                     {%elif profile.baseuser.user_type == 2 or profile.baseuser.user_type == 3  %}
                     <li class="menu-title">Patients</li><!-- /.menu-title -->
                     <li>
@@ -108,16 +90,6 @@
                             <input class="input" name="q" type="text" placeholder="Search by name...">
                         </form>
                     </li>
-                    </li>
-
-                    <li class="menu-title">Documents</li>
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false"> <i class="menu-icon fa fa-file-medical"></i>Documents</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="fa fa-puzzle-piece"></i><a href="ui-buttons.html">Documents A</a></li>
-                            <li><i class="fa fa-id-badge"></i><a href="ui-badges.html">Documents B</a></li>
-                        </ul>
                     </li>
 
                     {% elif profile.baseuser.user_type == 4%}
@@ -138,7 +110,7 @@
                             <li>
                                 {%if tasks%}
                                 {%for t in tasks%}
-
+                                <div>
                                 <button type="button" class="btn btn-link" data-toggle="modal"
                                     data-target="#openModaltask{{t.id}}">
                                     {{t.name}}
@@ -146,6 +118,7 @@
                                 <input data-url="{% url 'task_complete' %}" type="button" id="complete{{t.id}}"
                                     class="btn btn-secondary complete" name="{{ t.id }}" value="✓" />
                                 <br />
+                                </div>
 
 
                                 {%endfor%}
@@ -214,7 +187,9 @@
                 <div class="header-menu">
                     <div class="user-area dropdown float-right">
                         <div class="header-left">
+                        <a href="{%url 'help' id=profile.baseuser.id%}">
                             <button class="btn btn-link">Help</button>
+                        </a>
                         </div>
                     </div>
 
@@ -227,16 +202,18 @@
                         <div class="user-menu dropdown-menu">
                             {%if profile.baseuser.user_type == 1%}
                             <a class="nav-link" href="{%url 'patient_details' id=profile.baseuser.id%}"><i
-                                    class="fa fa- user"></i>My Details</a>
+                                    class="fa fa-user"></i>My Details</a>
                             <a class="nav-link" href="{%url 'doctors_view' id=profile.baseuser.id%}"><i
-                                    class="fa fa- user"></i>My Practices</a>
+                                    class="fa fa-hospital"></i>My Practices</a>
                             {%else%}
                             <a class="nav-link" href="{%url 'staff_details' id=profile.baseuser.id%}"><i
-                                    class="fa fa- user"></i>My Details</a>
+                                    class="fa fa-user"></i>My Details</a>
                             {%endif%}
 
+                            <a class="nav-link" href="{%url 'account_change_password'%}"><i
+                                    class="fa fa-key"></i>Change Password</a>
                             <a class="nav-link" href="{%url 'account_logout' %}"><i
-                                    class="fa fa-power -off"></i>Logout</a>
+                                    class="fa fa-power-off"></i>Logout</a>
                         </div>
                     </div>
 
@@ -249,9 +226,6 @@
 
             {% block body_block %}
             {% endblock %}
-            {% comment %}
-            <!-- Default map with 300x400 dimensions -->
-            {% easy_map "Gordonbush, KW9 6LX" 300 400 %} {% endcomment %}
 
 
             {%if groups%}
@@ -310,10 +284,6 @@
                     </div>
                 </div>
             </div>
-            {% comment %} <p style="padding: 0px 20px 5px 20px"><a href="#openModal_{{g.name}}">{{g.name}}</a></p>
-            {% endcomment %}
-            {% comment %}
-            </a> {% endcomment %}
 
             {%endfor%}
             {%endif%}
@@ -349,13 +319,13 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            <hr/>
+                            <hr />
                             <div class="row">
                                 <div class="col">
                                     <b>Notes: </b> {{t.notes}}
                                 </div>
                             </div>
-                            
+
 
 
                         </div>
@@ -373,10 +343,6 @@
                     </div>
                 </div>
             </div>
-            {% comment %} <p style="padding: 0px 20px 5px 20px"><a href="#openModal_{{g.name}}">{{g.name}}</a></p>
-            {% endcomment %}
-            {% comment %}
-            </a> {% endcomment %}
 
             {%endfor%}
             {%endif%}
@@ -385,10 +351,13 @@
             <footer class="site-footer-signup">
                 <div class="footer-inner bg-white">
                     <div class="row">
-                        <div class="col-sm-6">
+                        <div class="col-sm-4">
                             Copyright &copy; 2018 Ela Admin
                         </div>
-                        <div class="col-sm-6 text-right">
+                        <div class="col-sm-4 text-center">
+                           <b><a style="color:#344e86" href="https://app.termly.io/document/privacy-notice/60ba3efc-0d8c-410b-8736-e87cab7f2e8a">Privacy Policy</a></b>
+                        </div>
+                        <div class="col-sm-4 text-right">
                             Designed by <a href="https://colorlib.com">Colorlib</a>
                         </div>
                     </div>
@@ -427,7 +396,9 @@
         <script src="{% static 'js/main.js' %}"></script>
 
         <!-- chart.js for the vitals charts-->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        {% comment %} https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js {% endcomment %}
+        {% comment %} <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script> {% endcomment %}
+        <script src="{% static 'js/Chart.js' %}"></script>
 
         <!-- ajax js -->
         <script type="text/javascript">
@@ -477,6 +448,8 @@
                 scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters)
             })
         </script>
+            {% block jquery_block %}
+            {% endblock %}
 
 </body>
 

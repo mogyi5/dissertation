@@ -1,0 +1,25 @@
+{% extends 'myhealthdb/second_base.html' %}
+
+{% load crispy_forms_tags %}
+{% block body_block %}
+
+<div class="card">
+    <div class="card-header">
+        <h3>Delete Patient Relation</h3>
+    </div>
+    <div class="card-body">
+        <form method="post">{% csrf_token %}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                Please fix the errors in the form below.
+                {% for error in form.non_field_errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <p>Are you sure you want to delete "{{ object.patient }}" from the Practice?</p>
+            <input class="btn btn-primary btn-block" type="submit" value="Confirm">
+        </form>
+    </div>
+</div>
+{%endblock%}

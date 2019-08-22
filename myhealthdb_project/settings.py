@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+#directories 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,41 +41,21 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myhealthdb',
     'registration',
-
-    'django.contrib.sites', # new
-
-    # 3rd party
-    'allauth', # new
-    'allauth.account', # new
-    'allauth.socialaccount', # new
-
+    'rest_framework',
+    'django.contrib.sites',
+    'allauth', 
+    'allauth.account',
+    'allauth.socialaccount',
     'crispy_forms',
-
     'contact_form',
-
-    'captcha',
     'datetimewidget',
     'bootstrap_datepicker_plus',
     'bootstrap4',
-    'bootstrap_modal_forms',
     'django_select2',
-    'chartjs',
     'easy_maps',
     'postgis',
     'mapwidgets',
     'phonenumber_field'
-
-    # 'pysolr',
-    # 'elasticsearch',
-    # 'elasticsearch2',
-    # 'haystack',
-    #'xapian-haystack',
-    # 'todo',
-    # 'bleach',
-    # 'schedule',
-    # 'djangobower',
-
-    # 'fullcalendar',
 ]
 
 MIDDLEWARE = [
@@ -191,6 +170,8 @@ AUTHENTICATION_BACKENDS = (
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
+#AllAuth
+
 SITE_ID = 1
 
 ACCOUNT_EMAIL_REQUIRED = True
@@ -214,8 +195,7 @@ EMAIL_HOST_USER = 'szaboki.reka@gmail.com'  # this is my email address, use your
 EMAIL_HOST_PASSWORD = 'Cttbsr48R2'   # set environ yourself
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 
-RECAPTCHA_PUBLIC_KEY = '6Ld_ya0UAAAAACdlTzZNLrMDzp_99XUX6lFM7rq4'
-RECAPTCHA_PRIVATE_KEY = '6Ld_ya0UAAAAAAY9-Gw97sL411C1ImaAVoXwPVdC'
+# crispy form specific
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -223,30 +203,12 @@ BOOTSTRAP4 = {
     'include_jquery': True,
 }
 
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-#         'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
-#     },
-# }
-
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-#         'URL': 'http://127.0.0.1:9200/',
-#         'INDEX_NAME': 'haystack',
-#     },
-# }
-
-# HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-
 #USER STUFF
 AUTH_USER_MODEL = 'myhealthdb.CustomUser'
 
-# EASY_MAPS_GOOGLE_KEY = 'AIzaSyAJepJxaTHQRGbSPstrE3Pr0VdEnrN2d0o'
-# EASY_MAPS_GOOGLE_KEY = 'AIzaSyATg_isuGSCHIlJamrxAXfkFDTYhIz7ytM'
-EASY_MAPS_GOOGLE_KEY = 'AIzaSyCzCYVvHq7yit0ESbH-OLn8r0dA4WiMb8I'
+#map stuff
 
+EASY_MAPS_GOOGLE_KEY = 'AIzaSyCzCYVvHq7yit0ESbH-OLn8r0dA4WiMb8I'
 EASY_MAPS_CENTER = (-41.3, 32)
 
 
@@ -262,7 +224,7 @@ MAP_WIDGETS = {
 
 # SECURE_SSL_REDIRECT=FALSE
 
-# GDAL_LIBRARY_PATH = 'C:\OSGeo4W64\bin\gdal204'
+#gdal and geo related stuff
 
 if os.name == 'nt':
     import platform
@@ -274,3 +236,8 @@ if os.name == 'nt':
     os.environ['GDAL_DATA'] = OSGEO4W + r"\share\gdal"
     os.environ['PROJ_LIB'] = OSGEO4W + r"\share\proj"
     os.environ['PATH'] = OSGEO4W + r"\bin;" + os.environ['PATH']
+
+#phonenumber things
+
+PHONENUMBER_DB_FORMAT = 'NATIONAL'
+PHONENUMBER_DEFAULT_REGION = 'GB'

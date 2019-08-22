@@ -21,6 +21,7 @@
                     <th scope="col">Reaction</th>
                     <th scope="col">Start</th>
                     <th scope="col">Stop</th>
+                    <th scope="col">Added By</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -36,6 +37,11 @@
                     <td>{{p.reaction}}</td>
                     <td>{{p.start}}</td>
                     <td>{{p.stop}}</td>
+                    {%if p.added_by.id == profile.baseuser.id%}
+                    <td>You</td>
+                    {% else %}
+                    <td>Staff</td>
+                    {%endif%}
                     <td> <a href="{% url 'edit_condition' id=profile.baseuser.id condition_pk=p.pk %}">
                             <button class="btn btn-secondary">Edit</button></a></td>
                 </tr>

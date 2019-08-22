@@ -6,8 +6,6 @@
 {{ efformset.media }}
 {% endblock %}
 
-{% comment %} {{ form.media.css }}
-{{ form.media.js }} {% endcomment %}
 
 {% block body_block %}
 <div class="card">
@@ -37,9 +35,9 @@
             {% endif %}
 
             <div id="efform_set">
-                {% comment %} {{ efformset.management_form }} {% endcomment %}
+                
                 {{ efformset.management_form }}
-                {% comment %} {{ efformset|crispy }} {% endcomment %}
+
 
                 {% for f in efformset %}
                 <div>
@@ -53,10 +51,6 @@
                 {% endfor %}
                 {% endif %}
 
-                {% comment %} {%for form in efformset%}
-                {{ efformset|crispy}}
-                {{form|crispy}}
-                {%endfor%} {% endcomment %}
                 <button class="btn btn-primary btn-block" type="submit" name="submit">Submit!</button>
         </form>
     </div>

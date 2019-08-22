@@ -20,7 +20,6 @@ urlpatterns = [
     path('profile/<int:id>/events/<int:event_pk>/delete-event/', views.EventDeleteView.as_view(), name='delete_event'),
     path('profile/<int:id>/events/', views.events, name='events'),
     path('profile/<int:id>/search-result/', views.PatientSearchResultsView.as_view(), name='patient_search_results'),
-    # path('profile/<int:id>/group/<slug:slug>/', views.GroupDetailsView.as_view(), name='group'),
     path('profile/<int:id>/create-task/', views.TaskCreateView.as_view(), name='create_task'),
     path('profile/<int:id>/task-home/', views.task_home, name='task'),
     path('task_complete/', views.task_complete, name='task_complete'),
@@ -37,8 +36,7 @@ urlpatterns = [
     path('profile/<int:id>/add-document/', views.DocumentCreateView.as_view(), name='create_document'),
     path('profile/<int:id>/pdf-view/<int:pdfid>/', views.pdf_view, name='pdf_view'),   
     path('delete-document/<int:document_pk>/', views.DocumentDeleteView.as_view(), name='delete_document'),
-    path('profile/<int:id>/weight/', views.weightview, name='weight'),
-    path('weight_chart_json/', views.WeightChartJSONView.as_view(), name='weight_chart_json'),
+    path('profile/<int:id>/vitals/', views.vitalsview, name='vitals'),
     path('profile/<int:id>/groups/', views.autocompleteGroup, name='groups'),
     path('profile/<int:id>/doctors/', views.doctors_view, name='doctors_view'),
     path('profile/<int:id>/doctors/register/', views.doctors_reg, name='doctors_reg'),
@@ -53,10 +51,14 @@ urlpatterns = [
     path('profile/<int:id>/shifts/<int:pk>/edit-shift/', views.ShiftUpdateView.as_view(), name='edit_shift'),
     path('profile/<int:id>/shifts/<int:pk>/delete-shift/', views.ShiftDeleteView.as_view(), name='delete_shift'),
     path('profile/<int:id>/patients/<int:pk>/', views.patient_view, name='patient_view'),
-
-    
-    # path('profile/<int:id>/groups_search/', views.autocompleteGroup, name='ajax_group_search'),
-    # path('weight_chart_json2/', views.WeightChartJSON2View.as_view(), name='weight_chart_json2'),
-
-    # path('profile/<int:id>/advanced-search/', views.AdvancedSearchView.as_view(), name='advanced_search'),
+    path('profile/<int:id>/patients/<int:pk>/create-immunization/', views.ImmunizationCreateView, name='doc_create_immunization'),
+    path('profile/<int:id>/patients/<int:pk>/create-condition/', views.DoctorConditionCreateView, name='doc_create_condition'),
+    path('profile/<int:id>/patients/<int:pk>/create-medication/', views.DoctorMedicationCreateView, name='doc_create_medication'),
+    path('profile/<int:id>/patients/<int:pk>/upload-document/', views.DoctorDocumentCreateView, name='doc_create_document'),
+    path('profile/<int:id>/patients/<int:pk>/delete/', views.PatientHospitalDeleteView.as_view(), name='delete_relation'),
+    path('profile/<int:id>/staff-create-event/', views.staff_event_create, name='staff_event_create'),
+    path('profile/<int:id>/add_height/', views.HeightCreateView, name='add_height'),
+    path('profile/<int:id>/add_weight/', views.WeightCreateView, name='add_weight'),
+    path('profile/<int:id>/help/', views.help, name='help'),
+    path('weightdata/<int:id>/', views.WeightData.as_view(), name='weight_data'),
 ]

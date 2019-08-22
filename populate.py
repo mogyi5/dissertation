@@ -29,9 +29,9 @@ def populate():
     itguy = CustomUser.objects.create_user(username='itguy',email='it@it.com',password='myhealthdb', user_type = '4' )
 # populating the patients also
     Profiles = {
-    "patient@patient.com":{'firstname':'pat', 'lastname':'pot',"sex": "Female", "dob": "2002-02-02", "tel_no": "111111111111"}, #, "address":"UK, Birmingham"}, #"ad_line1":"my first line", "ad_city":"glasgow", "ad_postcode":"g22 opp", "ad_country":"uk"},
-    "patient2@patient2.com":{'firstname':'bot', 'lastname':'bat',"sex": "Male", "dob": "2003-03-03", "tel_no": "2222222222222"},# "address":"UK, London"},# "ad_line1":"hello hello", "ad_city":"edinburgh", "ad_postcode":"ginaaa", "ad_country":"england"},    
-    "patient3@patient3.com":{'firstname':'yoyo', 'lastname':'whatsup',"sex": "Female", "dob": "2004-04-04", "tel_no": "333333333333"},# "address":"UK, Glasgow, Rosevale 23"},#  "ad_line1":"i am groot", "ad_city":"wales", "ad_postcode":"binary", "ad_country":"spain"},
+    "patient@patient.com":{'firstname':'pat', 'lastname':'pot',"sex": "Female", "dob": "2002-02-02", "tel_no": "+41524204242"}, #, "address":"UK, Birmingham"}, #"ad_line1":"my first line", "ad_city":"glasgow", "ad_postcode":"g22 opp", "ad_country":"uk"},
+    "patient2@patient2.com":{'firstname':'bot', 'lastname':'bat',"sex": "Male", "dob": "2003-03-03", "tel_no": "+41524204242"},# "address":"UK, London"},# "ad_line1":"hello hello", "ad_city":"edinburgh", "ad_postcode":"ginaaa", "ad_country":"england"},    
+    "patient3@patient3.com":{'firstname':'yoyo', 'lastname':'whatsup',"sex": "Female", "dob": "2004-04-04", "tel_no": "+41524204242"},# "address":"UK, Glasgow, Rosevale 23"},#  "ad_line1":"i am groot", "ad_city":"wales", "ad_postcode":"binary", "ad_country":"spain"},
     }
 
     for p, p_data in Profiles.items():
@@ -59,12 +59,12 @@ def populate():
 
 # populating the staff also
     Staff = {
-    "doctor@doctor.com":{'firstname':'dic', 'lastname':'doc',"tel_no": "222222222222", "ward": "ward"},
-    "doctor2@doctor2.com":{'firstname':'derek', 'lastname':'doo',"tel_no": "1324", "ward": "ward"},
-    "doctor3@doctor3.com":{'firstname':'drunk', 'lastname':'yoohoo',"tel_no": "07479509090",  "ward": "ward2"},
-    "receptionist1@receptionist1.com":{'firstname':'ella', 'lastname':'b',"tel_no": "849002380",  "ward": "ward2"},
-    "receptionist2@receptionist2.com":{'firstname':'recept', 'lastname':'ionist',"tel_no": "7743",  "ward": "ward"},
-    "it@it.com":{'firstname':'itguy', 'lastname':'itguy',"tel_no": "7789798743",  "ward": "ward"},
+    "doctor@doctor.com":{'firstname':'dic', 'lastname':'doc',"tel_no": "+41524204242", "ward": "ward"},
+    "doctor2@doctor2.com":{'firstname':'derek', 'lastname':'doo',"tel_no": "+41524204242", "ward": "ward"},
+    "doctor3@doctor3.com":{'firstname':'drunk', 'lastname':'yoohoo',"tel_no": "+41524204242",  "ward": "ward2"},
+    "receptionist1@receptionist1.com":{'firstname':'ella', 'lastname':'b',"tel_no": "+41524204242",  "ward": "ward2"},
+    "receptionist2@receptionist2.com":{'firstname':'recept', 'lastname':'ionist',"tel_no": "+41524204242",  "ward": "ward"},
+    "it@it.com":{'firstname':'itguy', 'lastname':'itguy',"tel_no": "+41524204242",  "ward": "ward"},
     }
 
     for p, p_data in Staff.items():

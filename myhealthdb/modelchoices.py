@@ -1,8 +1,13 @@
+
+#choices for the models and the forms included here.
+
+#patient sex
 SEX = (
     ('M', 'Male'),
     ('F', 'Female')
 )
 
+#customuser user_type
 USER_TYPE_CHOICES = (
     (1, 'patient'),
     (2, 'doctor'),
@@ -10,6 +15,13 @@ USER_TYPE_CHOICES = (
     (4, 'IT'),
 )
 
+#vital type
+VITALTYPE = (
+    ('Weight', 'Weight'),
+    ('Height', 'Height'),
+)
+
+#condition type
 CONDITION_TYPE = (
     ('Allergy', 'Allergy'),
     ('Heart Condition', 'Heart Condition'),
@@ -17,6 +29,7 @@ CONDITION_TYPE = (
     ('Deaf', 'Deaf'),
 )
 
+#condition severity
 SEVERITY = (
     ('Minor', 'Minor'),
     ('Low', 'Low'),
@@ -25,40 +38,21 @@ SEVERITY = (
     ('Severe', 'Severe'),
 )
 
-ACTIVITY_TYPE = (
-    ('Run', 'Run'),
-    ('Jog', 'Jog'),
-    ('Walk', 'Walk'),
-    ('Cycle', 'Cycle'),
-    ('Swim', 'Swim'),
-)
-
-UNIT = (
-    ('m', 'm'),
-    ('Km', 'Km'),
-    ('Mi', 'Mi'),
-)
-
+#hospital type
 HOSPITAL_TYPE = (
     ('General Practice', 'General Practice'),
     ('General Hospital', 'General Hospital'),
     ('Specialized Hospital', 'Specialized Hospital')
 )
 
-SEVERITY = (
-    ('Minor', 'Minor'),
-    ('Low', 'Low'),
-    ('Moderate', 'Moderate'),
-    ('Very High', 'Very High'),
-    ('Severe', 'Severe'),
-)
-
+#document type
 DOC_TYPE = (
     ('Discharge Letter', 'Discharge Letter'),
     ('Lab Result', 'Lab Result'),
     ('Prescription', 'Prescription')
 )
 
+#event type
 EVENT_TYPE = (
     ('Surgery', 'Surgery'),
     ('Consultation', 'Consultation'),
@@ -68,13 +62,15 @@ EVENT_TYPE = (
     ('Shift', 'Shift'),
 )
 
+#immunization type
 IMM_TYPE = (
     ('FLU', 'Influenza'),
-    ('ZIK', 'Zika Virus')
+    ('ZIK', 'Zika Virus'),
+    ('MSL', 'Measles')
 )
 
+#hospital form interest
 REASON = (
-    ('support', 'Support'),
-    ('feedback', 'Feedback'),
-    ('delete', 'Account deletion')
+    ('I', 'Interest in Product'),
+    ('P', 'Problem with the Product')
 )

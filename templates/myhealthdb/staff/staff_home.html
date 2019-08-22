@@ -4,45 +4,13 @@
 {% load myhealthdb_extras %}
 
 {% block body_block %}
-<div class="card">
-  <div class="card-block">
-    <h3 class="card-header">Your updates</h3>
-    <div class="card-body">
-      <a href="#" class="card-link">Card link</a>
-      <a href="#" class="card-link">Another link</a>
-    </div>
-  </div>
-</div>
 
 
-{% comment %} <div class="card">
-  <div class="card-block">
-    <h4 class="card-title">Your appointments today</h4>
-    {% if events %}
-    {% for e in events %}
-
-    {{e.title}}
-    {{e.date_in}}
-    {{e.type}}
-    <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
-    <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
-    <br />
-    {% endfor %}
-    {% else %}
-    <p>You have no pending events!</p>
-    {% endif%} <br />
-    {% if profile.baseuser.id == 3%}
-    <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
-    {% endif %}
-  </div>
-</div> {% endcomment %}
 {% if profile.baseuser.user_type != 4%}
 
-<div class="container">
-  <div class="row">
     <div class="col-xs-12 ">
       <nav>
-        <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
           <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-schedule" role="tab"
             aria-controls="nav-home" aria-selected="true">Schedule</a>
           {% if profile.baseuser.user_type == 2 %}
@@ -52,56 +20,123 @@
           <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-inpatients" role="tab"
             aria-controls="nav-profile" aria-selected="false">Pending Registration</a>
           {% endif %}
-          {% comment %} <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact"
-            role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
-          <a class="nav-item nav-link" id="nav-about-tab" data-toggle="tab" href="#nav-about" role="tab"
-            aria-controls="nav-about" aria-selected="false">About</a> {% endcomment %}
-        </div>
       </nav>
       <div class="tab-content py-3 px-3 px-sm-0" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-schedule" role="tabpanel" aria-labelledby="nav-home-tab">
           {% if profile.baseuser.user_type == 2%}
-          <h4 class="card-title">Your appointments today</h4>
+          <h3>Your appointments today</h3>
           {% elif profile.baseuser.user_type == 3 %}
-          <h4 class="card-title">Today's appointments</h4>
-
+          <h3>Today's appointments</h3>
 
           {% endif %}
 
+          <hr />
+
           {% if events %}
+          <div class="row">
+            <div class="col-md">
+              <b>Title</b>
+            </div>
+            <div class="col-md">
+              <b>Time</b>
+            </div>
+            <div class="col-md">
+              <b>Patient</b>
+            </div>
+            <div class="col-md">
+              <b>Type</b>
+            </div>
+            <div class="col-sm">
+
+            </div>
+
+          </div>
+          <hr />
           {% for e in events %}
+          <div class="row">
+            <div class="col-md">
+              {{e.title}}
+            </div>
+            <div class="col-md">
+              {{e.date_in}}
+            </div>
+            <div class="col-md">
+              <b>{{e.pd_relation.patient}}</b>
+            </div>
+            <div class="col-md">
+              {{e.type}}
+            </div>
+            <div class="col-sm">
+              <a class="btn btn-primary active" role="button" aria-pressed="true"
+                href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit</a>
+              <a class="btn btn-secondary active" role="button" aria-pressed="true"
+                href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete</a>
+            </div>
 
-          {% if profile.baseuser.user_type == 3%}
-          {{e.pd_relation.doctor}}
-          {{e.pd_relation.patient}}
-          {% endif%}
 
-          {{e.title}}
-          {{e.date_in.time}}
-          {{e.type}}
-          <a href="{%url 'edit_event' id=profile.baseuser.id event_pk=e.id %}">Edit event</a>
-          <a href="{%url 'delete_event' id=profile.baseuser.id event_pk=e.id %}">Delete event</a>
+          </div>
+          <hr />
+
+
           <br />
           {% endfor %}
           {% else %}
-          <p>You have no pending events!</p>
-          {% endif%} <br />
-          {% if profile.baseuser.id == 3%}
-          <a href="{%url 'event_create' id=profile.baseuser.id %}" class="card-link">Book appointment</a>
+          <p>There are no upcoming appointments!</p>
+          {% endif %}
+
+          {% if profile.baseuser.user_type == 3 %}
+          <a href="{%url 'staff_event_create' id=profile.baseuser.id %}" class="btn btn-primary btn-block active"
+            role="button" aria-pressed="true">Book Appointment</a>
+
           {% endif %}
         </div>
         {% if profile.baseuser.user_type == 2 %}
         <div class="tab-pane fade" id="nav-inpatients" role="tabpanel" aria-labelledby="nav-profile-tab">
-          {% if inpatients %}
-          {% for i in inpatients %}
 
-          {{i.patient}}
+          <div>
+            <h3>Your inpatients</h3>
+            <hr/>
+            {%if inpatients%}
 
-          <br />
-          {% endfor %}
-          {% else %}
-          <p>You have no inpatients!</p>
-          {% endif%}
+            <div class="row">
+              <div class="col">
+                <b>Patient Name</b>
+              </div>
+              <div class="col">
+                <b>Sex</b>
+              </div>
+              <div class="col">
+                <b>DoB</b>
+              </div>
+              <div class="col">
+                <b>NHS Number</b>
+              </div>
+            </div>
+            <hr />
+            {% for p in inpatients %}
+
+            <div class="row">
+              <div class="col">
+                <a href="{% url 'patient_view'  id=profile.baseuser.id pk=p.baseuser.id%}">{{p.first_name}}
+                  {{p.last_name}}</a>
+              </div>
+              <div class="col">
+                {{p.sex}}
+              </div>
+              <div class="col">
+                {{p.dob}}
+              </div>
+              <div class="col">
+                {{p.nhs_no}}
+              </div>
+            </div>
+            <hr />
+
+            {% endfor %}
+            {% else %}
+            <p>You have no inpatients!</p>
+            {% endif%}
+          </div>
         </div>
         {% elif profile.baseuser.user_type == 3%}
         <div class="tab-pane fade" id="nav-inpatients" role="tabpanel" aria-labelledby="nav-profile-tab">
@@ -109,11 +144,9 @@
           {% for i in pending %}
           <div>
             {{i.patient}} <input data-url="{% url 'accept_patient' %}" type="button" id="register_pat{{i.id}}"
-              class="register_pat btn btn-info" name="{{ i.id }}" value="Accept!"
-              onclick='confirm("Are you sure you want to register this patient?");' />
+              class="register_pat btn btn-primary" name="{{ i.id }}" value="Accept!" />
             <input data-url="{% url 'reject_application' %}" type="button" id="reject_pat{{i.id}}"
-              class="reject_pat btn btn-info" name="{{ i.id }}" value="Reject!"
-              onclick='confirm("Are you sure you want to reject this patient?");' />
+              class="reject_pat btn btn-warning" name="{{ i.id }}" value="Reject!" />
 
             <br />
           </div>
@@ -126,8 +159,6 @@
 
       </div>
     </div>
-  </div>
-</div>
 
 {%else %}
 <div class="card">

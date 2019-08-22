@@ -4,44 +4,135 @@
 
 
 {% block body_block %}
-<h3>Your Weight</h3>
-<canvas id="weightChart"></canvas>
-<canvas id="weightChart2"></canvas>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Your Measurements</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6 col-md-2">
+
+                <h5>Your BMI: </h5>
+            </div>
+            <div class="col-6 col-md-2">
+                {%if bmi%}
+
+                {%if bmi <= 18 %}
+
+                <p style="color:blue">{{bmi|floatformat:"2"}} <b>Underweight</b></p>
+
+                {%elif bmi > 18 and bmi < 25%}
+                <p style="color:green">{{bmi|floatformat:"2"}} <b>Healthy</b></p>
+
+                {%elif bmi >= 25 and bmi < 30 %}
+                <p style="color:yellow">{{bmi|floatformat:"2"}} <b>Overweight</b></p>
+                {%elif bmi >= 30 and bmi < 39 %}
+                <p style="color:orange">{{bmi|floatformat:"2"}} <b>Obese</b></p>
+                {%elif bmi >= 39%}
+                <p style="color:red">{{bmi|floatformat:"2"}} <b>Extremely Obese</b></p>
+
+                {%endif%}
+                {%else%}
+                <p>BMI calculated after you input height and weight!</p>
+                {%endif%}
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-6 col-md-2">
+
+                <h5>Your Height: </h5>
+            </div>
+
+            {%if height%}
+            <div class="col-6 col-md-2">
+
+                {{height.value}}cm
+            </div>
+            {%else%}
+            <div class="col-6 col-md-2">
+                <p>No height data!</p>
+            </div>
+            <div class="col-6 col-md-2">
 
 
-<script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"></script>
+                <a href="{% url 'add_height' id=profile.baseuser.id %}" class="btn btn-primary btn-lg active"
+                    role="button" aria-pressed="true">Add Height</a>
+            </div>
+            {%endif%}
 
-<!-- chart.js for the vitals charts-->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        </div>
 
-<script type="text/javascript">
-    $.get('{% url "weight_chart_json" %}', function (data) {
-        var ctx = $("#weightChart").get(0).getContext("2d");
-        new Chart(ctx, {
-            type: 'line',
-            data: data,
-        });
-    });
-</script>
-{% comment %} 
-<script type="text/javascript">
-    $.get('{% url "weight_chart_json2" %}', function (data) {
-        var ctx = $("#weightChart2").get(0).getContext("2d");
-        new Chart(ctx, {
-            type: 'line',
-            data: data,//{
-                //datasets: [{
-                  //  data: data,
-                   // cubicInterpolationMode: 'monotone',
-                //}]
-            //}
-            //backgroundColor: 'rgba(255,99,132,0.2)'
-            options: {
-                responsive: true,
-                spanGaps: false,
-            }
-        });
-    });
-</script> {% endcomment %}
+        <hr />
+        <div class="row">
+            <div class="col-6 col-md-2">
+
+                <h5>Your Weight: </h5>
+            </div>
+            <div class="col-6 col-md-2">
+                {%if weight%}
+
+                {{weight.value}}kg
+
+                {% else %}
+                <p>No weight data!</p>
+                {%endif%}
+            </div>
+            {%if already%}
+            <div class="col-12 col-md-4">
+                <p>You may update your weight once a day.</p>
+            </div>
+            {%else%}
+            <div class="col-12 col-md-2">
+
+                <a href="{% url 'add_weight' id=profile.baseuser.id %}" class="btn btn-primary btn-lg active"
+                    role="button" aria-pressed="true">Add Weight</a>
+
+            </div>
+            {%endif%}
+
+        </div>
+        <canvas id="myChart"></canvas>
+    </div>
+</div>
 
 {% endblock %}
+
+{%block jquery_block%}
+<script>
+    $(document).ready(function () {
+        var endpoint = '/weightdata/{{profile.baseuser.id}}'
+        var defaultData = []
+        var labels = []
+        $.ajax({
+            method: "GET",
+            url: endpoint,
+            success: function (data) {
+                labels = data.labels
+                defaultData = data.default
+                var ctx = document.getElementById('myChart').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Weight',
+                            data: defaultData,
+                            cubicInterpolationMode: 'monotone',
+                            spanGaps: 'true',
+                            backgroundColor: 'rgb(20, 108, 247, 0.4)',
+                        }]
+                    }
+                })
+            },
+            error: function (error_data) {
+                console.log("error")
+                console.log(error_data)
+            }
+        })
+    })
+</script>
+
+
+{%endblock%}

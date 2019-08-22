@@ -49,38 +49,57 @@ $(document).ready(function () {
         });
     });
 
+    function confirmRegistration() {
+        return confirm("Are you sure you want to register with this practice? Your medical data will be shared.");
+    }
+
     // medication is done
-    $('.register').click(function (event) {
-        var register = $(this)
+    $('.register').click(function () {
+
+        if(!confirmRegistration()) {
+            return false;
+        }
+
+            var register = $(this)
         //     var par = $(this).parent()
 
-        $.ajax({
-            type: "POST",
-            data: {
-                'id': register.attr('name'),
-                'csrfmiddlewaretoken': window.CSRF_TOKEN
-            },
-            url: register.data('url'),
-            dataType: "json",
-            beforeSend: function () {
-                return confirm("Are you sure?");
-            },
-            success: function (response) {
-                // par.fadeOut(200, function(){
-                //     par.remove();
-                // });
-                alert(response.message);
-                //             // alert('Company likes count is now ' + response.likes_count);
-            },
-            error: function (rs, e) {
-                alert(rs.responseText);
-            }
-        });
-
+            $.ajax({
+                type: "POST",
+                data: {
+                    'id': register.attr('name'),
+                    'csrfmiddlewaretoken': window.CSRF_TOKEN
+                },
+                url: register.data('url'),
+                dataType: "json",
+                // beforeSend: function () {
+                //     return confirm("Are you sure?");
+                // },
+                success: function (response) {
+                    // par.fadeOut(200, function(){
+                    //     par.remove();
+                    // });
+                    alert(response.message);
+                    //             // alert('Company likes count is now ' + response.likes_count);
+                },
+                error: function (rs, e) {
+                    alert(rs.responseText);
+                }
+            });
+        
     });
 
+    function confirmConfirmation() {
+        return confirm("Are you sure you want to register this patient?");
+    }
+
+
     // medication is done
-    $('.register_pat').click(function (event) {
+    $('.register_pat').click(function () {
+
+        if(!confirmConfirmation()) {
+            return false;
+        }
+
         var register_pat = $(this);
         var par = $(this).parent();
 
@@ -105,9 +124,18 @@ $(document).ready(function () {
 
     });
 
+    function confirmRejection() {
+        return confirm("Are you sure you want to reject this patient?");
+    }
+
 
         // medication is done
         $('.reject_pat').click(function (event) {
+
+            if(!confirmRejection()) {
+                return false;
+            }
+
             var reject_pat = $(this);
             var par = $(this).parent();
     
