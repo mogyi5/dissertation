@@ -141,7 +141,7 @@ def WeightCreateView(request, id):
             return redirect('vitals', id=id)
         else:
             # if form is not valid, print errors
-            form = WeightForm(request.GET or None)
+            # form = WeightForm(request.GET or None)
             print(form.errors)
 
     # add data to context
@@ -182,7 +182,7 @@ def HeightCreateView(request, id):
             height.save()
             return redirect('vitals', id=id)
         else:
-            form = HeightForm(request.GET or None)
+            # form = HeightForm(request.GET or None)
             print(form.errors)
 
     context['form'] = form
@@ -219,12 +219,19 @@ class WeightData(APIView):
         end_date = {}
         try:
             # get the earliest and latest date for the weights of the patient
-            start_date = Vital.objects.filter(
-                patient=profile, type='Weight').order_by('date')[0].date
-            end_date = Vital.objects.filter(
-                patient=profile, type='Weight').order_by('-date')[0].date
+            start_date_list = Vital.objects.filter(
+                patient=profile, type='Weight').order_by('date')
+            end_date_list = Vital.objects.filter(
+                patient=profile, type='Weight').order_by('-date')
+
+            if start_date_list and end_date_list:
+                start_date = start_date_list[0].date
+                end_date = end_date_list[0].date
+
         except Vital.DoesNotExist:
             pass
+
+        
 
         # calculate the time period between the start and end dates, and add the days inbetween to the graph labels
         labels = []
@@ -355,7 +362,7 @@ def ImmunizationCreateView(request, id, pk):
             newimmu.save()
             return redirect('patient_view', id=id, pk=pk)
         else:
-            form = ImmunizationForm(user=patient)
+            # form = ImmunizationForm(user=patient)
             print(form.errors)
 
     context['form'] = form
@@ -414,10 +421,23 @@ def patient_view(request, id, pk):
             context['patientem'] = PatientEm.objects.filter(patient=patient)
             context['conditions'] = Condition.objects.filter(patient=patient)
             context['medications'] = Medication.objects.filter(patient=patient)
-            height = Vital.objects.filter(patient=patient, type='Height')[0]
+            height={}
+            try:
+                height = Vital.objects.get(patient=patient, type='Height')
+            except Vital.DoesNotExist:
+                pass
+
             context['height'] = height
-            weight = Vital.objects.filter(
-                patient=patient, type="Weight").order_by('-id')[0]
+
+            weight={}
+            try:
+                weight_list = Vital.objects.filter(
+                    patient=patient, type="Weight")
+                if weight_list:
+                    weight = weight_list.order_by('-id')[0]
+            except Vital.DoesNotExist:
+                pass
+
             context['weight'] = weight
             context['immunizations'] = Immunization.objects.filter(
                 patient=patient)
@@ -513,7 +533,8 @@ def add_schedule(request, id):
             return HttpResponseRedirect(reverse_lazy('home_base'))
 
         else:
-            efformset = EventFormSet(request.GET or None, prefix="foo")
+            print(form.errors)
+            # efformset = EventFormSet(request.GET or None, prefix="foo")
 
     context['efformset'] = efformset
 
@@ -577,8 +598,9 @@ def StaffCreateView(request, id):
             return redirect('hospital_details', id=id)
 
         else:
-            form = StaffSignupForm(request.GET or None)
-            baseform = CustomUserForm(request.GET or None)
+            print(form.errors)
+            # form = StaffSignupForm(request.GET or None)
+            # baseform = CustomUserForm(request.GET or None)
 
     baseform.auto_id = True
 
@@ -868,7 +890,6 @@ def doctors_reg(request, id):
                         break
                 else:
                     if thedistance <= closest[k][1]:
-                        print('too big')
                         closest.insert(k+1, data_array)
                         del closest[k]
                         break
@@ -950,8 +971,12 @@ def vitalsview(request, id):
 
     try:
         # get most recent weight
-        weight = Vital.objects.filter(
-            patient=profile, type="Weight").order_by('-date')[0]
+        weight_list = Vital.objects.filter(
+            patient=profile, type="Weight").order_by('-date')
+
+        if weight_list:
+            weight = weight_list[0]
+            
         context['weight'] = weight
 
         # pass a context to the view which controls if the button to add your weight should be there, you should only add weight once a day.
@@ -987,7 +1012,7 @@ def pdf_view(request, id, pdfid):
 
     # try to find file and open it
     try:
-        return FileResponse(open(MEDIA_ROOT + '/' + str(document.file), 'rb'), content_type='application/pdf')
+        return FileResponse(open(MEDIA_ROOT + '/' + str(document.pdf_file), 'rb'), content_type='application/pdf')
     except FileNotFoundError:
         raise Http404()
 
@@ -1085,7 +1110,7 @@ def DoctorDocumentCreateView(request, id, pk):
             document.save()
             return redirect('patient_view', id=id,  pk=pk)
         else:
-            form = DocDocumentForm(patient, request.GET or None)
+            # form = DocDocumentForm(patient, request.GET or None)
             print(form.errors)
 
     context['form'] = form
@@ -1277,7 +1302,7 @@ def DoctorConditionCreateView(request, id, pk):
             condition.save()
             return redirect('patient_view', id=id, pk=pk)
         else:
-            form = DoctorConditionForm(user=patient)
+            # form = DoctorConditionForm(user=patient)
             print(form.errors)
 
     context['form'] = form
@@ -1412,7 +1437,7 @@ def DoctorMedicationCreateView(request, id, pk):
             condition.save()
             return redirect('patient_view', id=id, pk=pk)
         else:
-            form = DoctorMedicationForm(user=patient)
+            # form = DoctorMedicationForm(user=patient)
             print(form.errors)
 
     context['form'] = form
@@ -1586,7 +1611,7 @@ class TaskUpdateView(UserPassesTestMixin, UpdateView):
     def form_valid(self, form):
         task = form.save(commit=False)
         task.save()
-        return redirect('task', id=id)
+        return redirect('task', id=self.request.user.id)
 
 #view the search results
 class PatientSearchResultsView(UserPassesTestMixin, ListView):
@@ -1768,8 +1793,8 @@ def staff_event_create(request, id):
             newevent.save()
             return redirect('home_base')
         else:
-            form = StaffEventBookingForm(
-                profile.ward.hospital, request.GET or None)
+            # form = StaffEventBookingForm(
+            #     profile.ward.hospital, request.GET or None)
             print(form.errors)
 
     context = {
@@ -1802,20 +1827,22 @@ def event_create(request, id):
     #form stuff
     form = EventBookingForm(user=profile)
     form.fields['date_in'].widget = DateTimePickerInput(options={
-        'minDate': ((datetime.today() - timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S')),
+        'minDate': ((datetime.today()).strftime('%Y-%m-%d %H:%M:%S')),
         'maxDate': ((datetime.today() + timedelta(days=7)).strftime('%Y-%m-%d 23:59:59')),
-        'enabledHours': [8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+
+        #patient can only book in opening times
+        'enabledHours': [9, 10, 11, 12, 13, 14, 15, 16],
     })
 
     if request.method == 'POST':
-        form = EventBookingForm(request.POST)
+        form = EventBookingForm(profile, request.POST)
 
         if form.is_valid():
             newevent = form.save(commit=False)
             newevent.save()
             return redirect('home_base')
         else:
-            form = EventBookingForm(user=profile)
+            # form = EventBookingForm(user=profile)
             print(form.errors)
 
     context = {
@@ -2056,9 +2083,9 @@ def patient_details_update(request, id):
             return redirect('patient_home', id)
 
         else:
-            form = PatientProfileForm(instance=request.user.patient)
-            ecformset = ECSet(request.GET or None,
-                              instance=request.user.patient)
+            # form = PatientProfileForm(instance=request.user.patient)
+            # ecformset = ECSet(request.GET or None,
+            #                   instance=request.user.patient)
             print(form.errors)
 
     context = {
@@ -2170,7 +2197,7 @@ def staff_details(request, id):
             profile.save()
             return redirect('staff_home', id)
         else:
-            form = StaffProfileForm(instance=request.user.staff)
+            # form = StaffProfileForm(instance=request.user.doctor)
             print(form.errors)
 
     context['form'] = form
@@ -2194,22 +2221,3 @@ def home_base(request):
         return redirect('patient_home', id=thisid)
     else:
         return redirect("staff_home", id=thisid)
-
-
-#view for the contact form
-class HospitalContactFormView(FormView):
-    form_class = HospitalContactForm
-    template_name = 'contact_form/contact_form.html'
-
-    def form_valid(self, form):
-        human = True
-        form.save()
-        return super(HospitalContactFormView, self).form_valid(form)
-
-    def get_form_kwargs(self):
-        kwargs = super(HospitalContactFormView, self).get_form_kwargs()
-        kwargs.update({'request': self.request})
-        return kwargs
-
-    def get_success_url(self):
-        return reverse('contact_form_sent')

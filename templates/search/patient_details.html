@@ -214,7 +214,7 @@
 
                 <tr>
                     <th scope="row">{{ p.name }}</th>
-                    <td> <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.file }}</a></td>
+                    <td> <a href="{% url 'pdf_view' id=profile.baseuser.id pdfid=p.id%}">{{ p.pdf_file }}</a></td>
                     <td>{{p.type}}</td>
                     <td>{{p.description}}</td>
                     <td>{{p.added_by}}</td>

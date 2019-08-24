@@ -165,7 +165,7 @@ class MedicationForm(forms.ModelForm):
 
 #form for creating a task for staff
 class TaskForm(forms.ModelForm):
-
+    
     class Meta:
         model = Task
         fields = ['name', 'notes', 'complete_by', 'deadline']
@@ -293,6 +293,13 @@ class PatientSignupForm(forms.Form):
 
 #form for hospitals to conatct 
 class HospitalContactForm(forms.Form):
+
+    def __init__(self, request, *args, **kwargs):
+        super(HospitalContactForm, self).__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        instance = super(HospitalContactForm, self).save(commit=True)
+        return instance
  
     reason = forms.ChoiceField(choices=REASON, label='Reason')
 

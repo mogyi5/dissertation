@@ -1245,6 +1245,7 @@ header .form-inline {
     /* normal; */
   }
 
+  
   .first-base {
     position: absolute;
     min-width:30%;
@@ -1252,22 +1253,24 @@ header .form-inline {
     top: 50%;
     transform: translate(-50%, -50%);
   }
-  
+
   .content_signup{
     float: left;
     padding: 1.875em;
-    width: 100%; 
+    width: 100%;
     background-color: #f3f4f4;
-    height:auto; 
+    height:auto;
   }
 
 .content {
   float: left;
   padding: 1.875em;
-  min-width: 100%; 
+  min-width: 100%;
   min-height: 100vh;
+  height: auto;
   background-color: #f3f4f4;
   position: relative;}
+
 
 .card {
   margin-bottom: 1.875em;
