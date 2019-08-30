@@ -52,7 +52,7 @@
 
                     <li class="menu-title">Booking</li><!-- /.menu-title -->
                     <li>
-                        <a href="{%url 'home_base'%}"><i class="menu-icon fa fa-calendar-week"></i>Events </a>
+                        <a href="{%url 'home_base'%}"><i class="menu-icon fa fa-calendar-week"></i>Appointments</a>
                     </li>
 
                     <li class="menu-title">Self Diagnosis</li><!-- /.menu-title -->
@@ -75,7 +75,7 @@
                     </li>
                     <li>
                         <a href="{% url 'documents'  id=profile.baseuser.id%}"><i
-                                class="menu-icon fa fa-file-medical"></i>Documents </a>
+                                class="menu-icon fa fa-file-medical"></i>PDF Documents </a>
                     </li>
 
                     {%elif profile.baseuser.user_type == 2 or profile.baseuser.user_type == 3  %}
@@ -191,6 +191,11 @@
                         <a href="{%url 'help' id=profile.baseuser.id%}">
                             <button class="btn btn-link">Help</button>
                         </a>
+                        {%if profile.baseuser.user_type == 1%}
+                        <a href="{%url 'patient_details' id=profile.baseuser.id%}">
+                            <button class="btn btn-link">My Practices</button>
+                        </a>
+                        {%endif%}
                         </div>
                     </div>
 
@@ -204,8 +209,6 @@
                             {%if profile.baseuser.user_type == 1%}
                             <a class="nav-link" href="{%url 'patient_details' id=profile.baseuser.id%}"><i
                                     class="fa fa-user"></i>My Details</a>
-                            <a class="nav-link" href="{%url 'doctors_view' id=profile.baseuser.id%}"><i
-                                    class="fa fa-hospital"></i>My Practices</a>
                             {%else%}
                             <a class="nav-link" href="{%url 'staff_details' id=profile.baseuser.id%}"><i
                                     class="fa fa-user"></i>My Details</a>

@@ -4,6 +4,8 @@ from contact_form.views import ContactFormView
 from .forms import HospitalContactForm
 from . import views 
 
+
+#a list of the url's here which can be accessed via the views.
 urlpatterns = [
     path('contact/', ContactFormView.as_view(form_class=HospitalContactForm), name='contact_form'),
     path('contact/sent/', TemplateView.as_view(template_name='contact_form/contact_form_sent.html'), name='contact_form_sent'),

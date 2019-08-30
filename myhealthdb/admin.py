@@ -26,7 +26,7 @@ class PatientAdmin(admin.ModelAdmin):
                 'address':  GooglePointFieldWidget()
             }
 
-#register all models in the admin
+#register all models in the admin for display
 admin.site.register(Shift)
 admin.site.register(CustomUser)
 admin.site.register(PatientHospital)

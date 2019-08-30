@@ -63,7 +63,7 @@ class ShiftForm(forms.ModelForm):
             if end < start:
                 raise forms.ValidationError("End should be later than start.")
 
-#formset for creating shifts as the IT admin, for all the staff
+#formset for creating shifts as the IT admin, for all the staff,  setting the widgets to be date and time 
 EventFormSet = modelformset_factory(Shift, form=ShiftForm, can_delete=True, extra=1,widgets={
     'date': DatePickerInput(), 'start': TimePickerInput(), 'end': TimePickerInput()})
 
@@ -301,7 +301,10 @@ class HospitalContactForm(forms.Form):
         instance = super(HospitalContactForm, self).save(commit=True)
         return instance
  
+    name = forms.CharField()
     reason = forms.ChoiceField(choices=REASON, label='Reason')
+    message = forms.CharField(widget=forms.Textarea)
+
 
 #form for creating just the customuser
 class CustomUserForm(forms.ModelForm):

@@ -72,7 +72,7 @@ def request_user_check(user):
 # therefore i will only comment on things that you may see for the first time, but not all of it (it's 2000 lines of code.)
 # hope it makes sense, the logic is not that difficult with these views!
 
-
+#view for the help page 
 def help(request, id):
 
     context = {}
@@ -101,7 +101,7 @@ def help(request, id):
 
     return response
 
-
+#view for adding a weight value
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def WeightCreateView(request, id):
 
@@ -154,7 +154,7 @@ def WeightCreateView(request, id):
     return response
 
 
-# same as the weight view, just for the height - can post more than once a day though
+# same as the weight view, just for the height - can post more than once a day though, constraint is removed.
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def HeightCreateView(request, id):
 
@@ -196,7 +196,7 @@ def HeightCreateView(request, id):
 # this view passes the weight data for the graph in vitals.
 # part of the django restful api
 
-
+#this is an ajax view which passes the weight graph the relevant information to display
 class WeightData(APIView):
 
     # do not need any classes for this, it's only a graph
@@ -259,8 +259,6 @@ class WeightData(APIView):
 
 # a class based view, supposed to make life much easier. it does not.
 # it is a deleteview which deletes an object, and the userpassestestmixin means that the user must pass a test (staff_check) to proceed to this page
-
-
 class PatientHospitalDeleteView(UserPassesTestMixin, DeleteView):
 
     # deleting from patienthospital
@@ -300,7 +298,7 @@ class PatientHospitalDeleteView(UserPassesTestMixin, DeleteView):
         context['profile'] = profile
         return context
 
-
+#a view which creates an immunization
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def ImmunizationCreateView(request, id, pk):
 
@@ -374,8 +372,6 @@ def ImmunizationCreateView(request, id, pk):
     return response
 
 # patient details view
-
-
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def patient_view(request, id, pk):
     context = {}
@@ -431,9 +427,11 @@ def patient_view(request, id, pk):
 
             weight={}
             try:
+                #the user may not have a weight entry so we try
                 weight_list = Vital.objects.filter(
                     patient=patient, type="Weight")
                 if weight_list:
+                    #if it exists, get the latest one
                     weight = weight_list.order_by('-id')[0]
             except Vital.DoesNotExist:
                 pass
@@ -452,9 +450,7 @@ def patient_view(request, id, pk):
 
     return response
 
-# seen similar before!
-
-
+#a deleteview to delete shifts
 class ShiftDeleteView(UserPassesTestMixin, DeleteView):
     model = Shift
     template_name = "admin_things/shift_delete_view.html"
@@ -470,9 +466,7 @@ class ShiftDeleteView(UserPassesTestMixin, DeleteView):
         context['profile'] = profile
         return context
 
-# seen similar before!
-
-
+#an updateview to update shifts
 class ShiftUpdateView(UserPassesTestMixin, UpdateView):
     model = Shift
     fields = ('start', 'end', 'date', 'staff')
@@ -499,9 +493,8 @@ class ShiftUpdateView(UserPassesTestMixin, UpdateView):
         return form
 
 # user must be it guy
-
-
 @user_passes_test(it_check, redirect_field_name='home_base')
+#a view which creates schedules for staff
 def add_schedule(request, id):
 
     if id != request.user.id:
@@ -542,9 +535,7 @@ def add_schedule(request, id):
 
     return response
 
-# seen similar before!
-
-
+#a view which can delete staff
 class StaffDeleteView(UserPassesTestMixin, DeleteView):
     model = Staff
     template_name = "admin_things/staff_delete_view.html"
@@ -561,9 +552,8 @@ class StaffDeleteView(UserPassesTestMixin, DeleteView):
         return context
 
 # user must be an it person
-
-
 @user_passes_test(it_check, redirect_field_name='home_base')
+#an it person can add staff to their hospital 
 def StaffCreateView(request, id):
     if id != request.user.id:
         return redirect('home_base')
@@ -613,6 +603,7 @@ def StaffCreateView(request, id):
 
 
 @user_passes_test(it_check, redirect_field_name='home_base')
+#a view for seeing the hospital's details
 def hospital_details(request, id):
     if id != request.user.id:
         return redirect('home_base')
@@ -669,8 +660,6 @@ def hospital_details(request, id):
     return response
 
 # a list view of all the patients in the hospital
-
-
 class PatientView(UserPassesTestMixin, ListView):
     model = Patient
     template_name = "search/patient_view.html"
@@ -696,6 +685,7 @@ class PatientView(UserPassesTestMixin, ListView):
         context = super(PatientView, self).get_context_data(**kwargs)
         profile = Staff.objects.get_or_create(
             baseuser=self.request.user)[0]
+        #pass groups and tasks to the view
         try:
             groups = Group.objects.filter(members=profile)
             context['groups'] = groups
@@ -711,8 +701,6 @@ class PatientView(UserPassesTestMixin, ListView):
         return context
 
 # json response for rejecting a patient, comes up with an alert
-
-
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def reject_patient(request):
 
@@ -730,8 +718,6 @@ def reject_patient(request):
     return HttpResponse(json.dumps(ctx), content_type='application/json')
 
 # json response for accepting a patient, comes up with an alert
-
-
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def accept_patient(request):
 
@@ -781,8 +767,6 @@ def register_hospital(request):
     return HttpResponse(json.dumps(ctx), content_type='application/json')
 
 # view for patient to see all their patienthospital objects
-
-
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def doctors_view(request, id):
     if id != request.user.id:
@@ -828,8 +812,6 @@ def doctors_view(request, id):
     return response
 
 # the view which shows the nearest hospitals, passes the hospital objects to it and shows distance.
-
-
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def doctors_reg(request, id):
 
@@ -902,8 +884,6 @@ def doctors_reg(request, id):
     return response
 
 # show groups, send data in json format
-
-
 def autocompleteGroup(request, id):
 
     ctx = {}
@@ -940,8 +920,6 @@ def autocompleteGroup(request, id):
     return render(request, "groups/groups_list_view.html", context=ctx)
 
 # view which shows the vitals, the height and weight
-
-
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def vitalsview(request, id):
 
@@ -997,8 +975,6 @@ def vitalsview(request, id):
 # ----------------------------------file open/download----------------------------------------
 
 # when a pdf is clicked, it is opened/downloaded in firefox
-
-
 @login_required(redirect_field_name='index')
 def pdf_view(request, id, pdfid):
 
@@ -1018,7 +994,7 @@ def pdf_view(request, id, pdfid):
 
 # ---------------------------------------------------------------------------------------------
 
-
+#a view for deleting a document
 class DocumentDeleteView(LoginRequiredMixin, DeleteView):
     login_url = 'accounts/login/'
     redirect_field_name = 'home_base'
@@ -1057,8 +1033,6 @@ def DocumentsView(request, id):
     return response
 
 # a form view which allows doctors to add documents for patients
-
-
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def DoctorDocumentCreateView(request, id, pk):
 
@@ -1123,8 +1097,6 @@ def DoctorDocumentCreateView(request, id, pk):
 
 # loginrequiredmixin means that the user should be logged in, otherwise they cannot see the content
 # a view to create documents
-
-
 class DocumentCreateView(LoginRequiredMixin, CreateView):
     login_url = 'accounts/login/'
     redirect_field_name = 'home_base'
@@ -1149,9 +1121,7 @@ class DocumentCreateView(LoginRequiredMixin, CreateView):
         self.obj.save()
         return super(DocumentCreateView, self).form_valid(form)
 
-# similar to before
-
-
+#a view to see immunizations of a patient
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def ImmunizationsView(request, id):
 
@@ -1180,9 +1150,7 @@ def ImmunizationsView(request, id):
         request, 'immunizations/immunizations_list_view.html', context)
     return response
 
-# similar to before
-
-
+# a view to see the conditions of a patient
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def ConditionsView(request, id):
 
@@ -1211,9 +1179,7 @@ def ConditionsView(request, id):
 
     return response
 
-# similar to before
-
-
+# a view to update the conditions of a patient
 @method_decorator(login_required, name='dispatch')
 class ConditionUpdateView(LoginRequiredMixin, UpdateView):
     login_url = 'accounts/login/'
@@ -1246,8 +1212,6 @@ class ConditionUpdateView(LoginRequiredMixin, UpdateView):
         return form
 
 # a view for a doctor to create a condition
-
-
 @user_passes_test(staff_check, redirect_field_name='home_base')
 def DoctorConditionCreateView(request, id, pk):
 
@@ -1313,9 +1277,7 @@ def DoctorConditionCreateView(request, id, pk):
 
     return response
 
-# similar to before
-
-
+# a view to create conditions for a patient
 class ConditionCreateView(LoginRequiredMixin, CreateView):
     login_url = 'accounts/login/'
     redirect_field_name = 'home_base'
@@ -1332,6 +1294,7 @@ class ConditionCreateView(LoginRequiredMixin, CreateView):
         context['profile'] = profile
         return context
 
+    #set object values not in form before saving
     def form_valid(self, form):
         self.obj = form.save(commit=False)
         self.obj.patient = self.request.user.patient
@@ -1339,15 +1302,14 @@ class ConditionCreateView(LoginRequiredMixin, CreateView):
         self.obj.save()
         return super(ConditionCreateView, self).form_valid(form)
 
+    #set the widgets
     def get_form(self):
         form = super().get_form()
         form.fields['start'].widget = DatePickerInput()
         form.fields['stop'].widget = DatePickerInput()
         return form
 
-# similar to before
-
-
+# look at all of the patient's medication
 @user_passes_test(patient_check, redirect_field_name='home_base')
 def MedicationView(request, id):
 
@@ -1659,7 +1621,7 @@ class PatientSearchResultsView(UserPassesTestMixin, ListView):
 
         return object_list
 
-#pass nothing
+#pass nothing, static 
 def index(request):
 
     context_dict = {}
@@ -1667,7 +1629,7 @@ def index(request):
 
     return response
 
-#pass nothing
+#pass nothing, static
 def about(request):
 
     context_dict = {}
@@ -1704,15 +1666,15 @@ def events(request, id):
 
     return response
 
-#similar to before
-class EventDeleteView(UserPassesTestMixin, DeleteView):
+#a view for deleting events
+class EventDeleteView(LoginRequiredMixin, DeleteView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'home_base'
+
     model = Event
     template_name = 'event/event_delete_form.html'
     pk_url_kwarg = 'event_pk'
-    success_url = reverse_lazy('task', id=id)
-
-    def test_func(self):
-        return staff_check(self.request.user)
+    success_url = reverse_lazy('home_base')
 
     def get_context_data(self, **kwargs):
         context = super(EventDeleteView, self).get_context_data(**kwargs)
@@ -1726,7 +1688,7 @@ class EventDeleteView(UserPassesTestMixin, DeleteView):
         context['profile'] = profile
         return context
 
-#similar to before
+#a view for updating events
 @method_decorator(login_required, name='dispatch')
 class EventUpdateView(LoginRequiredMixin, UpdateView):
     login_url = 'accounts/login/'
@@ -1757,7 +1719,7 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
     def get_form(self):
         form = super().get_form()
         form.fields['date_in'].widget = DateTimePickerInput(options={
-            'minDate': (datetime.datetime.today()).strftime('%Y-%m-%d %H:%M:%S'),
+            'minDate': (datetime.today()).strftime('%Y-%m-%d %H:%M:%S'),
             'enabledHours': [8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
         })
         return form
